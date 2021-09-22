@@ -1,0 +1,10 @@
+patterns:
+  - pat: ".*\\.jpg"
+    rule:
+      type: "file"
+      validMeta: { "$ref": "text.schema.yaml" }
+  - pat: ".*\\.(txt|md)"
+    rule: {}
+  - pat: ".+"
+    rule:
+      type: dir

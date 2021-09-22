@@ -1,0 +1,25 @@
+patterns:
+- pat: (.*/)?a_[^/]*
+  rule:
+    anyOf:
+    - {type: dir}
+    - do:
+      - rewrite: {inName: true, pat: a_(.*), sub: b_\1}
+        rule: {type: false}
+- pat: (.*/)?b_[^/]*
+  rule:
+    anyOf:
+    - {type: dir}
+    - do:
+      - rewrite: {inName: true, pat: b_(.*), sub: a_\1}
+        rule: {type: false}
+- pat: (.*/)?[^/]+
+  rule:
+    anyOf:
+    - {type: dir}
+    - do:
+      - rewrite: {inName: true, sub: a_\2}
+        rule: {type: file}
+    - do:
+      - rewrite: {inName: true, sub: b_\2}
+        rule: {type: file}
