@@ -2,6 +2,35 @@
 
 A directory structure and metadata linter based on JSON Schema.
 
+JSON Schema is great for validating (files containing) JSON objects that e.g. contain
+metadata, but these are only the smallest pieces in the organization of a whole directory
+structure, e.g. of some dataset of project.
+When working on datasets of a certain kind, they might contain various types of data,
+each different file requiring different accompanying metadata, based on its file type
+and/or location.
+DirSchema combines JSON Schema and regexes into a solution to enforce structural
+dependencies and metadata requirements in directories and directory-like archives.
+With it you can for example check that:
+
+* only files of a certain type are in a location (e.g. only `jpg` files in directory `img`)
+* for each data file there exists a metadata file (e.g. `test.jpg` has `test.jpg_meta.json`)
+* each metadata file is valid according to some JSON Schema
+
+If validating these kinds of constraints looks appealing to you, this tool is for you!
+
+## Installation and Usage
+
+Install the tool using `pip install` just as any other Python package.
+
+Given a DirSchema file and a directory that needs to be checked, just run:
+```
+dirschema my_dirschema.yaml some/directory
+```
+If there is no output, everything is fine. Otherwise, the tool will return for each
+checked file the violated rules.
+
+TODO: write manual for DirSchema
+
 ## Development
 
 This project uses [Poetry](https://python-poetry.org/) for dependency management.

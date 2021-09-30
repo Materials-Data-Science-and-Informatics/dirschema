@@ -1,10 +1,9 @@
-patterns:
-  - pat: ".*\\.jpg"
-    rule:
+anyOf:
+  - match: ".*\\.(txt|md)"
+  - match: ".*\\.jpg"
+    then:
       type: "file"
       validMeta: { "$ref": "text.schema.yaml" }
-  - pat: ".*\\.(txt|md)"
-    rule: {}
-  - pat: ".+"
-    rule:
-      type: dir
+  - match: ".*"
+    then:
+      type: "dir"

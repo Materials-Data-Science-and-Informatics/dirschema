@@ -1,25 +1,20 @@
-patterns:
-- pat: (.*/)?a_[^/]*
-  rule:
+matchStart: -1
+anyOf:
+- type: dir
+- match: a_(.*)
+  rewrite: b_\1
+  then:
+    type: false
+- match: b_(.*)
+  rewrite: a_\1
+  then:
+    type: false
+- match: (.*)
+  then:
     anyOf:
-    - {type: dir}
-    - do:
-      - rewrite: {inName: true, pat: a_(.*), sub: b_\1}
-        rule: {type: false}
-- pat: (.*/)?b_[^/]*
-  rule:
-    anyOf:
-    - {type: dir}
-    - do:
-      - rewrite: {inName: true, pat: b_(.*), sub: a_\1}
-        rule: {type: false}
-- pat: (.*/)?[^/]+
-  rule:
-    anyOf:
-    - {type: dir}
-    - do:
-      - rewrite: {inName: true, sub: a_\2}
-        rule: {type: file}
-    - do:
-      - rewrite: {inName: true, sub: b_\2}
-        rule: {type: file}
+    - rewrite: a_\1
+      then:
+        type: file
+    - rewrite: b_\1
+      then:
+        type: file

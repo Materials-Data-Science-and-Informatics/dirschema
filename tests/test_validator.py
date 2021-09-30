@@ -1,159 +1,183 @@
 """Tests for dirschema validator."""
 
+import copy
 import json
 
-from dirschema.core import DirSchema, PatPair, Rule
+from dirschema.core import DSRule, MetaConvention, Rule
 from dirschema.parse import loads_json, to_uri
-from dirschema.validator import DirSchemaValidator
+from dirschema.validator import DSValidator
+
+
+def rule_from_yaml(yml: str, base_uri=None) -> DSRule:
+    """Load from YAML string, expanding $refs."""
+    base_uri = base_uri if not base_uri else to_uri(str(base_uri))
+    return DSRule.parse_obj(copy.deepcopy(loads_json(yml, base_uri=base_uri)))
 
 
 def test_construct(tmp_path):
     """Test loading a dirschema from object or file."""
-    ds = DirSchema()
-    dsv = DirSchemaValidator(ds)
+    ds = DSRule()
+    dsv = DSValidator(ds)
     assert dsv.schema == ds
 
     with open(tmp_path / "empty.dirschema.json", "w") as f:
         f.write(ds.json())
-    dsv2 = DirSchemaValidator(tmp_path / "empty.dirschema.json")
+    dsv2 = DSValidator(tmp_path / "empty.dirschema.json")
     assert dsv2.schema == ds
 
 
 def test_validate_basic(tmp_path):
     """Test trivial rules, type and valid/validMeta rules."""
-    ds = DirSchema()
-    dsv = DirSchemaValidator(ds)
+    dsv = DSValidator(rule_from_yaml("{}"))
     dsv.schema_uri = to_uri(str(tmp_path))
-    assert not dsv.validate(tmp_path)  # trivial (no rules)
-
-    ds.patterns = [PatPair(pat="", rule=Rule())]
     assert not dsv.validate(tmp_path)  # trivial (empty rule)
 
-    ds.patterns = [PatPair(pat="", rule=Rule(type="dir"))]
+    dsv.schema = rule_from_yaml('anyOf:\n- match: ""\n  then: {type: dir}')
     assert not dsv.validate(tmp_path)  # still trivial (root is always "dir")
-    dsv.schema.patterns[0].rule = Rule(type="file")
+    dsv.schema = rule_from_yaml('anyOf:\n- match: ""\n  then: {type: file}')
     assert dsv.validate(tmp_path)  # contradiction
-    dsv.schema.patterns[0].rule = Rule(type=True)
+    dsv.schema = rule_from_yaml('anyOf:\n- match: ""\n  then: {type: true}')
     assert not dsv.validate(tmp_path)  # trivial if it exists
-    dsv.schema.patterns[0].rule = Rule(type=False)
+    dsv.schema = rule_from_yaml('anyOf:\n- match: ""\n  then: {type: false}')
     assert dsv.validate(tmp_path)  # contradiction if it exists
 
-    dsv.schema.patterns[0].rule = Rule(valid="true")
+    dsv.schema = rule_from_yaml('anyOf:\n- match: ""\n  then: {valid: true}')
     assert dsv.validate(tmp_path)  # not a file
-    dsv.schema.patterns[0].rule = Rule(validMeta="true")
+    dsv.schema = rule_from_yaml('anyOf:\n- match: ""\n  then: {validMeta: true}')
     assert dsv.validate(tmp_path)  # not existing
 
-    with open(tmp_path / "_meta.json", "w") as f:
+    with open(tmp_path / "_mymeta.json", "w") as f:
         f.write("not JSON")
-    dsv.schema.patterns[0] = PatPair(pat="_meta\\.json", rule=Rule(type="file"))
+    dsv.schema = rule_from_yaml(
+        'anyOf: [{match: ""}, {match: "_mymeta\\\\.json", then: {type: file}}]'
+    )
     assert not dsv.validate(tmp_path)  # is a file
-    dsv.schema.patterns[0].rule = Rule(type="dir")
-    assert dsv.validate(tmp_path)  # file is not a dir
-    dsv.schema.patterns[0].rule = Rule(type=True)
+    dsv.schema = rule_from_yaml(
+        'anyOf: [{match: ""}, {match: "_mymeta\\\\.json", then: {type: dir}}]'
+    )
+    assert dsv.validate(tmp_path)  # file is not dir
+
+    dsv.metaConvention = MetaConvention(fileSuffix="_mymeta.json")
+    assert not dsv.validate(tmp_path)  # file is not checked anymore
+    dsv.metaConvention = MetaConvention()
+
+    dsv.schema = rule_from_yaml(
+        'anyOf: [{match: ""}, {match: "_mymeta\\\\.json", then: {type: true}}]'
+    )
     assert not dsv.validate(tmp_path)  # trivial if it exists
-    dsv.schema.patterns[0].rule = Rule(type=False)
+    dsv.schema = rule_from_yaml(
+        'anyOf: [{match: ""}, {match: "_mymeta\\\\.json", then: {type: false}}]'
+    )
     assert dsv.validate(tmp_path)  # contradiction if it exists
 
-    dsv.schema.patterns[0].rule = Rule(valid="true")
-    assert dsv.validate(tmp_path)  # not valid json file
-    dsv.schema.patterns[0] = PatPair(pat="", rule=Rule(validMeta="true"))
+    dsv.schema = rule_from_yaml(
+        'anyOf: [{match: ""}, {match: "_mymeta\\\\.json", then: {valid: true}}]'
+    )
     assert dsv.validate(tmp_path)  # not valid json file
 
-    with open(tmp_path / "_meta.json", "w") as f:
+    with open(tmp_path / "_mymeta.json", "w") as f:
         f.write("{}")
-    dsv.schema.patterns[0] = PatPair(pat="_meta\\.json", rule=Rule(valid="true"))
-    assert not dsv.validate(tmp_path)  # ok
-    dsv.schema.patterns[0] = PatPair(pat="", rule=Rule(validMeta="true"))
-    assert not dsv.validate(tmp_path)  # ok
+    assert not dsv.validate(tmp_path)  # now it is valid
 
+    dsv.schema = rule_from_yaml(
+        'anyOf: [{match: "", validMeta: true}, {match: "_mymeta\\\\.json"}]'
+    )
+    assert dsv.validate(tmp_path)  # wrong convention
+    dsv.metaConvention = MetaConvention(fileSuffix="_mymeta.json")
+    dsv.schema = rule_from_yaml('{match: "", validMeta: true}')
+    assert not dsv.validate(tmp_path)  # ok with that convention
+    dsv.metaConvention = MetaConvention()
+
+    (tmp_path / "_mymeta.json").unlink()
+
+
+def test_ref_resolving(tmp_path):
+    """Test a non-trivial schema with nested references."""
     with open(tmp_path / "text.schema.json", "w") as f:
-        json.dump(
-            {
-                "type": "object",
-                "properties": {"author": {"type": "string"}},
-                "required": ["author"],
-            },
-            f,
+        textSchema = {
+            "type": "object",
+            "properties": {"author": {"type": "string"}},
+            "required": ["author"],
+        }
+        json.dump(textSchema, f)
+
+    with open(tmp_path / "partial.dirschema.json", "w") as f:
+        partialSchema = {
+            "match": "",
+            "validMeta": {"$ref": str(tmp_path / "text.schema.json")},
+        }
+        json.dump(partialSchema, f)
+
+    with open(tmp_path / "outer.dirschema.yaml", "w") as f:
+        f.write(
+            'anyOf: [{match: ".*\\\\.(dir)?schema\\\\.(json|yaml)"},{"$ref": "'
+            + str(tmp_path / "partial.dirschema.json")
+            + '"}]'
         )
 
-    textSchema = json.dumps({"$ref": str(tmp_path / "text.schema.json")})
-
-    dsv.schema.patterns[0] = PatPair(pat="_meta\\.json", rule=Rule(valid=textSchema))
-    assert dsv.validate(tmp_path)  # not valid according to schema
-    dsv.schema.patterns[0] = PatPair(pat="", rule=Rule(validMeta=textSchema))
-    assert dsv.validate(tmp_path)  # same here
-
+    dsv = DSValidator(tmp_path / "outer.dirschema.yaml")
+    assert dsv.validate(tmp_path)  # not existing root metadata
+    (tmp_path / "_meta.json").touch()
+    assert dsv.validate(tmp_path)  # not valid root metadata
     with open(tmp_path / "_meta.json", "w") as f:
         json.dump({"author": "Jane Doe"}, f)
-    dsv.schema.patterns[0] = PatPair(pat="_meta\\.json", rule=Rule(valid="true"))
-    assert not dsv.validate(tmp_path)  # valid
-    dsv.schema.patterns[0] = PatPair(pat="", rule=Rule(validMeta="true"))
-    assert not dsv.validate(tmp_path)  # valid
+    assert not dsv.validate(tmp_path)  # ok
 
 
 def test_combinations(tmp_path):
     """Test allOf, anyOf and oneOf rules."""
-    ds = DirSchema()
-    dsv = DirSchemaValidator(ds)
+    ds = Rule()
+    dsv = DSValidator(ds)
 
-    ds.patterns = [PatPair(pat="", rule=Rule())]
+    dsv.schema = rule_from_yaml('match: ""\nthen: {}')
     assert not dsv.validate(tmp_path)
 
-    ds.patterns = [PatPair(pat="", rule=Rule(allOf=[]))]
+    dsv.schema = rule_from_yaml("allOf: []")
     assert not dsv.validate(tmp_path)
-    ds.patterns = [PatPair(pat="", rule=Rule(allOf=[Rule(), Rule(type="dir")]))]
+    dsv.schema = rule_from_yaml("allOf: [{type: dir}]")
     assert not dsv.validate(tmp_path)
-    ds.patterns = [PatPair(pat="", rule=Rule(allOf=[Rule(), Rule(type="file")]))]
+    dsv.schema = rule_from_yaml("allOf: [{},{type: file}]")
     assert dsv.validate(tmp_path)
 
-    ds.patterns = [PatPair(pat="", rule=Rule(anyOf=[]))]
+    dsv.schema = rule_from_yaml("anyOf: []")
     assert not dsv.validate(tmp_path)
-    ds.patterns = [PatPair(pat="", rule=Rule(anyOf=[Rule(), Rule(type="file")]))]
+    dsv.schema = rule_from_yaml("anyOf: [{}, {type: file}]")
     assert not dsv.validate(tmp_path)
-    ds.patterns = [PatPair(pat="", rule=Rule(anyOf=[Rule(), Rule(type="dir")]))]
+    dsv.schema = rule_from_yaml("anyOf: [{}, {type: dir}]")
     assert not dsv.validate(tmp_path)
-    ds.patterns = [
-        PatPair(pat="", rule=Rule(anyOf=[Rule(type=False), Rule(type="file")]))
-    ]
+    dsv.schema = rule_from_yaml("anyOf: [{type: false}, {type: file}]")
     assert dsv.validate(tmp_path)
 
-    ds.patterns = [PatPair(pat="", rule=Rule(oneOf=[]))]
+    dsv.schema = rule_from_yaml("oneOf: []")
     assert not dsv.validate(tmp_path)
-    ds.patterns = [PatPair(pat="", rule=Rule(oneOf=[Rule(), Rule(type="file")]))]
+    dsv.schema = rule_from_yaml("oneOf: [{}, {type: file}]")
     assert not dsv.validate(tmp_path)
-    ds.patterns = [
-        PatPair(pat="", rule=Rule(oneOf=[Rule(type="file"), Rule(type="dir")]))
-    ]
+    dsv.schema = rule_from_yaml("oneOf: [{type: dir}, {type: file}]")
     assert not dsv.validate(tmp_path)
-    ds.patterns = [PatPair(pat="", rule=Rule(oneOf=[Rule(), Rule(type="dir")]))]
+    dsv.schema = rule_from_yaml("oneOf: [{type: dir}, {}]")
     assert dsv.validate(tmp_path)
 
 
-mutex_yaml = """patterns:
-- pat: (.*/)?a_[^/]*
-  rule:
+mutex_yaml = """matchStart: -1
+anyOf:
+- type: dir
+- match: a_(.*)
+  rewrite: b_\\1
+  then:
+    type: false
+- match: b_(.*)
+  rewrite: a_\\1
+  then:
+    type: false
+- match: (.*)
+  then:
     anyOf:
-    - {type: dir}
-    - do:
-      - rewrite: {inName: true, pat: a_(.*), sub: b_\\1}
-        rule: {type: false}
-- pat: (.*/)?b_[^/]*
-  rule:
-    anyOf:
-    - {type: dir}
-    - do:
-      - rewrite: {inName: true, pat: b_(.*), sub: a_\\1}
-        rule: {type: false}
-- pat: (.*/)?[^/]+
-  rule:
-    anyOf:
-    - {type: dir}
-    - do:
-      - rewrite: {inName: true, sub: a_\\2}
-        rule: {type: file}
-    - do:
-      - rewrite: {inName: true, sub: b_\\2}
-        rule: {type: file}
+    - rewrite: a_\\1
+      then:
+        type: file
+    - rewrite: b_\\1
+      then:
+        type: file
 """
 
 
@@ -164,8 +188,8 @@ def test_example_forall_mutex(tmp_path):
     For each file **/ITEM that does not start with a_ or b_,
     require that either a_ITEM or b_ITEM must exist, but not both.
     """
-    ds = DirSchema.parse_obj(loads_json(mutex_yaml))
-    dsv = DirSchemaValidator(ds)
+    ds = rule_from_yaml(mutex_yaml)
+    dsv = DSValidator(ds)
 
     assert not dsv.validate(tmp_path)
 

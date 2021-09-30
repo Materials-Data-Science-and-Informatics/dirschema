@@ -20,7 +20,7 @@ make-docs:
   cache: {}
   script:
     - pip install pdoc anybadge
-    - pdoc -o docs python_app_template
+    - pdoc -o docs dirschema
     - anybadge -l download -v docs > docs-badge.svg
   artifacts:
     paths:
@@ -73,12 +73,12 @@ cache: &global_cache
     - poetry install --no-root
 
 # Run the tests with multiple Python interpreters with tox.
-run-pytest-tox:
-  image: fkrull/multi-python:latest
-  stage: test
-  <<: *prepare-env
-  script:
-    - poetry run tox
+# run-pytest-tox:
+#   image: fkrull/multi-python:latest
+#   stage: test
+#   <<: *prepare-env
+#   script:
+#     - poetry run tox
 
 # Instead of using tox we can also run with multiple containers,
 # based on the same job template.

@@ -4,8 +4,11 @@ import sys
 from pathlib import Path
 
 import typer
+from ruamel.yaml import YAML
 
-from .validator import DirSchemaValidator
+from .validator import DSValidator
+
+yaml = YAML()
 
 app = typer.Typer()
 
@@ -21,7 +24,7 @@ def check(
     Take a YAML or JSON DirSchema and a directory (or suitable archive),
     perform validation according to schema and print all unsatisfied constraints.
     """
-    dsv = DirSchemaValidator(schema)
+    dsv = DSValidator(schema)
     errors = dsv.validate(dir)
     if errors:
         dsv.format_errors(errors, sys.stdout)

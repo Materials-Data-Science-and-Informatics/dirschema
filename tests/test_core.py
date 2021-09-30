@@ -1,6 +1,10 @@
 """Tests for dirschema core."""
+import re
+from typing import cast
 
-from dirschema.core import MetaConvention, Rewrite
+import pytest
+
+from dirschema.core import DSRule, JSONObj, MetaConvention, PathSlice, Rule, TypeEnum
 
 
 def test_meta_convention():
@@ -62,20 +66,79 @@ def test_meta_convention():
 
 
 def test_rewrite():
-    """Test rewriting rules for dirschemas."""
-    assert Rewrite()("hello") == "hello"
-    assert Rewrite()("hello/world") == "hello/world"
+    """Test rewriting of paths."""
+    # edge cases, with identity transform. check slice/unslice invariant
+    for start in [None, 0]:
+        for end in [None, 0, 4, 5]:
+            assert PathSlice.into("", start, end).rewrite().unslice() == ""
+            assert PathSlice.into("hello", start, end).rewrite().unslice() == "hello"
+            assert (
+                PathSlice.into("a/b/c/d", start, end).rewrite().unslice() == "a/b/c/d"
+            )
 
-    assert Rewrite(sub="\\2")("hello again") == "hello again"
-    assert Rewrite(sub="\\1")("hello again") == ""
-    assert Rewrite(sub="\\1")("hello/a gain/my friends") == "hello/a gain/"
-    assert Rewrite(sub="\\1\\2\\2")("hello w/orld/a b") == "hello w/orld/a ba b"
-    assert Rewrite(pat="(hel)(lo)", sub="\\1p \\2\\2")("hello world") == "help lolo"
-    assert Rewrite(pat="hello", sub="world")("test") is None
+    # non-trivial slices
+    arr = ["a", "b", "c"]
+    for start, end in [(None, 1), (0, 2), (1, 3), (-2, -1), (1, -1)]:
+        assert PathSlice.into("a/b/c", start, end).sliceStr == "/".join(arr[start:end])
+    assert PathSlice.into("a/b/c", 1, 0).sliceStr == "b/c"  # special case: end = 0
 
-    assert Rewrite(inName=True, sub="a_\\2_b")("") == "a__b"
-    assert Rewrite(inName=True, sub="a_\\2_b")("x") == "a_x_b"
-    assert Rewrite(inName=True, sub="a_\\2_b")("x/y") == "x/a_y_b"
-    assert Rewrite(inName=True, sub="a_\\2_b")("x/y/z") == "x/y/a_z_b"
-    assert Rewrite(inName=True, pat="(.*)foo", sub="\\1bar")("x/y/zfoo") == "x/y/zbar"
-    assert Rewrite(inName=True, pat="(.*)foo", sub="\\1bar")("x/y/zfo") is None
+    # invalid slices
+    for start, end in [(-1, -2), (1, 1), (2, 1)]:
+        with pytest.raises(ValueError):
+            assert PathSlice.into("a/b/c", start, end)
+
+    psl = PathSlice.into("a/bbc/d", 1, 2)
+    assert psl.sliceStr == "bbc"
+    assert psl.rewrite("b") is None  # not full match!
+    assert psl.rewrite("b", "c") is None  # same
+    assert psl.rewrite("b*c").unslice() == "a/bbc/d"  # full match, no substitution
+    assert psl.rewrite("(b*)(c)", "\\2\\1\\2").unslice() == "a/cbbc/d"  # rewrite
+    assert psl.sliceStr == "bbc"  # original slice object still as before
+    with pytest.raises(re.error):
+        assert psl.rewrite("(b*)c", "\\2")  # invalid capture group
+
+    # rewrite multiple segments
+    psl = PathSlice.into("a/b/c/d", 1, 3)
+    assert psl.rewrite("([^/]+)/(.+)", "\\2/\\1").unslice() == "a/c/b/d"
+    assert psl.rewrite("([^/]+)/(.+)", "").unslice() == "a/d"
+
+
+def test_magic():
+    """Test magic methods and convenience constructors."""
+    # test the DSRule constructor (that dispatch to bool/rule works)
+    assert DSRule(True).__root__ == True
+    assert DSRule(False).__root__ == False
+    assert DSRule(None).__root__ == Rule()
+    assert DSRule(type="file").__root__ == Rule(type="file")
+    assert DSRule(__root__=Rule(type="file")).__root__ == Rule(type="file")
+
+    # test representation
+    assert repr(DSRule(True)) == "true"
+    assert repr(DSRule(False)) == "false"
+    assert repr(DSRule(None)).strip() == "{}"
+    assert repr(DSRule(type="file")).strip() == "{type: file}"
+
+    # special "private" fields that are to be included in serialization
+    r = DSRule()
+    cast(Rule, r.__root__)._metaPath = "meta"
+    cast(Rule, r.__root__)._rewritePath = "test"
+    assert repr(r).strip() == "{metaPath: meta, rewritePath: test}"
+
+    # test truthiness of rules
+    assert not r  # because "private" fields are ignored
+    assert not DSRule()
+    assert not DSRule(False)
+    assert DSRule(True)
+
+    for val in TypeEnum:
+        assert Rule(type=val)
+    for val in [False, True, JSONObj()]:
+        assert Rule(valid=val)
+        assert Rule(validMeta=val)
+
+    assert Rule(allOf=[Rule()])
+    assert Rule(oneOf=[Rule()])
+    assert Rule(anyOf=[Rule()])
+    assert Rule(then=DSRule(type=False))
+    assert Rule(match="")
+    assert Rule(match="something")

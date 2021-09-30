@@ -2,5 +2,6 @@
     "type": "object",
     "properties": {
         "author": { "type": "string" }
-    }
+    },
+    "required": ["author"]
 }
