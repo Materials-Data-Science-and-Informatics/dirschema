@@ -1,0 +1,16 @@
+# demo of hhow nested rewrite/then chains behave
+rewrite: "foo"
+then:
+  type: file
+  rewrite: "\\1bar"
+  then:
+    # demonstrates how "then" can be used to augment the effective constraint evaluation order
+    # notice that anyOf usually comes after validMeta
+    anyOf:
+      - type: dir
+    then:
+      validMeta:
+        "$ref": text.schema.json
+      rewrite: "\\1/qux"
+      then:
+        type: file

@@ -125,7 +125,7 @@ def test_magic():
     assert repr(r).strip() == "{metaPath: meta, rewritePath: test}"
 
     # test truthiness of rules
-    assert not r  # because "private" fields are ignored
+    assert r  # "private" fields are not ignored
     assert not DSRule()
     assert not DSRule(False)
     assert DSRule(True)

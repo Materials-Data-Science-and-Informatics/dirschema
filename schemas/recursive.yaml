@@ -1,0 +1,8 @@
+matchStart: -1
+anyOf:
+  - match: "a"
+    type: dir
+    then:
+      "$ref": "#"
+  - match: "b"
+    type: file

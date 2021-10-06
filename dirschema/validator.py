@@ -13,7 +13,7 @@ import jsonschema
 from ruamel.yaml import YAML
 
 from .adapters import IDirectory, get_adapter_for
-from .core import DSRule, MetaConvention, PathSlice, Rule, TypeEnum
+from .core import DSRule, MetaConvention, PathSlice, Rule, TypeEnum, untruthy_str
 from .parse import load_json, to_uri
 
 yaml = YAML(typ="safe")
@@ -164,27 +164,35 @@ class DSValidator:
         # take care of metadata JSON Schema validation constraint
         for key in ("valid", "validMeta"):
             schema = rl.__dict__[key]
-            if schema is not None:
-                metapath = path
-                if key == "validMeta":
-                    metapath = curCtx.metaConvention.meta_for(path, is_dir=is_dir)
+            if schema is None:
+                continue
 
-                dat = ctx.dirAdapter.load_json(metapath)
-                validationError = False
-                if dat is not None:
-                    try:
-                        jsonschema.validate(dat, schema.__root__)
-                    except jsonschema.ValidationError:
-                        validationError = True
+            if not is_file and not is_dir:
+                # original path does not exist -> cannot proceed
+                err._metaPath = untruthy_str(path)
+                continue
 
-                # in case of validation error, enrich with the file path
-                if dat is None or validationError:
-                    err.__dict__[key] = schema
-                    if key == "validMeta":
-                        err._metaPath = metapath
+            # use metadata convention for validMeta
+            metapath = path
+            if key == "validMeta":
+                metapath = curCtx.metaConvention.meta_for(path, is_dir=is_dir)
+
+            # try loading the metadata
+            dat = ctx.dirAdapter.load_json(metapath)
+            if dat is None:
+                # failed loading metadata file -> cannot proceed
+                err._metaPath = untruthy_str(metapath)
+                continue
+
+            try:
+                jsonschema.validate(dat, schema.__root__)
+            except jsonschema.ValidationError:
+                err.__dict__[key] = schema
 
         if err:
-            return DSRule(__root__=err)
+            ret = DSRule()
+            ret.__root__ = err  # need to do it like that to keep _metaPath
+            return ret
 
         # 3. check the complex constraints
         for op in ("allOf", "anyOf", "oneOf"):
@@ -211,6 +219,11 @@ class DSValidator:
                 err.__dict__[op] = suberrs
             # print("num rules:", num_rules, "num fails: ", num_fails)
 
+        if rl.not_:
+            negErr = self.validate_path(thenPath, rl.not_, curCtx)
+            if negErr is None:
+                err.not_ = rl.not_
+
         if err:
             return DSRule(__root__=err)
 
@@ -221,10 +234,7 @@ class DSValidator:
             if thenErr is not None:
                 err = cast(Rule, thenErr.__root__)  # technically a lie, but morally ok
                 if not isinstance(err, bool) and thenPath != path:
-                    err._rewritePath = thenPath
-
-        # if ctx.debug:
-        #     print(f"return validate_rule for '{path}': {repr(err)}")
+                    err._rewritePath = err._rewritePath or untruthy_str(thenPath)
 
         if err:
             return DSRule(__root__=err)

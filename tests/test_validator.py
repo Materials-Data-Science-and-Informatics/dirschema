@@ -21,7 +21,7 @@ def test_construct(tmp_path):
     assert dsv.schema == ds
 
     with open(tmp_path / "empty.dirschema.json", "w") as f:
-        f.write(ds.json())
+        f.write(ds.json(by_alias=True))
     dsv2 = DSValidator(tmp_path / "empty.dirschema.json")
     assert dsv2.schema == ds
 
@@ -155,6 +155,11 @@ def test_combinations(tmp_path):
     dsv.schema = rule_from_yaml("oneOf: [{type: dir}, {type: file}]")
     assert not dsv.validate(tmp_path)
     dsv.schema = rule_from_yaml("oneOf: [{type: dir}, {}]")
+    assert dsv.validate(tmp_path)
+
+    dsv.schema = rule_from_yaml("not: {type: file}")
+    assert not dsv.validate(tmp_path)
+    dsv.schema = rule_from_yaml("not: {type: dir}")
     assert dsv.validate(tmp_path)
 
 
