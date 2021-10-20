@@ -22,6 +22,8 @@ If validating these kinds of constraints looks appealing to you, this tool is fo
 
 Install the tool using `pip install` just as any other Python package.
 
+Read the [manual](./MANUAL.md) to learn how to write a dirschema.
+
 Given a DirSchema file and a directory that needs to be checked, just run:
 ```
 dirschema my_dirschema.yaml some/directory
@@ -29,7 +31,8 @@ dirschema my_dirschema.yaml some/directory
 If there is no output, everything is fine. Otherwise, the tool will return for each
 checked file the violated rules.
 
-TODO: write manual for DirSchema
+You can call the validation from Python using the class `DSValidator` in 
+`dirschema.validator`, e.g. `DSValidator("/path/to/dirschema").validate("/dataset/path")`
 
 ## Development
 
