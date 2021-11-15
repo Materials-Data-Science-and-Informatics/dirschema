@@ -31,7 +31,7 @@ dirschema my_dirschema.yaml some/directory
 If there is no output, everything is fine. Otherwise, the tool will return for each
 checked file the violated rules.
 
-You can call the validation from Python using the class `DSValidator` in 
+You can call the validation from Python using the class `DSValidator` in
 `dirschema.validator`, e.g. `DSValidator("/path/to/dirschema").validate("/dataset/path")`
 
 ## Development
@@ -40,17 +40,15 @@ This project uses [Poetry](https://python-poetry.org/) for dependency management
 
 Clone this repository and run `poetry install`.
 
-Pre-commit hooks should be enabled. If they are not, run `pre-commit install`.
+Run `pre-commit install` after cloning to enable pre-commit to enforce the required linting hooks.
 
-Before commiting, run `pytest` and make sure you did not break anything.
-Also check that the pre-commit hooks are run successfully.
+Run `pytest` before merging your changes to make sure you did not break anything.
 
 To generate documentation, run `pdoc -o docs python_app_template`.
 
 To check coverage, use `pytest --cov`.
 
 To run the tests with different Python versions, run `tox`.
-You can use [pyenv](https://github.com/pyenv/pyenv) 
+You can use [pyenv](https://github.com/pyenv/pyenv)
 to manage and install other Python interpreter versions without touching the system.
 You should install the versions in the `.python-version` file.
-

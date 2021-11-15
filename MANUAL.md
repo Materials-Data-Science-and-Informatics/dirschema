@@ -197,7 +197,7 @@ Require that the path:
 **Value:**
 JSON Schema
 
-**Description:** 
+**Description:**
 Require that the path is a JSON file (**YAML is not allowed**) that successfully validates
 against the JSON Schema provided as the value.
 
@@ -208,7 +208,7 @@ Validation fails if the path does not exist, is not a JSON file or is not valid.
 **Value:**
 JSON Schema
 
-**Description:** 
+**Description:**
 Require that the metadata file of the current path (according to the used convention)
 is a JSON file (**YAML is not allowed**) that successfully validates
 against the JSON Schema provided as the value.
@@ -271,7 +271,7 @@ If all other constraints in the current rule are satisfied, require that the rul
 in the value is also satisfied on the (possibly rewritten) path.
 
 This mechanism exists first and foremost in order to be used in combination with
-`rewrite`, as just combining multiple rules can be achieved using `allOf`. 
+`rewrite`, as just combining multiple rules can be achieved using `allOf`.
 
 Additionally, this can be used for sequential "short circuiting" of rule evaluation to
 modify or refine the four evaluation phases outlined above.
