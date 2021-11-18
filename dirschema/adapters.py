@@ -6,8 +6,13 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Dict, Iterable, Optional
 
-import h5py
-import numpy
+try:
+    import h5py
+    import numpy
+except ImportError:
+    _has_h5 = False
+else:
+    _has_h5 = True
 
 # NOTE: currently, completely ignores existence of symlinks
 # the h5py visit function does ignore them too and also reasonable validation behavior unclear
@@ -71,6 +76,9 @@ class H5Dir(IDirectory):
     """Adapter for working with HDF5 files."""
 
     def __init__(self, dir: Path) -> None:  # noqa: D107
+        if not _has_h5:
+            raise ImportError("Install dirschema with [h5] extra for HDF5 support!")
+
         super().__init__(dir)
         self.file = h5py.File(dir, "r")  # auto-closed on GC, no need to do anything
 
