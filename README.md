@@ -1,14 +1,28 @@
 # dirschema
 
+[
+![Test](https://img.shields.io/github/workflow/status/Materials-Data-Science-and-Informatics/dirschema/test?label=test)
+](https://github.com/Materials-Data-Science-and-Informatics/dirschema/actions?query=workflow:test)
+[
+![Coverage](https://img.shields.io/codecov/c/gh/Materials-Data-Science-and-Informatics/dirschema?token=4JU2SZFZDZ)
+](https://app.codecov.io/gh/Materials-Data-Science-and-Informatics/dirschema)
+[
+![Docs](https://img.shields.io/badge/read-docs-success)
+](FIXME_GHPAGES_URL/dirschema)
+[
+![PyPIPkgVersion](https://img.shields.io/pypi/v/dirschema)
+](https://pypi.org/project/dirschema/)
+
 A directory structure and metadata linter based on JSON Schema.
 
-JSON Schema is great for validating (files containing) JSON objects that e.g. contain
-metadata, but these are only the smallest pieces in the organization of a whole directory
-structure, e.g. of some dataset of project.
+[JSON Schema](https://json-schema.org/) is great for validating (files containing) JSON
+objects that e.g. contain metadata, but these are only the smallest pieces in the
+organization of a whole directory structure, e.g. of some dataset of project.
 When working on datasets of a certain kind, they might contain various types of data,
 each different file requiring different accompanying metadata, based on its file type
 and/or location.
-DirSchema combines JSON Schema and regexes into a solution to enforce structural
+
+**DirSchema** combines JSON Schemas and regexes into a solution to enforce structural
 dependencies and metadata requirements in directories and directory-like archives.
 With it you can for example check that:
 
@@ -44,7 +58,7 @@ Run `pre-commit install` after cloning to enable pre-commit to enforce the requi
 
 Run `pytest` before merging your changes to make sure you did not break anything.
 
-To generate documentation, run `pdoc -o docs python_app_template`.
+To generate documentation, run `pdoc --html -o docs python_app_template`.
 
 To check coverage, use `pytest --cov`.
 
