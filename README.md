@@ -66,3 +66,17 @@ To run the tests with different Python versions, run `tox`.
 You can use [pyenv](https://github.com/pyenv/pyenv)
 to manage and install other Python interpreter versions without touching the system.
 You should install the versions in the `.python-version` file.
+
+## Acknowledgements
+
+<div>
+<img style="vertical-align: middle;" alt="HMC Logo" src="https://helmholtz-metadaten.de/storage/88/hmc_Logo.svg" width=50% height=50% />
+&nbsp;&nbsp;
+<img style="vertical-align: middle;" alt="FZJ Logo" src="https://upload.wikimedia.org/wikipedia/de/8/8b/J%C3%BClich_fz_logo.svg" width=30% height=30% />
+</div>
+<br />
+
+This project was developed at the Institute for Materials Data Science and Informatics
+(IAS-9) of the Jülich Research Center and funded by the Helmholtz Metadata Collaboration
+(HMC), an incubator-platform of the Helmholtz Association within the framework of the
+Information and Data Science strategic initiative.
