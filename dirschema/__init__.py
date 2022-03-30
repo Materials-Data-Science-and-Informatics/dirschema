@@ -1,1 +1,1 @@
-"""Package."""
+"""Dirschema package."""

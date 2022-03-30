@@ -19,6 +19,7 @@ from typing import (
     Union,
 )
 
+from jsonschema import Draft202012Validator
 from pydantic import BaseModel, Extra, Field
 from ruamel.yaml import YAML
 from typing_extensions import Final
@@ -42,6 +43,13 @@ class MetaConvention(BaseModel):
     pathSuffix: str = ""
     filePrefix: str = ""
     fileSuffix: str = "_meta.json"
+
+    @classmethod
+    def from_tuple(cls, pp: str, ps: str, fp: str, fs: str):
+        """Return new metadata file convention."""
+        return MetaConvention(
+            pathPrefix=pp, pathSuffix=ps, filePrefix=fp, fileSuffix=fs
+        )
 
     def is_meta(self, path: str) -> bool:
         """Check whether given path is a metadata file according to the convention."""
@@ -101,15 +109,9 @@ class PathSlice(BaseModel):
         """
         Slice into a path, splitting on the slashes.
 
-        Slice semantics is mostly like Python, except that [x:x] is forbidden,
-        unless [0:0], which means the full path.
+        Slice semantics is mostly like Python, except that stop=0 means
+        "until the end", so that [0:0] means the full path.
         """
-        if start and stop:
-            if start == stop != 0 or start < 0 < stop:
-                raise ValueError(f"Invalid slice: {start}:{stop}")
-            if stop < start and (0 <= stop or start <= 0):
-                raise ValueError(f"Invalid slice: {start}:{stop}")
-
         segs = path.split("/")
         pref = "/".join(segs[: start if start else 0])
         inner = "/".join(segs[start : stop if stop != 0 else None])  # noqa: E203
@@ -152,22 +154,23 @@ class PathSlice(BaseModel):
         return None
 
 
-class JSONObj(BaseModel):
-    """Helper class wrapping an arbitrary JSON object to be acceptable for pydantic."""
+class JSONSchemaObj(BaseModel):
+    """Helper class wrapping an arbitrary JSON Schema to be acceptable for pydantic."""
 
     @classmethod
-    def __get_validators__(cls):  # noqa: D105
+    def __get_validators__(cls):
         yield cls.validate
 
     @classmethod
-    def validate(cls, v):  # noqa: D102
+    def validate(cls, v):
+        Draft202012Validator.check_schema(v)  # throws SchemaError if schema is invalid
         return v
 
 
 class JSONSchema(BaseModel):
     """A JSON Schema is just a boolean or some (further unvalidated) JSON object."""
 
-    __root__: Union[bool, JSONObj]
+    __root__: JSONSchemaObj
 
 
 class TypeEnum(Enum):
@@ -249,17 +252,15 @@ class Rule(BaseModel):
 
     # these are JSON-Schema-like logical operators:
 
-    allOf: List[DSRule] = Field([], description="Conjunction of rules (eval in order).")
+    allOf: List[DSRule] = Field([], description="Conjunction (evaluated in order).")
 
-    anyOf: List[DSRule] = Field([], description="Disjunction of rules (eval in order).")
+    anyOf: List[DSRule] = Field([], description="Disjunction (evaluated in order).")
 
-    oneOf: List[DSRule] = Field(
-        [], description="Exact-1-of-N for rules (eval in order)."
-    )
+    oneOf: List[DSRule] = Field([], description="Exact-1-of-N (evaluated in order).")
 
     not_: Optional[DSRule] = Field(description="Negation of a rule.", alias="not")
 
-    # if rewrite is set, apply then to rewritten path instead of original
+    # if rewrite is set, apply 'then' to rewritten path instead of original
     # missing rewrite is like rewrite \1, missing match is like ".*"
     then: Optional[DSRule] = Field(
         description="If this rule is true, evaluate then rule."
@@ -274,9 +275,9 @@ class Rule(BaseModel):
     )
 
     # indices of path segments (i.e. array parts after splitting on /)
-    # matchSegStart < matchSegEnd (unless matchSegEnd negative and start positive)
+    # matchStart < matchEnd (unless start pos. and end neg.)
     # matchStart = -1 = match only in final segment
-    # it's python slice without step option
+    # it's python slice without 'step' option
     # this means, missing segments are ignored
     # to have "exact" number of segments, match on a pattern with required # of / first
     matchStart: Optional[int]

@@ -4,7 +4,7 @@ from typing import cast
 
 import pytest
 
-from dirschema.core import DSRule, JSONObj, MetaConvention, PathSlice, Rule, TypeEnum
+from dirschema.core import DSRule, JSONSchema, MetaConvention, PathSlice, Rule, TypeEnum
 
 
 def test_meta_convention():
@@ -78,14 +78,16 @@ def test_rewrite():
 
     # non-trivial slices
     arr = ["a", "b", "c"]
-    for start, end in [(None, 1), (0, 2), (1, 3), (-2, -1), (1, -1)]:
-        assert PathSlice.into("a/b/c", start, end).sliceStr == "/".join(arr[start:end])
+    slices = [(None, 1), (0, 2), (1, 3), (-2, -1), (1, -1), (-3, 2)]
+    for start, end in slices:
+        sl = PathSlice.into("a/b/c", start, end).sliceStr
+        assert sl == "/".join(arr[start:end])
+        assert len(sl) > 0
     assert PathSlice.into("a/b/c", 1, 0).sliceStr == "b/c"  # special case: end = 0
 
-    # invalid slices
-    for start, end in [(-1, -2), (1, 1), (2, 1)]:
-        with pytest.raises(ValueError):
-            assert PathSlice.into("a/b/c", start, end)
+    # empty slices
+    for start, end in [(-1, 1), (-1, -2), (1, 1), (2, 1)]:
+        assert PathSlice.into("a/b/c", start, end).sliceStr == ""
 
     psl = PathSlice.into("a/bbc/d", 1, 2)
     assert psl.sliceStr == "bbc"
@@ -132,7 +134,7 @@ def test_magic():
 
     for val in TypeEnum:
         assert Rule(type=val)
-    for val in [False, True, JSONObj()]:
+    for val in [False, True, JSONSchema(__root__={})]:
         assert Rule(valid=val)
         assert Rule(validMeta=val)
 
