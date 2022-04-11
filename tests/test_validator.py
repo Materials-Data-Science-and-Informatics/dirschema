@@ -57,9 +57,9 @@ def test_validate_basic(tmp_path):
     )
     assert dsv.validate(tmp_path)  # file is not dir
 
-    dsv.metaConvention = MetaConvention(fileSuffix="_mymeta.json")
+    dsv.meta_conv = MetaConvention(fileSuffix="_mymeta.json")
     assert not dsv.validate(tmp_path)  # file is not checked anymore
-    dsv.metaConvention = MetaConvention()
+    dsv.meta_conv = MetaConvention()
 
     dsv.schema = rule_from_yaml(
         'anyOf: [{match: ""}, {match: "_mymeta\\\\.json", then: {type: true}}]'
@@ -83,10 +83,10 @@ def test_validate_basic(tmp_path):
         'anyOf: [{match: "", validMeta: true}, {match: "_mymeta\\\\.json"}]'
     )
     assert dsv.validate(tmp_path)  # wrong convention
-    dsv.metaConvention = MetaConvention(fileSuffix="_mymeta.json")
+    dsv.meta_conv = MetaConvention(fileSuffix="_mymeta.json")
     dsv.schema = rule_from_yaml('{match: "", validMeta: true}')
     assert not dsv.validate(tmp_path)  # ok with that convention
-    dsv.metaConvention = MetaConvention()
+    dsv.meta_conv = MetaConvention()
 
     (tmp_path / "_mymeta.json").unlink()
 

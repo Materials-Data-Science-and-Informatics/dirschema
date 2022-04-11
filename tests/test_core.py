@@ -4,7 +4,7 @@ from typing import cast
 
 import pytest
 
-from dirschema.core import DSRule, JSONSchema, MetaConvention, PathSlice, Rule, TypeEnum
+from dirschema.core import DSRule, MetaConvention, PathSlice, Rule, TypeEnum
 
 
 def test_meta_convention():
@@ -122,8 +122,8 @@ def test_magic():
 
     # special "private" fields that are to be included in serialization
     r = DSRule()
-    cast(Rule, r.__root__)._metaPath = "meta"
-    cast(Rule, r.__root__)._rewritePath = "test"
+    cast(Rule, r.__root__).__dict__["metaPath"] = "meta"
+    cast(Rule, r.__root__).__dict__["rewritePath"] = "test"
     assert repr(r).strip() == "{metaPath: meta, rewritePath: test}"
 
     # test truthiness of rules
@@ -134,7 +134,7 @@ def test_magic():
 
     for val in TypeEnum:
         assert Rule(type=val)
-    for val in [False, True, JSONSchema(__root__={})]:
+    for val in [False, True, {}]:
         assert Rule(valid=val)
         assert Rule(validMeta=val)
 

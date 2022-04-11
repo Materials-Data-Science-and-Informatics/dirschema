@@ -41,8 +41,8 @@ class IDirectory(ABC):
         """Return whether the path is (like) a file."""
 
     @abstractmethod
-    def load_json(self, path: str) -> Optional[Any]:
-        """Try loading JSON file at given path (to perform validation on it)."""
+    def load_meta(self, path: str) -> Optional[Any]:
+        """Try loading metadata file at given path (to perform validation on it)."""
 
 
 class RealDir(IDirectory):
@@ -60,7 +60,7 @@ class RealDir(IDirectory):
     def is_file(self, dir: str) -> bool:  # noqa: D102
         return self.base.joinpath(Path(dir)).is_file()
 
-    def load_json(self, path: str):  # noqa: D102
+    def load_meta(self, path: str):  # noqa: D102
         try:
             with open(self.base.joinpath(Path(path)), "r") as f:
                 return json.load(f)
@@ -135,7 +135,7 @@ class H5Dir(IDirectory):
         # otherwise check it is a dataset (= "file")
         return path in self.file and isinstance(self.file[path], h5py.Dataset)
 
-    def load_json(self, path: str):  # noqa: D102
+    def load_meta(self, path: str):  # noqa: D102
         p = path
         # try treating as attribute
         if p == H5_ATTR_SUF:

@@ -168,7 +168,10 @@ class JSONSchemaObj(BaseModel):
 
 
 class JSONSchema(BaseModel):
-    """A JSON Schema is just a boolean or some (further unvalidated) JSON object."""
+    """A JSON Schema is just a boolean or some (further unvalidated) JSON object.
+
+    We need this indirection to have the correct truthiness in `Rule` for `valid[Meta]`.
+    """
 
     __root__: JSONSchemaObj
 
@@ -240,14 +243,16 @@ class Rule(BaseModel):
         description="Check that path is a file / is a dir."
     )
 
-    valid: Optional[JSONSchema] = Field(description="Validate against provided schema.")
+    valid: Optional[Union[JSONSchema, str]] = Field(
+        description="Validate file against provided schema or validator."
+    )
 
     # only set for output in case of errors! NOT for the user
-    _metaPath: Optional[untruthy_str] = None  # = Field(alias="metaPath")
+    # _metaPath: Optional[untruthy_str] = None  # = Field(alias="metaPath")
 
     # this will use the provided metadataConvention for rewriting to the right path
-    validMeta: Optional[JSONSchema] = Field(
-        description="Validate external metadata against provided schema."
+    validMeta: Optional[Union[JSONSchema, str]] = Field(
+        description="Validate external metadata against provided schema or validator."
     )
 
     # these are JSON-Schema-like logical operators:
@@ -285,8 +290,9 @@ class Rule(BaseModel):
 
     # only do rewrite if match was successful
     rewrite: Optional[str]
+
     # only set for output in case of errors! NOT for the user
-    _rewritePath: Optional[untruthy_str] = None  # = Field(alias="rewritePath")
+    # _rewritePath: Optional[untruthy_str] = None  # = Field(alias="rewritePath")
 
     # ----
 
@@ -297,7 +303,7 @@ class Rule(BaseModel):
         During validation, successful fields are removed, i.e. remaining fields indicate
         validation errors. Hence, this can be used to check presence of any errors.
         """
-        return any(list(vars(self).values()) + [self._metaPath, self._rewritePath])
+        return any(list(vars(self).values()))
 
     def __repr__(self, stream=None) -> str:
         """Print out the rule as YAML (only the non-default values)."""
@@ -322,17 +328,10 @@ class Rule(BaseModel):
         if self.not_:
             d["not"] = d.pop("not_")
 
-        if self._metaPath:
-            d["metaPath"] = self._metaPath
-
-        if self._rewritePath:
-            d["rewritePath"] = self._rewritePath
-
         return d
 
     class Config:
         extra = Extra.forbid
-        underscore_attrs_are_private = True
 
 
 Rule.update_forward_refs()

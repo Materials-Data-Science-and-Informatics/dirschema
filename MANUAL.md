@@ -16,7 +16,7 @@ supports the following operations:
 * return a list of paths to all "files" and "directories" (normalized as described below)
 * test whether a path is a "directory" (inner node)
 * test whether a path is a "file" (leaf)
-* load a "file" as JSON to perform JSON Schema validation on it
+* load a "file" (typically JSON) to perform JSON Schema or custom validation on it
 
 In the following we will use the language of **directories** and **files** and will refer
 to the whole tree structure as the **dataset**. Other directory/file-like structures can
@@ -201,7 +201,8 @@ JSON Schema
 Require that the path is a JSON file (**YAML is not allowed**) that successfully validates
 against the JSON Schema provided as the value.
 
-Validation fails if the path does not exist, is not a JSON file or is not valid.
+Validation fails if the path does not exist, cannot be loaded by the adapter or is not
+valid according to the validation handler.
 
 #### validMeta
 
@@ -214,7 +215,8 @@ is a JSON file (**YAML is not allowed**) that successfully validates
 against the JSON Schema provided as the value.
 
 Validation fails if the path does not exist, the metadata file does not exist, the
-metadata file is not a JSON file or it is not valid.
+metadata file cannot be loaded by the adapter or is not valid according to the validation
+handler.
 
 ### Combinations of Rules
 

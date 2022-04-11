@@ -18,6 +18,8 @@ from .parse import load_json, to_uri
 
 yaml = YAML(typ="safe")
 
+# custom validator#ENTRYPOINT://args
+
 
 @dataclass
 class DSEvalCtx:
@@ -54,26 +56,29 @@ class DSValidator:
     def __init__(
         self,
         schema: Union[bool, Rule, DSRule, str, Path],
-        metaconv: Optional[MetaConvention] = None,
+        meta_conv: Optional[MetaConvention] = None,
+        default_handler: Optional[str] = None,
+        local_schema_basedir: Optional[Path] = None,
     ) -> None:
         """
         Construct validator instance from given schema or schema location.
 
         Accepts DSRule, naked bool or Rule, or a str/Path that is interpreted as location.
         """
-        self.metaConvention = metaconv or MetaConvention()
+        self.meta_conv = meta_conv or MetaConvention()
+        self.default_handler = default_handler or "cwd://"
+        self.local_schema_basedir = local_schema_basedir
+
         if isinstance(schema, bool) or isinstance(schema, Rule):
-            self.schema_uri = None
             self.schema = DSRule(__root__=schema)
         elif isinstance(schema, DSRule):
-            self.schema_uri = None
             self.schema = schema
         elif isinstance(schema, str) or isinstance(schema, Path):
-            self.schema_uri = to_uri(str(schema))
+            uri = to_uri(str(schema), self.local_schema_basedir)
+            dat = load_json(uri, local_basedir=self.local_schema_basedir)
             # use deepcopy to get rid of jsonref (see jsonref issue #9)
             # otherwise we will get problems with pydantic serialization later
-            schema_json = load_json(self.schema_uri, base_uri=self.schema_uri)
-            self.schema = DSRule.parse_obj(copy.deepcopy(schema_json))
+            self.schema = DSRule.parse_obj(copy.deepcopy(dat))
         else:
             raise ValueError(f"Do not know how to process provided schema: {schema}")
 
@@ -92,8 +97,8 @@ class DSValidator:
         a residual rule that was not satisfied.
         """
         dir: IDirectory = get_adapter_for(path)
-        paths = [p for p in dir.get_paths() if not self.metaConvention.is_meta(p)]
-        ctx = DSEvalCtx(dirAdapter=dir, metaConvention=self.metaConvention, **kwargs)
+        paths = [p for p in dir.get_paths() if not self.meta_conv.is_meta(p)]
+        ctx = DSEvalCtx(dirAdapter=dir, metaConvention=self.meta_conv, **kwargs)
         errors = {}
         for p in paths:
             res = self.validate_path(p, self.schema, ctx)
@@ -132,7 +137,7 @@ class DSValidator:
 
         rl: Rule = cast(Rule, rule.__root__)  # used to check constraints
         curCtx = ctx.updated_context(rl)  # derived from parent ctx + current settings
-        err = Rule()  # used to collect errors
+        err = Rule()  # type: ignore # used to collect errors
 
         # 1. match / rewrite
         # if rewrite is set, don't need do do separate match and just try rewriting
@@ -163,13 +168,12 @@ class DSValidator:
 
         # take care of metadata JSON Schema validation constraint
         for key in ("valid", "validMeta"):
-            schema = rl.__dict__[key]
-            if schema is None:
+            if rl.__dict__[key] is None:  # attribute not set
                 continue
 
             if not is_file and not is_dir:
                 # original path does not exist -> cannot proceed
-                err._metaPath = untruthy_str(path)
+                err.__dict__["metaPath"] = untruthy_str(path)
                 continue
 
             # use metadata convention for validMeta
@@ -178,21 +182,21 @@ class DSValidator:
                 metapath = curCtx.metaConvention.meta_for(path, is_dir=is_dir)
 
             # try loading the metadata
-            dat = ctx.dirAdapter.load_json(metapath)
+            dat = ctx.dirAdapter.load_meta(metapath)
             if dat is None:
                 # failed loading metadata file -> cannot proceed
-                err._metaPath = untruthy_str(metapath)
+                err.__dict__["metaPath"] = untruthy_str(metapath)
                 continue
 
+            # TODO: validation handler
+            schema = rl.__dict__[key]
             try:
                 jsonschema.validate(dat, schema.__root__)
             except jsonschema.ValidationError:
                 err.__dict__[key] = schema
 
         if err:
-            ret = DSRule()
-            ret.__root__ = err  # need to do it like that to keep _metaPath
-            return ret
+            return DSRule(__root__=err)
 
         # 3. check the complex constraints
         for op in ("allOf", "anyOf", "oneOf"):
@@ -234,8 +238,10 @@ class DSValidator:
             if thenErr is not None:
                 err = cast(Rule, thenErr.__root__)  # technically a lie, but morally ok
                 if not isinstance(err, bool) and thenPath != path:
-                    err._rewritePath = err._rewritePath or untruthy_str(thenPath)
+                    old = err.__dict__.get("rewritePath")
+                    err.__dict__["rewritePath"] = old or untruthy_str(thenPath)
 
         if err:
             return DSRule(__root__=err)
+
         return None  # no errors

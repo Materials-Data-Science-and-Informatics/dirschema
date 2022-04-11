@@ -94,11 +94,11 @@ def test_realdir(tmp_path):
     assert inst.is_file("foo/data.bin")
     assert inst.is_file("foo/data.bin_meta.json")
 
-    assert inst.load_json("") is None
-    assert inst.load_json("invalid") is None
-    assert inst.load_json("foo/data.bin") is None
-    assert inst.load_json("foo/notReally.json") is None
-    assert inst.load_json("foo/data.bin_meta.json") == {"hello": "world"}
+    assert inst.load_meta("") is None
+    assert inst.load_meta("invalid") is None
+    assert inst.load_meta("foo/data.bin") is None
+    assert inst.load_meta("foo/notReally.json") is None
+    assert inst.load_meta("foo/data.bin_meta.json") == {"hello": "world"}
 
 
 def test_hdf5dir(tmp_path):
@@ -150,19 +150,19 @@ def test_hdf5dir(tmp_path):
         "someArray": [1, 2, 3],
         "someUnknown": None,
     }
-    meta = inst.load_json(H5_ATTR_SUF)
+    meta = inst.load_meta(H5_ATTR_SUF)
     assert meta == expected
-    assert inst.load_json("foo/data" + H5_ATTR_SUF) == {"filename": "data.bin"}
-    assert inst.load_json("foo/invalid" + H5_ATTR_SUF) is None
+    assert inst.load_meta("foo/data" + H5_ATTR_SUF) == {"filename": "data.bin"}
+    assert inst.load_meta("foo/invalid" + H5_ATTR_SUF) is None
 
     # test loading datasets as JSON
-    assert inst.load_json("") is None
-    assert inst.load_json("invalid") is None
-    assert inst.load_json("foo") is None
-    assert inst.load_json("foo/data") is None
-    assert inst.load_json("foo/notReally.json") is None
-    assert inst.load_json("foo/data_meta.json") == {"hello": "world"}
-    assert inst.load_json("foo/wrapped.json") == {"hello": "world"}
+    assert inst.load_meta("") is None
+    assert inst.load_meta("invalid") is None
+    assert inst.load_meta("foo") is None
+    assert inst.load_meta("foo/data") is None
+    assert inst.load_meta("foo/notReally.json") is None
+    assert inst.load_meta("foo/data_meta.json") == {"hello": "world"}
+    assert inst.load_meta("foo/wrapped.json") == {"hello": "world"}
 
 
 def test_getadapter(tmp_path):
