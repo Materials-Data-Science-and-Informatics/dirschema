@@ -18,7 +18,8 @@ from .parse import load_json, to_uri
 
 yaml = YAML(typ="safe")
 
-# custom validator#ENTRYPOINT://args
+# custom validators with syntax v#ENTRYPOINT://args
+# the plugin then is passed the current path to check and the args-string
 
 
 @dataclass
