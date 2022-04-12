@@ -6,7 +6,7 @@ import h5py
 import numpy
 import pytest
 
-from dirschema.adapters import H5_ATTR_SUF, H5Dir, RealDir, get_adapter_for
+from dirschema.adapters import H5Dir, RealDir, get_adapter_for
 
 
 def prep_realdir(path: Path):
@@ -41,8 +41,9 @@ def prep_hdf5dir(path: Path):
         f["/"].attrs["someInt"] = 42
         f["/"].attrs["someFloat"] = 3.14
         f["/"].attrs["someString"] = "hello"
+        f["/"].attrs["some.json"] = '{"a": true}'
         f["/"].attrs["someArray"] = [1, 2, 3]
-        f["/"].attrs["someUnknown"] = numpy.void("surprise".encode("utf-8"))
+        f["/"].attrs["someUnknown"] = "surprise".encode("utf-8")
 
         f.create_group("foo/bar")
 
@@ -109,11 +110,17 @@ def test_hdf5dir(tmp_path):
     paths = inst.get_paths()
     expected = [
         "",
-        H5_ATTR_SUF,
+        "@some.json",
+        "@someArray",
+        "@someBool",
+        "@someFloat",
+        "@someInt",
+        "@someString",
+        "@someUnknown",
         "foo",
         "foo/bar",
         "foo/data",
-        "foo/data" + H5_ATTR_SUF,
+        "foo/data@filename",
         "foo/data_meta.json",
         "foo/notReally.json",
         "foo/wrapped.json",
@@ -123,23 +130,23 @@ def test_hdf5dir(tmp_path):
 
     assert not inst.is_dir("invalid")
     assert inst.is_dir("")
-    assert not inst.is_dir(H5_ATTR_SUF)
+    assert not inst.is_dir("@some.json")
     assert inst.is_dir("foo")
     assert inst.is_dir("foo/bar")
     assert not inst.is_dir("foo/data")
-    assert not inst.is_dir("foo/data" + H5_ATTR_SUF)
+    assert not inst.is_dir("foo/data@filename")
     assert not inst.is_dir("foo/data_meta.json")
-    assert not inst.is_dir("foo/data_meta.json" + H5_ATTR_SUF)
+    assert not inst.is_dir("foo/data_meta.json@missing")
 
     assert not inst.is_file("invalid")
     assert not inst.is_file("")
-    assert inst.is_file(H5_ATTR_SUF)
+    assert inst.is_file("@someInt")
     assert not inst.is_file("foo")
     assert not inst.is_file("foo/bar")
     assert inst.is_file("foo/data")
-    assert inst.is_file("foo/data" + H5_ATTR_SUF)
+    assert inst.is_file("foo/data@filename")
     assert inst.is_file("foo/data_meta.json")
-    assert not inst.is_file("foo/data_meta.json" + H5_ATTR_SUF)
+    assert not inst.is_file("foo/data_meta.json@missing")
 
     # test loading attributes as JSON
     expected = {
@@ -148,12 +155,14 @@ def test_hdf5dir(tmp_path):
         "someFloat": 3.14,
         "someString": "hello",
         "someArray": [1, 2, 3],
-        "someUnknown": None,
+        "someUnknown": "surprise",
+        "some.json": {"a": True},
     }
-    meta = inst.load_meta(H5_ATTR_SUF)
-    assert meta == expected
-    assert inst.load_meta("foo/data" + H5_ATTR_SUF) == {"filename": "data.bin"}
-    assert inst.load_meta("foo/invalid" + H5_ATTR_SUF) is None
+    for atr, value in expected.items():
+        assert inst.load_meta("@" + atr) == value
+
+    assert inst.load_meta("foo/data@filename") == "data.bin"
+    assert inst.load_meta("foo/invalid@missing") is None
 
     # test loading datasets as JSON
     assert inst.load_meta("") is None

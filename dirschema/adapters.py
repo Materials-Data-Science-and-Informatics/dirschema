@@ -4,7 +4,7 @@ import itertools
 import json
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Dict, Iterable, Optional
+from typing import Any, Iterable, Optional
 
 try:
     import h5py
@@ -68,8 +68,11 @@ class RealDir(IDirectory):
             return None
 
 
-H5_ATTR_SUF = "@attrs"
-"""Suffix to address attributes of a different HDF5 entity (group or dataset)."""
+H5_ATTR_SEP = "@"
+"""Separator used in paths to separate a HDF5 node from an attribute."""
+
+H5_JSON_SUF = ".json"
+"""Suffix used in leaf nodes to distinguish strings from JSON-serialized data."""
 
 
 class H5Dir(IDirectory):
@@ -82,35 +85,17 @@ class H5Dir(IDirectory):
         super().__init__(dir)
         self.file = h5py.File(dir, "r")  # auto-closed on GC, no need to do anything
 
-    def attrs_to_json(self, h5path: str) -> Dict[str, Any]:  # noqa: D102
-        """
-        Interpret attributes of given valid HDF5 path as a JSON object.
-
-        This object can contain integers, floats, booleans and arrays of these.
-        """
-        ret: Dict[str, Any] = {}
-        atrs: Any = self.file[h5path].attrs
-        for k in atrs.keys():
-            if isinstance(atrs[k], str):
-                ret[k] = atrs[k]
-            elif isinstance(atrs[k], numpy.void):
-                ret[k] = None  # acknowledge existence, but don't try decoding value
-            else:
-                ret[k] = atrs[k].tolist()
-        return ret
-
     def get_paths(self) -> Iterable[str]:  # noqa: D102
         ret = [""]
-        if len(self.file["/"].attrs) > 0:
-            ret.append(H5_ATTR_SUF)
+        for atr in self.file["/"].attrs.keys():
+            ret.append(f"{H5_ATTR_SEP}{atr}")
 
         def collect(name: str) -> None:
-            if name.endswith("@attrs"):
-                raise ValueError(f"Invalid name, must not end with {H5_ATTR_SUF}!")
+            if name.find(H5_ATTR_SEP) >= 0:
+                raise ValueError(f"Invalid name, must not contain {H5_ATTR_SEP}!")
             ret.append(name)
-            # add "virtual" file path to access attributes as JSON objects, if any
-            if len(self.file[name].attrs) > 0:
-                ret.append(name + H5_ATTR_SUF)
+            for atr in self.file[name].attrs.keys():
+                ret.append(f"{name}{H5_ATTR_SEP}{atr}")
 
         self.file.visit(collect)
         return ret
@@ -118,7 +103,7 @@ class H5Dir(IDirectory):
     def is_dir(self, path: str) -> bool:  # noqa: D102
         if path == "":
             return True
-        if path.endswith(H5_ATTR_SUF) or path not in self.file:
+        if path.find(H5_ATTR_SEP) >= 0 or path not in self.file:
             return False
         if isinstance(self.file[path], h5py.Group):
             return True
@@ -126,24 +111,32 @@ class H5Dir(IDirectory):
 
     def is_file(self, path: str) -> bool:  # noqa: D102
         # attributes (treated like special files) exist if underlying group/dataset exists
-        if path.endswith(H5_ATTR_SUF):
-            if path == H5_ATTR_SUF:
-                return len(self.file["/"].attrs) > 0
-            p = path.split("@")[0]
-            return p in self.file and len(self.file[p].attrs) > 0
-
-        # otherwise check it is a dataset (= "file")
-        return path in self.file and isinstance(self.file[path], h5py.Dataset)
+        if path.find(H5_ATTR_SEP) >= 0:
+            p = path.split(H5_ATTR_SEP)
+            p[0] = p[0] or "/"
+            return p[0] in self.file and p[1] in self.file[p[0]].attrs
+        else:
+            # otherwise check it is a dataset (= "file")
+            return path in self.file and isinstance(self.file[path], h5py.Dataset)
 
     def load_meta(self, path: str):  # noqa: D102
         p = path
-        # try treating as attribute
-        if p == H5_ATTR_SUF:
-            return self.attrs_to_json("/")
-        if p.endswith(H5_ATTR_SUF):
-            try:
-                return self.attrs_to_json(p.split("@")[0])
-            except KeyError:
+        if p.find(H5_ATTR_SEP) >= 0:
+            # try treating as attribute
+            f, s = p.split(H5_ATTR_SEP)
+            f = f or "/"
+            if f in self.file and s in self.file[f].attrs:
+                dat = self.file[f].attrs[s]
+                if isinstance(dat, str):
+                    if s.endswith(H5_JSON_SUF):
+                        return json.loads(dat)
+                    else:
+                        return dat
+                elif isinstance(dat, h5py.Empty):
+                    return None
+                else:
+                    return dat.tolist()
+            else:
                 return None
 
         # check that the path exists and is a dataset, but not a numpy array
@@ -162,7 +155,7 @@ class H5Dir(IDirectory):
         try:
             if isinstance(bs, bytes):  # non-wrapped string (must not contain NUL)
                 return json.loads(bs.decode("utf-8"))
-            elif isinstance(bs, numpy.void):  # void-wrapped variable length bytes
+            elif isinstance(bs, numpy.void):  # void-wrapped bytes
                 return json.loads(bs.tobytes().decode("utf-8"))
 
         except (UnicodeDecodeError, json.JSONDecodeError):  # failed parsing it
