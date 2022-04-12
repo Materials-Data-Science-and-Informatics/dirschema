@@ -7,19 +7,56 @@ import json
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Optional, Union, cast
+from typing import Dict, List, Optional, Union, cast
 
-import jsonschema
+from jsonschema import Draft202012Validator
 from ruamel.yaml import YAML
 
 from .adapters import IDirectory, get_adapter_for
-from .core import DSRule, MetaConvention, PathSlice, Rule, TypeEnum, untruthy_str
+from .core import (
+    DSRule,
+    JSONSchema,
+    MetaConvention,
+    PathSlice,
+    Rule,
+    TypeEnum,
+    untruthy_str,
+)
+from .handler import ValidationHandler
+from .handlers import loaded_handlers
 from .parse import load_json, to_uri
 
 yaml = YAML(typ="safe")
 
-# custom validators with syntax v#ENTRYPOINT://args
-# the plugin then is passed the current path to check and the args-string
+
+def validate_custom(dat, plugin_str: str) -> Dict[str, List[str]]:
+    """Perform validation based on a validation handler string."""
+    try:
+        if not plugin_str.startswith("v#"):
+            raise ValueError
+        ep, args = plugin_str[2:].split("://")
+        if ep == "":
+            raise ValueError
+    except ValueError:
+        raise ValueError(f"Invalid custom validator string: '{plugin_str}'")
+
+    try:
+        h: ValidationHandler = loaded_handlers[ep]
+        return h.validate(dat, args)
+    except KeyError:
+        raise ValueError(f"Validator entry-point not found: '{ep}'")
+
+
+def validate_jsonschema(dat, schema) -> Dict[str, List[str]]:
+    """Perform validation based on a JSON Schema."""
+    v = Draft202012Validator(schema=schema)  # type: ignore
+    errs: Dict[str, List[str]] = {}
+    for verr in sorted(v.iter_errors(dat), key=lambda e: e.path):  # type: ignore
+        key = "/" + "/".join(map(str, verr.path))  # JSON Pointer into document
+        if key not in errs:
+            errs[key] = []
+        errs[key].append(verr.message)
+    return errs
 
 
 @dataclass
@@ -82,6 +119,32 @@ class DSValidator:
             self.schema = DSRule.parse_obj(copy.deepcopy(dat))
         else:
             raise ValueError(f"Do not know how to process provided schema: {schema}")
+
+    def validate_metadata(
+        self, dat, schema: Union[str, DSRule, Dict]
+    ) -> Dict[str, List[str]]:
+        """Validate metadata object (loaded dict) using JSON Schema or custom validator.
+
+        The validator must be either a JSON Schema embedded in a rule, or a string
+        pointing to a JSON Schema, or a custom validator handler string.
+
+        Returns a dict mapping from JSON Pointers to a list of errors in that location.
+        If the dict is empty, no validation errors were detected.
+        """
+        is_jsonschema = True
+        if isinstance(schema, str):
+            if schema.startswith("v#"):
+                is_jsonschema = False  # custom validation, not json schema!
+            else:  # load schema from URI
+                uri = to_uri(schema)
+                schema = load_json(uri, local_basedir=self.local_schema_basedir)
+        elif isinstance(schema, JSONSchema):  # unpack schema from parsed object
+            schema = schema.__root__
+        if is_jsonschema:
+            return validate_jsonschema(dat, schema)
+        else:
+            assert isinstance(schema, str)
+            return validate_custom(dat, schema)
 
     def validate(self, path: Path, **kwargs) -> Dict[str, DSRule]:
         """
@@ -189,12 +252,12 @@ class DSValidator:
                 err.__dict__["metaPath"] = untruthy_str(metapath)
                 continue
 
-            # TODO: validation handler
+            # apply validation (JSON Schema or custom plugin)
             schema = rl.__dict__[key]
-            try:
-                jsonschema.validate(dat, schema.__root__)
-            except jsonschema.ValidationError:
+            valErrs = self.validate_metadata(dat, schema)
+            if valErrs:
                 err.__dict__[key] = schema
+                err.__dict__["validationErrors"] = valErrs
 
         if err:
             return DSRule(__root__=err)

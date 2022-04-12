@@ -36,6 +36,7 @@ h5py = { version = "^3.4.0", optional = true }
 numpy = { version = "^1.21.2", optional = true }
 jsonschema = "^4.4.0"
 typer = "^0.4.0"
+entrypoints = "^0.4"
 
 [tool.poetry.dev-dependencies]
 pre-commit = "^2.13.0"
@@ -48,6 +49,12 @@ h5 = ["h5py", "numpy"]
 
 [tool.poetry.scripts]
 dirschema = 'dirschema.cli:app'
+
+[tool.poetry.plugins.dirschema_validator]
+# dirschema supports entry-point-based validation plugins.
+# The default pydantic handler can be subclassed or
+# can serve as a template for your custom validation plugins.
+pydantic = "dirschema.handler_pydantic:PydanticHandler"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
