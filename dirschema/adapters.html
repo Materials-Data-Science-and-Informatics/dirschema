@@ -31,22 +31,28 @@
         <h2>API Documentation</h2>
             <ul class="memberlist">
             <li>
+                    <a class="function" href="#require_h5py">require_h5py</a>
+            </li>
+            <li>
                     <a class="class" href="#IDirectory">IDirectory</a>
                             <ul class="memberlist">
                         <li>
                                 <a class="function" href="#IDirectory.__init__">IDirectory</a>
                         </li>
                         <li>
+                                <a class="function" href="#IDirectory.for_path">for_path</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#IDirectory.get_paths">get_paths</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#IDirectory.load_meta">load_meta</a>
                         </li>
                         <li>
                                 <a class="function" href="#IDirectory.is_dir">is_dir</a>
                         </li>
                         <li>
                                 <a class="function" href="#IDirectory.is_file">is_file</a>
-                        </li>
-                        <li>
-                                <a class="function" href="#IDirectory.load_meta">load_meta</a>
                         </li>
                 </ul>
 
@@ -58,13 +64,37 @@
                                 <a class="function" href="#RealDir.get_paths">get_paths</a>
                         </li>
                         <li>
+                                <a class="function" href="#RealDir.load_meta">load_meta</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#RealDir.is_dir">is_dir</a>
                         </li>
                         <li>
                                 <a class="function" href="#RealDir.is_file">is_file</a>
                         </li>
+                </ul>
+
+            </li>
+            <li>
+                    <a class="class" href="#ZipDir">ZipDir</a>
+                            <ul class="memberlist">
                         <li>
-                                <a class="function" href="#RealDir.load_meta">load_meta</a>
+                                <a class="function" href="#ZipDir.__init__">ZipDir</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#ZipDir.for_path">for_path</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#ZipDir.get_paths">get_paths</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#ZipDir.load_meta">load_meta</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#ZipDir.is_dir">is_dir</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#ZipDir.is_file">is_file</a>
                         </li>
                 </ul>
 
@@ -80,6 +110,9 @@
                             <ul class="memberlist">
                         <li>
                                 <a class="function" href="#H5Dir.__init__">H5Dir</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#H5Dir.for_path">for_path</a>
                         </li>
                         <li>
                                 <a class="function" href="#H5Dir.get_paths">get_paths</a>
@@ -124,6 +157,7 @@
 
 <span class="kn">import</span> <span class="nn">itertools</span>
 <span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">zipfile</span> <span class="k">as</span> <span class="nn">zip</span>
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span>
@@ -136,11 +170,16 @@
 <span class="k">else</span><span class="p">:</span>
     <span class="n">_has_h5</span> <span class="o">=</span> <span class="kc">True</span>
 
+
+<span class="k">def</span> <span class="nf">require_h5py</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Raise exception if h5py is not installed.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_has_h5</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;Install dirschema with [h5] extra for HDF5 support!&quot;</span><span class="p">)</span>
+
+
 <span class="c1"># NOTE: currently, completely ignores existence of symlinks</span>
 <span class="c1"># the h5py visit function does ignore them too and also reasonable validation behavior unclear</span>
 <span class="c1"># either stick to this, or find a reasonable semantics + workaround for HDF5 files</span>
-
-<span class="c1"># NOTE: another useful adapter could be a zip adapter</span>
 
 
 <span class="k">class</span> <span class="nc">IDirectory</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
@@ -150,9 +189,21 @@
         <span class="sd">&quot;&quot;&quot;Initialize interface object.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">base</span> <span class="o">=</span> <span class="nb">dir</span>
 
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">for_path</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return an instance given a path to a archive file or a directory.</span>
+
+<span class="sd">        Default implementation just passes through the path to the constructor.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="nb">dir</span><span class="p">)</span>
+
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">get_paths</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Return paths relative to give base directory that are to be checked.&quot;&quot;&quot;</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">load_meta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Try loading metadata file at given path (to perform validation on it).&quot;&quot;&quot;</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">is_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -161,10 +212,6 @@
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">is_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Return whether the path is (like) a file.&quot;&quot;&quot;</span>
-
-    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">load_meta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Try loading metadata file at given path (to perform validation on it).&quot;&quot;&quot;</span>
 
 
 <span class="k">class</span> <span class="nc">RealDir</span><span class="p">(</span><span class="n">IDirectory</span><span class="p">):</span>
@@ -176,18 +223,53 @@
             <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">],</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="p">)),</span> <span class="n">paths</span><span class="p">)</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">is_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>  <span class="c1"># noqa: D102</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="nb">dir</span><span class="p">))</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span>
-
-    <span class="k">def</span> <span class="nf">is_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>  <span class="c1"># noqa: D102</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="nb">dir</span><span class="p">))</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span>
-
     <span class="k">def</span> <span class="nf">load_meta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>  <span class="c1"># noqa: D102</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)),</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base</span> <span class="o">/</span> <span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
         <span class="k">except</span> <span class="p">(</span><span class="ne">FileNotFoundError</span><span class="p">,</span> <span class="ne">IsADirectoryError</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">is_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>  <span class="c1"># noqa: D102</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base</span> <span class="o">/</span> <span class="nb">dir</span><span class="p">)</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">is_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>  <span class="c1"># noqa: D102</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base</span> <span class="o">/</span> <span class="nb">dir</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span>
+
+
+<span class="k">class</span> <span class="nc">ZipDir</span><span class="p">(</span><span class="n">IDirectory</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Adapter for working with zip files.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">opened_file</span><span class="p">:</span> <span class="nb">zip</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># noqa: D107</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="nb">dir</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="n">opened_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">namelist</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">for_path</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>  <span class="c1"># noqa: D102</span>
+        <span class="n">opened</span> <span class="o">=</span> <span class="nb">zip</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>  <span class="c1"># auto-closed on GC, no need to do anything</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="n">opened</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_paths</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>  <span class="c1"># noqa: D102</span>
+        <span class="k">return</span> <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">),</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">)))</span>
+
+    <span class="k">def</span> <span class="nf">load_meta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>  <span class="c1"># noqa: D102</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">IsADirectoryError</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># as is_dir and is_file of zip.Path appear to work purely syntactically,</span>
+    <span class="c1"># they&#39;re useless for us. We rather just lookup in the list of paths</span>
+
+    <span class="k">def</span> <span class="nf">is_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>  <span class="c1"># noqa: D102</span>
+        <span class="n">cand_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="nb">dir</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span>
+        <span class="k">return</span> <span class="n">cand_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">names</span>
+
+    <span class="k">def</span> <span class="nf">is_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>  <span class="c1"># noqa: D102</span>
+        <span class="n">cand_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="nb">dir</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cand_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">names</span>
 
 
 <span class="n">H5_ATTR_SEP</span> <span class="o">=</span> <span class="s2">&quot;@&quot;</span>
@@ -200,12 +282,15 @@
 <span class="k">class</span> <span class="nc">H5Dir</span><span class="p">(</span><span class="n">IDirectory</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Adapter for working with HDF5 files.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># noqa: D107</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">_has_h5</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;Install dirschema with [h5] extra for HDF5 support!&quot;</span><span class="p">)</span>
-
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">opened_file</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># noqa: D107</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="nb">dir</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>  <span class="c1"># auto-closed on GC, no need to do anything</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="n">opened_file</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">for_path</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+        <span class="n">require_h5py</span><span class="p">()</span>
+        <span class="n">opened</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>  <span class="c1"># auto-closed on GC, no need to do anything</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="n">opened</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">get_paths</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>  <span class="c1"># noqa: D102</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]</span>
@@ -244,7 +329,7 @@
     <span class="k">def</span> <span class="nf">load_meta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>  <span class="c1"># noqa: D102</span>
         <span class="n">p</span> <span class="o">=</span> <span class="n">path</span>
         <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">H5_ATTR_SEP</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="c1"># try treating as attribute</span>
+            <span class="c1"># try treating as attribute. attributes are interpreted when possible</span>
             <span class="n">f</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">H5_ATTR_SEP</span><span class="p">)</span>
             <span class="n">f</span> <span class="o">=</span> <span class="n">f</span> <span class="ow">or</span> <span class="s2">&quot;/&quot;</span>
             <span class="k">if</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="ow">and</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">:</span>
@@ -273,30 +358,29 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bs</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">None</span>
 
-        <span class="c1"># try decoding as bytes</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bs</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>  <span class="c1"># non-wrapped string (must not contain NUL)</span>
-                <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">bs</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
-            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bs</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">void</span><span class="p">):</span>  <span class="c1"># void-wrapped bytes</span>
-                <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">bs</span><span class="o">.</span><span class="n">tobytes</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
+        <span class="c1"># the only kinds of datasets we accept are essentially utf-8 strings</span>
+        <span class="c1"># which are represented as possibly wrapped bytes</span>
 
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bs</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">void</span><span class="p">):</span>  <span class="c1"># void-wrapped bytes -&gt; unpack</span>
+            <span class="n">bs</span> <span class="o">=</span> <span class="n">bs</span><span class="o">.</span><span class="n">tobytes</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>  <span class="c1"># decode string from bytes</span>
+            <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">bs</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
         <span class="k">except</span> <span class="p">(</span><span class="ne">UnicodeDecodeError</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">):</span>  <span class="c1"># failed parsing it</span>
             <span class="k">return</span> <span class="kc">None</span>
 
 
 <span class="k">def</span> <span class="nf">get_adapter_for</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">IDirectory</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Return suitable interface adapter for given path.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Return suitable interface adapter for given path (selected by file extension).&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
-        <span class="k">return</span> <span class="n">RealDir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">RealDir</span><span class="o">.</span><span class="n">for_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">f</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
-            <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-            <span class="k">return</span> <span class="n">H5Dir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
-            <span class="c1"># apparently not HDF5 file</span>
-            <span class="k">pass</span>
+        <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;zip&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">ZipDir</span><span class="o">.</span><span class="n">for_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">((</span><span class="s2">&quot;h5&quot;</span><span class="p">,</span> <span class="s2">&quot;hdf5&quot;</span><span class="p">)):</span>
+            <span class="n">require_h5py</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">H5Dir</span><span class="o">.</span><span class="n">for_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found no suitable dirschema adapter for path: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
@@ -304,6 +388,29 @@
         </details>
 
             </section>
+                <section id="require_h5py">
+                            <div class="attr function"><a class="headerlink" href="#require_h5py">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">require_h5py</span><span class="signature">()</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="k">def</span> <span class="nf">require_h5py</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Raise exception if h5py is not installed.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_has_h5</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;Install dirschema with [h5] extra for HDF5 support!&quot;</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Raise exception if h5py is not installed.</p>
+</div>
+
+
+                </section>
                 <section id="IDirectory">
                                 <div class="attr class">
         <a class="headerlink" href="#IDirectory">#&nbsp;&nbsp</a>
@@ -322,9 +429,21 @@
         <span class="sd">&quot;&quot;&quot;Initialize interface object.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">base</span> <span class="o">=</span> <span class="nb">dir</span>
 
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">for_path</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return an instance given a path to a archive file or a directory.</span>
+
+<span class="sd">        Default implementation just passes through the path to the constructor.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="nb">dir</span><span class="p">)</span>
+
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">get_paths</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Return paths relative to give base directory that are to be checked.&quot;&quot;&quot;</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">load_meta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Try loading metadata file at given path (to perform validation on it).&quot;&quot;&quot;</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">is_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -333,10 +452,6 @@
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">is_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Return whether the path is (like) a file.&quot;&quot;&quot;</span>
-
-    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">load_meta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Try loading metadata file at given path (to perform validation on it).&quot;&quot;&quot;</span>
 </pre></div>
 
         </details>
@@ -366,6 +481,35 @@
 
 
                             </div>
+                            <div id="IDirectory.for_path" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#IDirectory.for_path">#&nbsp;&nbsp</a>
+
+                <div class="decorator">@classmethod</div>
+
+            <span class="def">def</span>
+            <span class="name">for_path</span><span class="signature">(cls, dir: pathlib.Path)</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">for_path</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return an instance given a path to a archive file or a directory.</span>
+
+<span class="sd">        Default implementation just passes through the path to the constructor.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="nb">dir</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Return an instance given a path to a archive file or a directory.</p>
+
+<p>Default implementation just passes through the path to the constructor.</p>
+</div>
+
+
+                            </div>
                             <div id="IDirectory.get_paths" class="classattr">
                                         <div class="attr function"><a class="headerlink" href="#IDirectory.get_paths">#&nbsp;&nbsp</a>
 
@@ -385,6 +529,29 @@
         </details>
 
             <div class="docstring"><p>Return paths relative to give base directory that are to be checked.</p>
+</div>
+
+
+                            </div>
+                            <div id="IDirectory.load_meta" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#IDirectory.load_meta">#&nbsp;&nbsp</a>
+
+                <div class="decorator">@abstractmethod</div>
+
+            <span class="def">def</span>
+            <span class="name">load_meta</span><span class="signature">(self, path: str) -&gt; Optional[Any]</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">load_meta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Try loading metadata file at given path (to perform validation on it).&quot;&quot;&quot;</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Try loading metadata file at given path (to perform validation on it).</p>
 </div>
 
 
@@ -435,29 +602,6 @@
 
 
                             </div>
-                            <div id="IDirectory.load_meta" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#IDirectory.load_meta">#&nbsp;&nbsp</a>
-
-                <div class="decorator">@abstractmethod</div>
-
-            <span class="def">def</span>
-            <span class="name">load_meta</span><span class="signature">(self, path: str) -&gt; Optional[Any]</span>:
-    </div>
-
-            <details>
-            <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span>    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">load_meta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Try loading metadata file at given path (to perform validation on it).&quot;&quot;&quot;</span>
-</pre></div>
-
-        </details>
-
-            <div class="docstring"><p>Try loading metadata file at given path (to perform validation on it).</p>
-</div>
-
-
-                            </div>
                 </section>
                 <section id="RealDir">
                                 <div class="attr class">
@@ -479,18 +623,18 @@
             <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">],</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="p">)),</span> <span class="n">paths</span><span class="p">)</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">is_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>  <span class="c1"># noqa: D102</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="nb">dir</span><span class="p">))</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span>
-
-    <span class="k">def</span> <span class="nf">is_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>  <span class="c1"># noqa: D102</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="nb">dir</span><span class="p">))</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span>
-
     <span class="k">def</span> <span class="nf">load_meta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>  <span class="c1"># noqa: D102</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)),</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base</span> <span class="o">/</span> <span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
         <span class="k">except</span> <span class="p">(</span><span class="ne">FileNotFoundError</span><span class="p">,</span> <span class="ne">IsADirectoryError</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">is_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>  <span class="c1"># noqa: D102</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base</span> <span class="o">/</span> <span class="nb">dir</span><span class="p">)</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">is_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>  <span class="c1"># noqa: D102</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base</span> <span class="o">/</span> <span class="nb">dir</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span>
 </pre></div>
 
         </details>
@@ -523,6 +667,31 @@
 
 
                             </div>
+                            <div id="RealDir.load_meta" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#RealDir.load_meta">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">load_meta</span><span class="signature">(self, path: str)</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">load_meta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>  <span class="c1"># noqa: D102</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base</span> <span class="o">/</span> <span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">FileNotFoundError</span><span class="p">,</span> <span class="ne">IsADirectoryError</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Try loading metadata file at given path (to perform validation on it).</p>
+</div>
+
+
+                            </div>
                             <div id="RealDir.is_dir" class="classattr">
                                         <div class="attr function"><a class="headerlink" href="#RealDir.is_dir">#&nbsp;&nbsp</a>
 
@@ -534,7 +703,7 @@
             <details>
             <summary>View Source</summary>
             <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">is_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>  <span class="c1"># noqa: D102</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="nb">dir</span><span class="p">))</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base</span> <span class="o">/</span> <span class="nb">dir</span><span class="p">)</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span>
 </pre></div>
 
         </details>
@@ -555,7 +724,7 @@
             <details>
             <summary>View Source</summary>
             <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">is_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>  <span class="c1"># noqa: D102</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="nb">dir</span><span class="p">))</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base</span> <span class="o">/</span> <span class="nb">dir</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span>
 </pre></div>
 
         </details>
@@ -565,8 +734,141 @@
 
 
                             </div>
-                            <div id="RealDir.load_meta" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#RealDir.load_meta">#&nbsp;&nbsp</a>
+                            <div class="inherited">
+                                <h5>Inherited Members</h5>
+                                <dl>
+                                    <div><dt><a href="#IDirectory">IDirectory</a></dt>
+                                <dd id="RealDir.__init__" class="function"><a href="#IDirectory.__init__">IDirectory</a></dd>
+                <dd id="RealDir.for_path" class="function"><a href="#IDirectory.for_path">for_path</a></dd>
+
+            </div>
+                                </dl>
+                            </div>
+                </section>
+                <section id="ZipDir">
+                                <div class="attr class">
+        <a class="headerlink" href="#ZipDir">#&nbsp;&nbsp</a>
+
+        
+        <span class="def">class</span>
+        <span class="name">ZipDir</span><wbr>(<span class="base"><a href="#IDirectory">IDirectory</a></span>):
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">ZipDir</span><span class="p">(</span><span class="n">IDirectory</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Adapter for working with zip files.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">opened_file</span><span class="p">:</span> <span class="nb">zip</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># noqa: D107</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="nb">dir</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="n">opened_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">namelist</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">for_path</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>  <span class="c1"># noqa: D102</span>
+        <span class="n">opened</span> <span class="o">=</span> <span class="nb">zip</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>  <span class="c1"># auto-closed on GC, no need to do anything</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="n">opened</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_paths</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>  <span class="c1"># noqa: D102</span>
+        <span class="k">return</span> <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">),</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">)))</span>
+
+    <span class="k">def</span> <span class="nf">load_meta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>  <span class="c1"># noqa: D102</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">IsADirectoryError</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># as is_dir and is_file of zip.Path appear to work purely syntactically,</span>
+    <span class="c1"># they&#39;re useless for us. We rather just lookup in the list of paths</span>
+
+    <span class="k">def</span> <span class="nf">is_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>  <span class="c1"># noqa: D102</span>
+        <span class="n">cand_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="nb">dir</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span>
+        <span class="k">return</span> <span class="n">cand_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">names</span>
+
+    <span class="k">def</span> <span class="nf">is_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>  <span class="c1"># noqa: D102</span>
+        <span class="n">cand_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="nb">dir</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cand_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">names</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Adapter for working with zip files.</p>
+</div>
+
+
+                            <div id="ZipDir.__init__" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#ZipDir.__init__">#&nbsp;&nbsp</a>
+
+        
+            <span class="name">ZipDir</span><span class="signature">(dir: pathlib.Path, opened_file: zipfile.ZipFile)</span>
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">opened_file</span><span class="p">:</span> <span class="nb">zip</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># noqa: D107</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="nb">dir</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="n">opened_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">namelist</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Initialize interface object.</p>
+</div>
+
+
+                            </div>
+                            <div id="ZipDir.for_path" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#ZipDir.for_path">#&nbsp;&nbsp</a>
+
+                <div class="decorator">@classmethod</div>
+
+            <span class="def">def</span>
+            <span class="name">for_path</span><span class="signature">(cls, dir: pathlib.Path)</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">for_path</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>  <span class="c1"># noqa: D102</span>
+        <span class="n">opened</span> <span class="o">=</span> <span class="nb">zip</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>  <span class="c1"># auto-closed on GC, no need to do anything</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="n">opened</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Return an instance given a path to a archive file or a directory.</p>
+
+<p>Default implementation just passes through the path to the constructor.</p>
+</div>
+
+
+                            </div>
+                            <div id="ZipDir.get_paths" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#ZipDir.get_paths">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">get_paths</span><span class="signature">(self) -&gt; Iterable[str]</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">get_paths</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>  <span class="c1"># noqa: D102</span>
+        <span class="k">return</span> <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">),</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">)))</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Return paths relative to give base directory that are to be checked.</p>
+</div>
+
+
+                            </div>
+                            <div id="ZipDir.load_meta" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#ZipDir.load_meta">#&nbsp;&nbsp</a>
 
         
             <span class="def">def</span>
@@ -577,9 +879,8 @@
             <summary>View Source</summary>
             <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">load_meta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>  <span class="c1"># noqa: D102</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)),</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-        <span class="k">except</span> <span class="p">(</span><span class="ne">FileNotFoundError</span><span class="p">,</span> <span class="ne">IsADirectoryError</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">IsADirectoryError</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">None</span>
 </pre></div>
 
@@ -590,14 +891,49 @@
 
 
                             </div>
-                            <div class="inherited">
-                                <h5>Inherited Members</h5>
-                                <dl>
-                                    <div><dt><a href="#IDirectory">IDirectory</a></dt>
-                                <dd id="RealDir.__init__" class="function"><a href="#IDirectory.__init__">IDirectory</a></dd>
+                            <div id="ZipDir.is_dir" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#ZipDir.is_dir">#&nbsp;&nbsp</a>
 
-            </div>
-                                </dl>
+        
+            <span class="def">def</span>
+            <span class="name">is_dir</span><span class="signature">(self, dir: str) -&gt; bool</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">is_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>  <span class="c1"># noqa: D102</span>
+        <span class="n">cand_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="nb">dir</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span>
+        <span class="k">return</span> <span class="n">cand_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">names</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Return whether the path is (like) a directory.</p>
+</div>
+
+
+                            </div>
+                            <div id="ZipDir.is_file" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#ZipDir.is_file">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">is_file</span><span class="signature">(self, dir: str) -&gt; bool</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">is_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>  <span class="c1"># noqa: D102</span>
+        <span class="n">cand_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="nb">dir</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cand_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">names</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Return whether the path is (like) a file.</p>
+</div>
+
+
                             </div>
                 </section>
                 <section id="H5_ATTR_SEP">
@@ -638,12 +974,15 @@
             <div class="pdoc-code codehilite"><pre><span></span><span class="k">class</span> <span class="nc">H5Dir</span><span class="p">(</span><span class="n">IDirectory</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Adapter for working with HDF5 files.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># noqa: D107</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">_has_h5</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;Install dirschema with [h5] extra for HDF5 support!&quot;</span><span class="p">)</span>
-
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">opened_file</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># noqa: D107</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="nb">dir</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>  <span class="c1"># auto-closed on GC, no need to do anything</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="n">opened_file</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">for_path</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+        <span class="n">require_h5py</span><span class="p">()</span>
+        <span class="n">opened</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>  <span class="c1"># auto-closed on GC, no need to do anything</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="n">opened</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">get_paths</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>  <span class="c1"># noqa: D102</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]</span>
@@ -682,7 +1021,7 @@
     <span class="k">def</span> <span class="nf">load_meta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>  <span class="c1"># noqa: D102</span>
         <span class="n">p</span> <span class="o">=</span> <span class="n">path</span>
         <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">H5_ATTR_SEP</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="c1"># try treating as attribute</span>
+            <span class="c1"># try treating as attribute. attributes are interpreted when possible</span>
             <span class="n">f</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">H5_ATTR_SEP</span><span class="p">)</span>
             <span class="n">f</span> <span class="o">=</span> <span class="n">f</span> <span class="ow">or</span> <span class="s2">&quot;/&quot;</span>
             <span class="k">if</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="ow">and</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">:</span>
@@ -711,13 +1050,14 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bs</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">None</span>
 
-        <span class="c1"># try decoding as bytes</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bs</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>  <span class="c1"># non-wrapped string (must not contain NUL)</span>
-                <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">bs</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
-            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bs</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">void</span><span class="p">):</span>  <span class="c1"># void-wrapped bytes</span>
-                <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">bs</span><span class="o">.</span><span class="n">tobytes</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
+        <span class="c1"># the only kinds of datasets we accept are essentially utf-8 strings</span>
+        <span class="c1"># which are represented as possibly wrapped bytes</span>
 
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bs</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">void</span><span class="p">):</span>  <span class="c1"># void-wrapped bytes -&gt; unpack</span>
+            <span class="n">bs</span> <span class="o">=</span> <span class="n">bs</span><span class="o">.</span><span class="n">tobytes</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>  <span class="c1"># decode string from bytes</span>
+            <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">bs</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
         <span class="k">except</span> <span class="p">(</span><span class="ne">UnicodeDecodeError</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">):</span>  <span class="c1"># failed parsing it</span>
             <span class="k">return</span> <span class="kc">None</span>
 </pre></div>
@@ -732,22 +1072,46 @@
                                         <div class="attr function"><a class="headerlink" href="#H5Dir.__init__">#&nbsp;&nbsp</a>
 
         
-            <span class="name">H5Dir</span><span class="signature">(dir: pathlib.Path)</span>
+            <span class="name">H5Dir</span><span class="signature">(dir: pathlib.Path, opened_file)</span>
     </div>
 
             <details>
             <summary>View Source</summary>
-            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># noqa: D107</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">_has_h5</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;Install dirschema with [h5] extra for HDF5 support!&quot;</span><span class="p">)</span>
-
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">opened_file</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># noqa: D107</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="nb">dir</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>  <span class="c1"># auto-closed on GC, no need to do anything</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="n">opened_file</span>
 </pre></div>
 
         </details>
 
             <div class="docstring"><p>Initialize interface object.</p>
+</div>
+
+
+                            </div>
+                            <div id="H5Dir.for_path" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#H5Dir.for_path">#&nbsp;&nbsp</a>
+
+                <div class="decorator">@classmethod</div>
+
+            <span class="def">def</span>
+            <span class="name">for_path</span><span class="signature">(cls, dir: pathlib.Path)</span>:
+    </div>
+
+            <details>
+            <summary>View Source</summary>
+            <div class="pdoc-code codehilite"><pre><span></span>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">for_path</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+        <span class="n">require_h5py</span><span class="p">()</span>
+        <span class="n">opened</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>  <span class="c1"># auto-closed on GC, no need to do anything</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="n">opened</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Return an instance given a path to a archive file or a directory.</p>
+
+<p>Default implementation just passes through the path to the constructor.</p>
 </div>
 
 
@@ -853,7 +1217,7 @@
             <div class="pdoc-code codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">load_meta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>  <span class="c1"># noqa: D102</span>
         <span class="n">p</span> <span class="o">=</span> <span class="n">path</span>
         <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">H5_ATTR_SEP</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="c1"># try treating as attribute</span>
+            <span class="c1"># try treating as attribute. attributes are interpreted when possible</span>
             <span class="n">f</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">H5_ATTR_SEP</span><span class="p">)</span>
             <span class="n">f</span> <span class="o">=</span> <span class="n">f</span> <span class="ow">or</span> <span class="s2">&quot;/&quot;</span>
             <span class="k">if</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="ow">and</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">:</span>
@@ -882,13 +1246,14 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bs</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">None</span>
 
-        <span class="c1"># try decoding as bytes</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bs</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>  <span class="c1"># non-wrapped string (must not contain NUL)</span>
-                <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">bs</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
-            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bs</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">void</span><span class="p">):</span>  <span class="c1"># void-wrapped bytes</span>
-                <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">bs</span><span class="o">.</span><span class="n">tobytes</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
+        <span class="c1"># the only kinds of datasets we accept are essentially utf-8 strings</span>
+        <span class="c1"># which are represented as possibly wrapped bytes</span>
 
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bs</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">void</span><span class="p">):</span>  <span class="c1"># void-wrapped bytes -&gt; unpack</span>
+            <span class="n">bs</span> <span class="o">=</span> <span class="n">bs</span><span class="o">.</span><span class="n">tobytes</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>  <span class="c1"># decode string from bytes</span>
+            <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">bs</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
         <span class="k">except</span> <span class="p">(</span><span class="ne">UnicodeDecodeError</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">):</span>  <span class="c1"># failed parsing it</span>
             <span class="k">return</span> <span class="kc">None</span>
 </pre></div>
@@ -912,25 +1277,23 @@
             <details>
             <summary>View Source</summary>
             <div class="pdoc-code codehilite"><pre><span></span><span class="k">def</span> <span class="nf">get_adapter_for</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">IDirectory</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Return suitable interface adapter for given path.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Return suitable interface adapter for given path (selected by file extension).&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
-        <span class="k">return</span> <span class="n">RealDir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">RealDir</span><span class="o">.</span><span class="n">for_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">f</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
-            <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-            <span class="k">return</span> <span class="n">H5Dir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
-            <span class="c1"># apparently not HDF5 file</span>
-            <span class="k">pass</span>
+        <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;zip&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">ZipDir</span><span class="o">.</span><span class="n">for_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">((</span><span class="s2">&quot;h5&quot;</span><span class="p">,</span> <span class="s2">&quot;hdf5&quot;</span><span class="p">)):</span>
+            <span class="n">require_h5py</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">H5Dir</span><span class="o">.</span><span class="n">for_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found no suitable dirschema adapter for path: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 
         </details>
 
-            <div class="docstring"><p>Return suitable interface adapter for given path.</p>
+            <div class="docstring"><p>Return suitable interface adapter for given path (selected by file extension).</p>
 </div>
 
 
