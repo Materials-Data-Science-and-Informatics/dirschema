@@ -2,6 +2,7 @@
 
 import itertools
 import json
+import zipfile as zip
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Iterable, Optional
@@ -14,11 +15,16 @@ except ImportError:
 else:
     _has_h5 = True
 
+
+def require_h5py():
+    """Raise exception if h5py is not installed."""
+    if not _has_h5:
+        raise ImportError("Install dirschema with [h5] extra for HDF5 support!")
+
+
 # NOTE: currently, completely ignores existence of symlinks
 # the h5py visit function does ignore them too and also reasonable validation behavior unclear
 # either stick to this, or find a reasonable semantics + workaround for HDF5 files
-
-# NOTE: another useful adapter could be a zip adapter
 
 
 class IDirectory(ABC):
@@ -28,9 +34,21 @@ class IDirectory(ABC):
         """Initialize interface object."""
         self.base = dir
 
+    @classmethod
+    def for_path(cls, dir: Path):
+        """Return an instance given a path to a archive file or a directory.
+
+        Default implementation just passes through the path to the constructor.
+        """
+        return cls(dir)
+
     @abstractmethod
     def get_paths(self) -> Iterable[str]:
         """Return paths relative to give base directory that are to be checked."""
+
+    @abstractmethod
+    def load_meta(self, path: str) -> Optional[Any]:
+        """Try loading metadata file at given path (to perform validation on it)."""
 
     @abstractmethod
     def is_dir(self, path: str) -> bool:
@@ -39,10 +57,6 @@ class IDirectory(ABC):
     @abstractmethod
     def is_file(self, path: str) -> bool:
         """Return whether the path is (like) a file."""
-
-    @abstractmethod
-    def load_meta(self, path: str) -> Optional[Any]:
-        """Try loading metadata file at given path (to perform validation on it)."""
 
 
 class RealDir(IDirectory):
@@ -54,18 +68,53 @@ class RealDir(IDirectory):
             [""], map(lambda p: str(p.relative_to(self.base)), paths)
         )
 
-    def is_dir(self, dir: str) -> bool:  # noqa: D102
-        return self.base.joinpath(Path(dir)).is_dir()
-
-    def is_file(self, dir: str) -> bool:  # noqa: D102
-        return self.base.joinpath(Path(dir)).is_file()
-
     def load_meta(self, path: str):  # noqa: D102
         try:
-            with open(self.base.joinpath(Path(path)), "r") as f:
+            with open(self.base / path, "r") as f:
                 return json.load(f)
         except (FileNotFoundError, IsADirectoryError, json.JSONDecodeError):
             return None
+
+    def is_dir(self, dir: str) -> bool:  # noqa: D102
+        return (self.base / dir).is_dir()
+
+    def is_file(self, dir: str) -> bool:  # noqa: D102
+        return (self.base / dir).is_file()
+
+
+class ZipDir(IDirectory):
+    """Adapter for working with zip files."""
+
+    def __init__(self, dir: Path, opened_file: zip.ZipFile) -> None:  # noqa: D107
+        super().__init__(dir)
+        self.file = opened_file
+        self.names = set(self.file.namelist())
+        self.names.add("/")
+
+    @classmethod
+    def for_path(cls, dir: Path):  # noqa: D102
+        opened = zip.ZipFile(dir, "r")  # auto-closed on GC, no need to do anything
+        return cls(dir, opened)
+
+    def get_paths(self) -> Iterable[str]:  # noqa: D102
+        return itertools.chain(map(lambda s: s.rstrip("/"), sorted(self.names)))
+
+    def load_meta(self, path: str):  # noqa: D102
+        try:
+            return json.loads(self.file.read(path).decode("utf-8"))
+        except (KeyError, IsADirectoryError, json.JSONDecodeError):
+            return None
+
+    # as is_dir and is_file of zip.Path appear to work purely syntactically,
+    # they're useless for us. We rather just lookup in the list of paths
+
+    def is_dir(self, dir: str) -> bool:  # noqa: D102
+        cand_name: str = dir.rstrip("/") + "/"
+        return cand_name in self.names
+
+    def is_file(self, dir: str) -> bool:  # noqa: D102
+        cand_name: str = dir.rstrip("/")
+        return cand_name in self.names
 
 
 H5_ATTR_SEP = "@"
@@ -78,12 +127,15 @@ H5_JSON_SUF = ".json"
 class H5Dir(IDirectory):
     """Adapter for working with HDF5 files."""
 
-    def __init__(self, dir: Path) -> None:  # noqa: D107
-        if not _has_h5:
-            raise ImportError("Install dirschema with [h5] extra for HDF5 support!")
-
+    def __init__(self, dir: Path, opened_file) -> None:  # noqa: D107
         super().__init__(dir)
-        self.file = h5py.File(dir, "r")  # auto-closed on GC, no need to do anything
+        self.file = opened_file
+
+    @classmethod
+    def for_path(cls, dir: Path):
+        require_h5py()
+        opened = h5py.File(dir, "r")  # auto-closed on GC, no need to do anything
+        return cls(dir, opened)
 
     def get_paths(self) -> Iterable[str]:  # noqa: D102
         ret = [""]
@@ -122,7 +174,7 @@ class H5Dir(IDirectory):
     def load_meta(self, path: str):  # noqa: D102
         p = path
         if p.find(H5_ATTR_SEP) >= 0:
-            # try treating as attribute
+            # try treating as attribute. attributes are interpreted when possible
             f, s = p.split(H5_ATTR_SEP)
             f = f or "/"
             if f in self.file and s in self.file[f].attrs:
@@ -151,29 +203,28 @@ class H5Dir(IDirectory):
         if isinstance(bs, numpy.ndarray):
             return None
 
-        # try decoding as bytes
-        try:
-            if isinstance(bs, bytes):  # non-wrapped string (must not contain NUL)
-                return json.loads(bs.decode("utf-8"))
-            elif isinstance(bs, numpy.void):  # void-wrapped bytes
-                return json.loads(bs.tobytes().decode("utf-8"))
+        # the only kinds of datasets we accept are essentially utf-8 strings
+        # which are represented as possibly wrapped bytes
 
+        if isinstance(bs, numpy.void):  # void-wrapped bytes -> unpack
+            bs = bs.tobytes()
+
+        try:  # decode string from bytes
+            return json.loads(bs.decode("utf-8"))
         except (UnicodeDecodeError, json.JSONDecodeError):  # failed parsing it
             return None
 
 
 def get_adapter_for(path: Path) -> IDirectory:
-    """Return suitable interface adapter for given path."""
+    """Return suitable interface adapter for given path (selected by file extension)."""
     if path.is_dir():
-        return RealDir(path)
+        return RealDir.for_path(path)
 
     if path.is_file():
-        try:
-            f = h5py.File(path, "r")
-            f.close()
-            return H5Dir(path)
-        except OSError:
-            # apparently not HDF5 file
-            pass
+        if path.name.endswith("zip"):
+            return ZipDir.for_path(path)
+        elif path.name.endswith(("h5", "hdf5")):
+            require_h5py()
+            return H5Dir.for_path(path)
 
     raise ValueError(f"Found no suitable dirschema adapter for path: {path}")

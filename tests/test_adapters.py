@@ -1,12 +1,14 @@
 """Tests for dirschema adapters."""
 import json
+import shutil
+import tempfile
 from pathlib import Path
 
 import h5py
 import numpy
 import pytest
 
-from dirschema.adapters import H5Dir, RealDir, get_adapter_for
+from dirschema.adapters import H5Dir, RealDir, ZipDir, get_adapter_for
 
 
 def prep_realdir(path: Path):
@@ -30,6 +32,14 @@ def prep_realdir(path: Path):
     with open(base / "foo" / "notReally.json", "w") as f:
         f.write("this is not valid JSON")
     return base
+
+
+def prep_zipdir(path: Path):
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        prep_realdir(Path(tmp_dir))
+        return Path(
+            shutil.make_archive(str(path / "archive"), "zip", tmp_dir + "/dataset")
+        )
 
 
 def prep_hdf5dir(path: Path):
@@ -64,7 +74,7 @@ def prep_hdf5dir(path: Path):
 def test_realdir(tmp_path):
     """Test adapter for real directories."""
     base = prep_realdir(tmp_path)
-    inst = RealDir(base)
+    inst = RealDir.for_path(base)
 
     paths = inst.get_paths()
     expected = [
@@ -81,12 +91,56 @@ def test_realdir(tmp_path):
     ]
     assert list(paths) == expected
 
-    assert not inst.is_dir("invalid")
     assert inst.is_dir("")
+    assert inst.is_dir("/")
     assert inst.is_dir("foo")
     assert inst.is_dir("foo/bar")
     assert not inst.is_dir("foo/data.bin")
     assert not inst.is_dir("foo/data.bin_meta.json")
+    assert not inst.is_dir("invalid")
+
+    assert not inst.is_file("invalid")
+    assert not inst.is_file("")
+    assert not inst.is_file("foo")
+    assert not inst.is_file("foo/bar")
+    assert inst.is_file("foo/data.bin")
+    assert inst.is_file("foo/data.bin_meta.json")
+
+    assert inst.load_meta("") is None
+    assert inst.load_meta("invalid") is None
+    assert inst.load_meta("foo/data.bin") is None
+    assert inst.load_meta("foo/notReally.json") is None
+    assert inst.load_meta("foo/data.bin_meta.json") == {"hello": "world"}
+
+
+def test_zipdir(tmp_path):
+    """Test adapter for real directories."""
+    base = prep_zipdir(tmp_path)
+    inst = ZipDir.for_path(base)
+
+    paths = inst.get_paths()
+    expected = [
+        "",
+        "_meta.json",
+        "binary.dat",
+        "foo",
+        "foo/bar",
+        "foo/data.bin",
+        "foo/data.bin_meta.json",
+        "foo/notReally.json",
+        "qux",
+        "readme.txt",
+    ]
+    assert list(paths) == expected
+
+    assert inst.is_dir("")
+    assert inst.is_dir("/")
+    assert inst.is_dir("foo/")
+    assert inst.is_dir("foo")
+    assert inst.is_dir("foo/bar")
+    assert not inst.is_dir("foo/data.bin")
+    assert not inst.is_dir("foo/data.bin_meta.json")
+    assert not inst.is_dir("invalid")
 
     assert not inst.is_file("invalid")
     assert not inst.is_file("")
@@ -105,7 +159,7 @@ def test_realdir(tmp_path):
 def test_hdf5dir(tmp_path):
     """Test adapter for HDF5 files."""
     base = prep_hdf5dir(tmp_path)
-    inst = H5Dir(base)
+    inst = H5Dir(base, h5py.File(base, "r"))
 
     paths = inst.get_paths()
     expected = [
