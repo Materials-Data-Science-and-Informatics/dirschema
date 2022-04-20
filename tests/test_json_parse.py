@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from dirschema.parse import load_json, loads_json, to_uri
+from dirschema.json.parse import load_json, loads_json, to_uri
 
 
 def test_to_uri(tmp_path):

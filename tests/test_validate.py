@@ -2,16 +2,17 @@
 
 import copy
 import json
+from pathlib import Path
 
 from dirschema.core import DSRule, MetaConvention, Rule
-from dirschema.parse import loads_json, to_uri
-from dirschema.validator import DSValidator
+from dirschema.json.parse import loads_json, to_uri
+from dirschema.validate import DSValidator
 
 
 def rule_from_yaml(yml: str, base_uri=None) -> DSRule:
     """Load from YAML string, expanding $refs."""
     base_uri = base_uri if not base_uri else to_uri(str(base_uri))
-    return DSRule.parse_obj(copy.deepcopy(loads_json(yml, base_uri=base_uri)))
+    return DSRule.parse_obj(copy.deepcopy(loads_json(yml, local_basedir=base_uri)))
 
 
 def test_construct(tmp_path):
@@ -29,7 +30,7 @@ def test_construct(tmp_path):
 def test_validate_basic(tmp_path):
     """Test trivial rules, type and valid/validMeta rules."""
     dsv = DSValidator(rule_from_yaml("{}"))
-    dsv.schema_uri = to_uri(str(tmp_path))
+    dsv.local_basedir = Path(to_uri(str(tmp_path)))
     assert not dsv.validate(tmp_path)  # trivial (empty rule)
 
     dsv.schema = rule_from_yaml('anyOf:\n- match: ""\n  then: {type: dir}')
@@ -39,12 +40,12 @@ def test_validate_basic(tmp_path):
     dsv.schema = rule_from_yaml('anyOf:\n- match: ""\n  then: {type: true}')
     assert not dsv.validate(tmp_path)  # trivial if it exists
     dsv.schema = rule_from_yaml('anyOf:\n- match: ""\n  then: {type: false}')
-    assert dsv.validate(tmp_path)  # contradiction if it exists
+    assert (ret := dsv.validate(tmp_path))  # contradiction if it exists
 
     dsv.schema = rule_from_yaml('anyOf:\n- match: ""\n  then: {valid: true}')
-    assert dsv.validate(tmp_path)  # not a file
+    assert (ret := dsv.validate(tmp_path))  # not a file
     dsv.schema = rule_from_yaml('anyOf:\n- match: ""\n  then: {validMeta: true}')
-    assert dsv.validate(tmp_path)  # not existing
+    assert (ret := dsv.validate(tmp_path))  # not existing
 
     with open(tmp_path / "_mymeta.json", "w") as f:
         f.write("not JSON")
@@ -55,7 +56,7 @@ def test_validate_basic(tmp_path):
     dsv.schema = rule_from_yaml(
         'anyOf: [{match: ""}, {match: "_mymeta\\\\.json", then: {type: dir}}]'
     )
-    assert dsv.validate(tmp_path)  # file is not dir
+    assert (ret := dsv.validate(tmp_path))  # file is not dir
 
     dsv.meta_conv = MetaConvention(fileSuffix="_mymeta.json")
     assert not dsv.validate(tmp_path)  # file is not checked anymore
@@ -68,12 +69,12 @@ def test_validate_basic(tmp_path):
     dsv.schema = rule_from_yaml(
         'anyOf: [{match: ""}, {match: "_mymeta\\\\.json", then: {type: false}}]'
     )
-    assert dsv.validate(tmp_path)  # contradiction if it exists
+    assert (ret := dsv.validate(tmp_path))  # contradiction if it exists
 
     dsv.schema = rule_from_yaml(
         'anyOf: [{match: ""}, {match: "_mymeta\\\\.json", then: {valid: true}}]'
     )
-    assert dsv.validate(tmp_path)  # not valid json file
+    assert (ret := dsv.validate(tmp_path))  # not valid json file
 
     with open(tmp_path / "_mymeta.json", "w") as f:
         f.write("{}")
@@ -89,6 +90,7 @@ def test_validate_basic(tmp_path):
     dsv.meta_conv = MetaConvention()
 
     (tmp_path / "_mymeta.json").unlink()
+    ret
 
 
 def test_ref_resolving(tmp_path):
@@ -118,7 +120,13 @@ def test_ref_resolving(tmp_path):
     dsv = DSValidator(tmp_path / "outer.dirschema.yaml")
     assert dsv.validate(tmp_path)  # not existing root metadata
     (tmp_path / "_meta.json").touch()
-    assert dsv.validate(tmp_path)  # not valid root metadata
+    assert (ret := dsv.validate(tmp_path))  # no root metadata file
+
+    with open(tmp_path / "_meta.json", "w") as f:
+        json.dump({"autho": "Jane Doe"}, f)
+    assert (ret := dsv.validate(tmp_path))  # no valid root metadata in file
+    ret
+
     with open(tmp_path / "_meta.json", "w") as f:
         json.dump({"author": "Jane Doe"}, f)
     assert not dsv.validate(tmp_path)  # ok
@@ -126,7 +134,7 @@ def test_ref_resolving(tmp_path):
 
 def test_combinations(tmp_path):
     """Test allOf, anyOf and oneOf rules."""
-    ds = Rule()
+    ds = Rule.construct()
     dsv = DSValidator(ds)
 
     dsv.schema = rule_from_yaml('match: ""\nthen: {}')
@@ -155,12 +163,13 @@ def test_combinations(tmp_path):
     dsv.schema = rule_from_yaml("oneOf: [{type: dir}, {type: file}]")
     assert not dsv.validate(tmp_path)
     dsv.schema = rule_from_yaml("oneOf: [{type: dir}, {}]")
-    assert dsv.validate(tmp_path)
+    assert (ret := dsv.validate(tmp_path))
 
     dsv.schema = rule_from_yaml("not: {type: file}")
     assert not dsv.validate(tmp_path)
     dsv.schema = rule_from_yaml("not: {type: dir}")
-    assert dsv.validate(tmp_path)
+    assert (ret := dsv.validate(tmp_path))
+    ret
 
 
 mutex_yaml = """matchStart: -1
@@ -208,7 +217,7 @@ def test_example_forall_mutex(tmp_path):
     assert not dsv.validate(tmp_path)
 
     (tmp_path / "blub/bar").touch()
-    assert dsv.validate(tmp_path)  # a_bar or b_bar file missing
+    assert (ret := dsv.validate(tmp_path))  # a_bar or b_bar file missing
 
     (tmp_path / "blub/a_bar").mkdir()
     assert dsv.validate(tmp_path)  # a_bar is not a file
@@ -218,7 +227,8 @@ def test_example_forall_mutex(tmp_path):
     assert not dsv.validate(tmp_path)
 
     (tmp_path / "blub/b_bar").touch()
-    assert dsv.validate(tmp_path)  # a_bar and b_bar BOTH exist
+    assert (ret := dsv.validate(tmp_path))  # a_bar and b_bar BOTH exist
 
     (tmp_path / "blub/a_bar").unlink()
     assert not dsv.validate(tmp_path)
+    ret

@@ -7,7 +7,8 @@ from typing import Tuple
 import typer
 from ruamel.yaml import YAML
 
-from .validator import DSValidator, MetaConvention
+from .log import log_level, logger
+from .validate import DSValidator, MetaConvention
 
 yaml = YAML()
 
@@ -33,6 +34,9 @@ ctx = dict(max_content_width=800)
 app = typer.Typer(context_settings=ctx)  # does not work
 typer_patch_cmd_ctx(app, ctx)
 
+def_meta_conv = MetaConvention().to_tuple()
+"""Default metadata convention, as tuple (used if user provides no override)."""
+
 
 @app.command()
 def check(
@@ -45,23 +49,38 @@ def check(
     ),
     dir: Path = typer.Argument(..., exists=True, help="Path or file to be validated."),
     conv: Tuple[str, str, str, str] = typer.Option(
-        ("", "", "", ""),
+        def_meta_conv,
         help=(
             "Used metadata file convention consisting of four strings "
             "(pathPrefix, pathSuffix, filePrefix, fileSuffix), at least one of which "
             "must be non-empty"
         ),
     ),
+    local_basedir: Path = typer.Option(
+        None,
+        exists=True,
+        help=(
+            "Base path to resolve local:// URIs "
+            "(Default: location of the passed dirschema)."
+        ),
+    ),
+    verbose: int = typer.Option(0, "--verbose", "-v", min=0, max=3),
 ) -> None:
     """
     Run dirschema validation of a directory against a schema.
 
-    Take a YAML or JSON DirSchema and a directory (or suitable archive),
-    perform validation according to schema and print all unsatisfied constraints.
+    Input:
+        schema: YAML or JSON DirSchema path
+        dir: Directory path (or suitable archive file) to be checked,
+
+    Performs validation according to schema and prints all unsatisfied constraints.
     """
-    dsv = DSValidator(schema, MetaConvention.from_tuple(*conv))
-    errors = dsv.validate(dir)
-    if errors:
+    logger.setLevel(log_level[verbose])
+    local_basedir = local_basedir or schema.parent
+    dsv = DSValidator(
+        schema, MetaConvention.from_tuple(*conv), local_basedir=local_basedir
+    )
+    if errors := dsv.validate(dir):
         dsv.format_errors(errors, sys.stdout)
         raise typer.Exit(code=1)
 

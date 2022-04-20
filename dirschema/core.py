@@ -7,17 +7,7 @@ import json
 import re
 from enum import Enum
 from pathlib import Path
-from typing import (
-    Iterable,
-    List,
-    Mapping,
-    Optional,
-    Pattern,
-    Sequence,
-    Set,
-    TypeVar,
-    Union,
-)
+from typing import List, Optional, Pattern, Tuple, Union
 
 from jsonschema import Draft202012Validator
 from pydantic import BaseModel, Extra, Field
@@ -43,6 +33,9 @@ class MetaConvention(BaseModel):
     pathSuffix: str = ""
     filePrefix: str = ""
     fileSuffix: str = "_meta.json"
+
+    def to_tuple(self) -> Tuple[str, str, str, str]:
+        return (self.pathPrefix, self.pathSuffix, self.filePrefix, self.fileSuffix)
 
     @classmethod
     def from_tuple(cls, pp: str, ps: str, fp: str, fs: str):
@@ -154,7 +147,7 @@ class PathSlice(BaseModel):
         return None
 
 
-class JSONSchemaObj(BaseModel):
+class JSONSchema(BaseModel):
     """Helper class wrapping an arbitrary JSON Schema to be acceptable for pydantic."""
 
     @classmethod
@@ -165,15 +158,6 @@ class JSONSchemaObj(BaseModel):
     def validate(cls, v):
         Draft202012Validator.check_schema(v)  # throws SchemaError if schema is invalid
         return v
-
-
-class JSONSchema(BaseModel):
-    """A JSON Schema is just a boolean or some (further unvalidated) JSON object.
-
-    We need this indirection to have the correct truthiness in `Rule` for `valid[Meta]`.
-    """
-
-    __root__: JSONSchemaObj
 
 
 class TypeEnum(Enum):
@@ -189,20 +173,23 @@ class TypeEnum(Enum):
     DIR = "dir"
     ANY = True
 
+    def is_satisfied(self, is_file: bool, is_dir: bool) -> bool:
+        if self == TypeEnum.MISSING and (is_file or is_dir):
+            return False
+        if self == TypeEnum.ANY and not (is_file or is_dir):
+            return False
+        if self == TypeEnum.DIR and not is_dir:
+            return False
+        if self == TypeEnum.FILE and not is_file:
+            return False
+        return True
+
 
 DEF_MATCH: Final[str] = "(.*)"
 """Default match regex to assume when none is set, but required by semantics."""
 
 DEF_REWRITE: Final[str] = "\\1"
 """Default rewrite rule to assume when none is set, but required by semantics."""
-
-
-class untruthy_str(str):
-    """Override truthiness of strings to be True even for empty string."""
-
-    def __bool__(self) -> bool:
-        """Any string is true-ish."""
-        return True
 
 
 class DSRule(BaseModel):
@@ -226,7 +213,7 @@ class DSRule(BaseModel):
     def __repr__(self) -> str:
         """Make wrapper transparent and just return repr of wrapped object."""
         if isinstance(self.__root__, bool):
-            return json.dumps(self.__root__)
+            return "true" if self.__root__ else "false"
         else:
             return repr(self.__root__)
 
@@ -247,9 +234,6 @@ class Rule(BaseModel):
         description="Validate file against provided schema or validator."
     )
 
-    # only set for output in case of errors! NOT for the user
-    # _metaPath: Optional[untruthy_str] = None  # = Field(alias="metaPath")
-
     # this will use the provided metadataConvention for rewriting to the right path
     validMeta: Optional[Union[JSONSchema, str]] = Field(
         description="Validate external metadata against provided schema or validator."
@@ -268,7 +252,7 @@ class Rule(BaseModel):
     # if rewrite is set, apply 'then' to rewritten path instead of original
     # missing rewrite is like rewrite \1, missing match is like ".*"
     then: Optional[DSRule] = Field(
-        description="If this rule is true, evaluate then rule."
+        description="If current rule is satisfied, evaluate the 'then' rule."
     )
 
     # match and rewrite (path inspection and manipulation):
@@ -291,19 +275,7 @@ class Rule(BaseModel):
     # only do rewrite if match was successful
     rewrite: Optional[str]
 
-    # only set for output in case of errors! NOT for the user
-    # _rewritePath: Optional[untruthy_str] = None  # = Field(alias="rewritePath")
-
     # ----
-
-    def __bool__(self) -> bool:
-        """
-        Return True if any field is truthy, i.e. non-empty and not None/False/0/"".
-
-        During validation, successful fields are removed, i.e. remaining fields indicate
-        validation errors. Hence, this can be used to check presence of any errors.
-        """
-        return any(list(vars(self).values()))
 
     def __repr__(self, stream=None) -> str:
         """Print out the rule as YAML (only the non-default values)."""
@@ -312,23 +284,10 @@ class Rule(BaseModel):
         if not stream:
             stream = io.StringIO()
             yaml.dump(res, stream)
-            return stream.getvalue()
+            return stream.getvalue().strip()
 
         yaml.dump(res, stream)
         return ""
-
-    def dict(self, **kwargs):
-        """
-        Override default dict creation to rename fields or include private fields.
-
-        These are used for extra annotations in error reporting,
-        but keeping them private makes them forbidden for setting by the user.
-        """
-        d = super().dict(**kwargs)
-        if self.not_:
-            d["not"] = d.pop("not_")
-
-        return d
 
     class Config:
         extra = Extra.forbid
@@ -336,40 +295,3 @@ class Rule(BaseModel):
 
 Rule.update_forward_refs()
 DSRule.update_forward_refs()
-
-
-T = TypeVar("T")
-
-
-def first_match_key(pats: Mapping[T, re.Pattern], path: str) -> Optional[T]:
-    """Return index or keys of first full match in traversal order of passed container."""
-    for i, pat in pats.items():
-        if pat.fullmatch(path):
-            return i
-    return None
-
-
-def all_matches_keys(pats: Mapping[T, re.Pattern], paths: Iterable[str]) -> Iterable[T]:
-    """Return keys of patterns fully matched by at least one path."""
-    # do this a bit more intelligently, don't match already matched expressions
-    # we also collect the remaining instead of done to not iterate them in inner loop
-    unmatched_pats: Set[T] = set(pats.keys())
-    for p in paths:
-        matched = set()
-        for k in unmatched_pats:
-            if pats[k].fullmatch(p):
-                matched.add(k)
-        unmatched_pats -= matched
-        if not unmatched_pats:
-            break
-    return set(pats.keys()) - unmatched_pats
-
-
-def first_match(pats: Sequence[re.Pattern], path: str) -> Optional[int]:
-    """Return index of first pattern fully matching the given path."""
-    return first_match_key(dict(enumerate(pats)), path)
-
-
-def all_matches(pats: Sequence[re.Pattern], path: str) -> Iterable[int]:
-    """Return indices of all patterns fully matching the given path."""
-    return all_matches_keys(dict(enumerate(pats)), [path])

@@ -5,11 +5,11 @@ anyOf:
   - match: ".*\\.(txt|md)"
   - match: ".*\\.jpg"
     type: "file"
-    validMeta: { "$ref": "text.schema.yaml" }
+    validMeta: { "$ref": "local://text.schema.yaml" }
   - match: "(.*)\\.dat"
     type: file
     rewrite: \1_extra
     then:
       allOf:
         - type: dir
-        - validMeta: { "$ref": "text.schema.yaml" }
+        - validMeta: { "$ref": "local://text.schema.yaml" }

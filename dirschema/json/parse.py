@@ -75,6 +75,9 @@ class ExtJsonLoader(JsonLoader):
 
 def loads_json(dat: str, **kwargs) -> Dict[str, Any]:
     """Load YAML/JSON from a string, resolving all refs, both local and remote."""
+    unknown_kwargs = set(kwargs.keys()) - set(["local_basedir"])
+    if len(unknown_kwargs) > 0:
+        raise ValueError(f"Unknown keyword arguments: '{unknown_kwargs}'")
     local_basedir = kwargs.pop("local_basedir", None)
 
     res = None
@@ -89,6 +92,9 @@ def loads_json(dat: str, **kwargs) -> Dict[str, Any]:
 
 def load_json(uri: str, **kwargs) -> Dict[str, Any]:
     """Load YAML/JSON from file/network + resolve all refs, both local and remote."""
+    unknown_kwargs = set(kwargs.keys()) - set(["local_basedir"])
+    if len(unknown_kwargs) > 0:
+        raise ValueError(f"Unknown keyword arguments: '{unknown_kwargs}'")
     local_basedir = kwargs.pop("local_basedir", None)
 
     ldr = ExtJsonLoader(local_basedir)

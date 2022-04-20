@@ -1,1 +1,1 @@
-"$ref": "text.schema.json"
+"$ref": "local://text.schema.json"

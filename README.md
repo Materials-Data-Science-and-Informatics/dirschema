@@ -8,7 +8,7 @@
 ](https://app.codecov.io/gh/Materials-Data-Science-and-Informatics/dirschema)
 [
 ![Docs](https://img.shields.io/badge/read-docs-success)
-](FIXME_GHPAGES_URL/dirschema)
+](https://materials-data-science-and-informatics.github.io/dirschema/dirschema.html)
 [
 ![PyPIPkgVersion](https://img.shields.io/pypi/v/dirschema)
 ](https://pypi.org/project/dirschema/)
@@ -39,6 +39,12 @@ With it you can for example check that:
 
 If validating these kinds of constraints looks appealing to you, this tool is for you!
 
+**Dirschema features:**
+* Built-in support for schemas and metadata stored as JSON or YAML
+* Built-in support for checking contents of ZIP and HDF5 archives
+* Extensible validation interface for advanced needs beyond JSON Schema
+* Both a Python library and a CLI tool to perform the validation
+
 ## Installation and Usage
 
 Install the tool using `pip install` just as any other Python package.
@@ -49,11 +55,11 @@ Given a DirSchema file and a directory that needs to be checked, just run:
 ```
 dirschema my_dirschema.yaml some/directory
 ```
-If there is no output, everything is fine. Otherwise, the tool will return for each
-checked file the violated rules.
+If there is no output, everything is fine. Otherwise, the tool will output
+a detailed error report for each file or directory that failed validation.
 
 You can call the validation from Python using the class `DSValidator` in
-`dirschema.validator`, e.g. `DSValidator("/path/to/dirschema").validate("/dataset/path")`
+`dirschema.validate`, e.g. `DSValidator("/path/to/dirschema").validate("/dataset/path")`
 
 ## Development
 
@@ -65,7 +71,7 @@ Run `pre-commit install` after cloning to enable pre-commit to enforce the requi
 
 Run `pytest` before merging your changes to make sure you did not break anything.
 
-To generate documentation, run `pdoc --html -o docs python_app_template`.
+To generate documentation, run `pdoc -o docs dirschema`.
 
 To check coverage, use `pytest --cov`.
 

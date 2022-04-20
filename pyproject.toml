@@ -27,7 +27,7 @@ include = [
 ####
 
 [tool.poetry.dependencies]
-python = "^3.7,<3.11"
+python = "^3.8,<3.11"
 pydantic = "^1.8.2"
 "ruamel.yaml" = "^0.17.16"
 jsonref = "^0.2"
@@ -54,7 +54,7 @@ dirschema = 'dirschema.cli:app'
 # dirschema supports entry-point-based validation plugins.
 # The default pydantic handler can be subclassed or
 # can serve as a template for your custom validation plugins.
-pydantic = "dirschema.handler_pydantic:PydanticHandler"
+pydantic = "dirschema.json.handler_pydantic:PydanticHandler"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

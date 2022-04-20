@@ -5,11 +5,11 @@ from typing import List
 import pytest
 from pydantic import BaseModel, StrictBool, StrictInt, StrictStr
 
-from dirschema.validator import (  # isort: skip
+from dirschema.json.validate import (  # isort: skip
     validate_custom,
     validate_jsonschema,
 )
-from dirschema.handler_pydantic import PydanticHandler  # isort: skip
+from dirschema.json.handler_pydantic import PydanticHandler  # isort: skip
 
 
 class SubModel(BaseModel):

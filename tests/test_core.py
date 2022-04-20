@@ -105,14 +105,30 @@ def test_rewrite():
     assert psl.rewrite("([^/]+)/(.+)", "").unslice() == "a/d"
 
 
+def test_type_enum():
+    assert TypeEnum.MISSING.is_satisfied(False, False)
+    assert TypeEnum.FILE.is_satisfied(True, False)
+    assert TypeEnum.DIR.is_satisfied(False, True)
+    assert TypeEnum.ANY.is_satisfied(True, False)
+    assert TypeEnum.ANY.is_satisfied(False, True)
+
+    assert not TypeEnum.MISSING.is_satisfied(True, False)
+    assert not TypeEnum.MISSING.is_satisfied(False, True)
+    assert not TypeEnum.FILE.is_satisfied(False, True)
+    assert not TypeEnum.DIR.is_satisfied(True, False)
+    assert not TypeEnum.ANY.is_satisfied(False, False)
+
+
 def test_magic():
     """Test magic methods and convenience constructors."""
     # test the DSRule constructor (that dispatch to bool/rule works)
     assert DSRule(True).__root__ == True
     assert DSRule(False).__root__ == False
-    assert DSRule(None).__root__ == Rule()
-    assert DSRule(type="file").__root__ == Rule(type="file")
-    assert DSRule(__root__=Rule(type="file")).__root__ == Rule(type="file")
+    assert DSRule(None).__root__ == Rule.construct()
+    assert DSRule(type="file").__root__ == Rule.construct(type=TypeEnum.FILE)
+    assert DSRule(
+        __root__=Rule.construct(type=TypeEnum.FILE)
+    ).__root__ == Rule.construct(type=TypeEnum.FILE)
 
     # test representation
     assert repr(DSRule(True)) == "true"
@@ -125,22 +141,3 @@ def test_magic():
     cast(Rule, r.__root__).__dict__["metaPath"] = "meta"
     cast(Rule, r.__root__).__dict__["rewritePath"] = "test"
     assert repr(r).strip() == "{metaPath: meta, rewritePath: test}"
-
-    # test truthiness of rules
-    assert r  # "private" fields are not ignored
-    assert not DSRule()
-    assert not DSRule(False)
-    assert DSRule(True)
-
-    for val in TypeEnum:
-        assert Rule(type=val)
-    for val in [False, True, {}]:
-        assert Rule(valid=val)
-        assert Rule(validMeta=val)
-
-    assert Rule(allOf=[Rule()])
-    assert Rule(oneOf=[Rule()])
-    assert Rule(anyOf=[Rule()])
-    assert Rule(then=DSRule(type=False))
-    assert Rule(match="")
-    assert Rule(match="something")

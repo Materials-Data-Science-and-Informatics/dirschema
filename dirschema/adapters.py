@@ -117,15 +117,14 @@ class ZipDir(IDirectory):
         return cand_name in self.names
 
 
-H5_ATTR_SEP = "@"
-"""Separator used in paths to separate a HDF5 node from an attribute."""
-
-H5_JSON_SUF = ".json"
-"""Suffix used in leaf nodes to distinguish strings from JSON-serialized data."""
-
-
 class H5Dir(IDirectory):
     """Adapter for working with HDF5 files."""
+
+    ATTR_SEP = "@"
+    """Separator used in paths to separate a HDF5 node from an attribute."""
+
+    JSON_SUF = ".json"
+    """Suffix used in leaf nodes to distinguish strings from JSON-serialized data."""
 
     def __init__(self, dir: Path, opened_file) -> None:  # noqa: D107
         super().__init__(dir)
@@ -140,14 +139,14 @@ class H5Dir(IDirectory):
     def get_paths(self) -> Iterable[str]:  # noqa: D102
         ret = [""]
         for atr in self.file["/"].attrs.keys():
-            ret.append(f"{H5_ATTR_SEP}{atr}")
+            ret.append(f"{self.ATTR_SEP}{atr}")
 
         def collect(name: str) -> None:
-            if name.find(H5_ATTR_SEP) >= 0:
-                raise ValueError(f"Invalid name, must not contain {H5_ATTR_SEP}!")
+            if name.find(self.ATTR_SEP) >= 0:
+                raise ValueError(f"Invalid name, must not contain {self.ATTR_SEP}!")
             ret.append(name)
             for atr in self.file[name].attrs.keys():
-                ret.append(f"{name}{H5_ATTR_SEP}{atr}")
+                ret.append(f"{name}{self.ATTR_SEP}{atr}")
 
         self.file.visit(collect)
         return ret
@@ -155,7 +154,7 @@ class H5Dir(IDirectory):
     def is_dir(self, path: str) -> bool:  # noqa: D102
         if path == "":
             return True
-        if path.find(H5_ATTR_SEP) >= 0 or path not in self.file:
+        if path.find(self.ATTR_SEP) >= 0 or path not in self.file:
             return False
         if isinstance(self.file[path], h5py.Group):
             return True
@@ -163,8 +162,8 @@ class H5Dir(IDirectory):
 
     def is_file(self, path: str) -> bool:  # noqa: D102
         # attributes (treated like special files) exist if underlying group/dataset exists
-        if path.find(H5_ATTR_SEP) >= 0:
-            p = path.split(H5_ATTR_SEP)
+        if path.find(self.ATTR_SEP) >= 0:
+            p = path.split(self.ATTR_SEP)
             p[0] = p[0] or "/"
             return p[0] in self.file and p[1] in self.file[p[0]].attrs
         else:
@@ -173,14 +172,14 @@ class H5Dir(IDirectory):
 
     def load_meta(self, path: str):  # noqa: D102
         p = path
-        if p.find(H5_ATTR_SEP) >= 0:
+        if p.find(self.ATTR_SEP) >= 0:
             # try treating as attribute. attributes are interpreted when possible
-            f, s = p.split(H5_ATTR_SEP)
+            f, s = p.split(self.ATTR_SEP)
             f = f or "/"
             if f in self.file and s in self.file[f].attrs:
                 dat = self.file[f].attrs[s]
                 if isinstance(dat, str):
-                    if s.endswith(H5_JSON_SUF):
+                    if s.endswith(self.JSON_SUF):
                         return json.loads(dat)
                     else:
                         return dat
