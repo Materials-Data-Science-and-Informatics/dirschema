@@ -1,11 +1,16 @@
 """Interface to perform DirSchema validation on various directory-like structures."""
 
+import io
 import itertools
 import json
 import zipfile as zip
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Iterable, Optional
+
+import ruamel.yaml.parser as yaml_parser
+
+from .json.parse import yaml
 
 try:
     import h5py
@@ -71,8 +76,16 @@ class RealDir(IDirectory):
     def load_meta(self, path: str):  # noqa: D102
         try:
             with open(self.base / path, "r") as f:
-                return json.load(f)
-        except (FileNotFoundError, IsADirectoryError, json.JSONDecodeError):
+                if path.endswith(".json"):
+                    return json.load(f)
+                elif path.endswith((".yaml")):
+                    return yaml.load(f)
+        except (
+            FileNotFoundError,
+            IsADirectoryError,
+            json.JSONDecodeError,
+            yaml_parser.ParserError,
+        ):
             return None
 
     def is_dir(self, dir: str) -> bool:  # noqa: D102
@@ -83,7 +96,7 @@ class RealDir(IDirectory):
 
 
 class ZipDir(IDirectory):
-    """Adapter for working with zip files."""
+    """Adapter for working with zip files (otherwise equivalent to `RealDir`)."""
 
     def __init__(self, dir: Path, opened_file: zip.ZipFile) -> None:  # noqa: D107
         super().__init__(dir)
@@ -101,12 +114,21 @@ class ZipDir(IDirectory):
 
     def load_meta(self, path: str):  # noqa: D102
         try:
-            return json.loads(self.file.read(path).decode("utf-8"))
-        except (KeyError, IsADirectoryError, json.JSONDecodeError):
+            dat = self.file.read(path).decode("utf-8")
+            if path.endswith(".json"):
+                return json.loads(dat)
+            elif path.endswith((".yaml")):
+                return yaml.load(io.StringIO(dat))
+        except (
+            KeyError,
+            IsADirectoryError,
+            json.JSONDecodeError,
+            yaml_parser.ParserError,
+        ):
             return None
 
     # as is_dir and is_file of zip.Path appear to work purely syntactically,
-    # they're useless for us. We rather just lookup in the list of paths
+    # they're useless for us. We rather just lookup in the list of paths we need anyway
 
     def is_dir(self, dir: str) -> bool:  # noqa: D102
         cand_name: str = dir.rstrip("/") + "/"
@@ -118,7 +140,24 @@ class ZipDir(IDirectory):
 
 
 class H5Dir(IDirectory):
-    """Adapter for working with HDF5 files."""
+    """Adapter for working with HDF5 files.
+
+    Attributes do not fit nicely into the concept of just directories and files.
+    The following conventions are used to checking attributes:
+
+    An attribute 'attr' of some dataset or group '/a/b'
+    is mapped to the path '/a/b@attr' and is interpreted as a file.
+
+    Therefore, '@' MUST NOT be used in names of groups, datasets or attributes.
+
+    Only JSON is supported for the metadata, assuming that HDF5 files are usually not
+    constructed by hand (which is the main reason for YAML support in the other cases).
+
+    All stored metadata entities must have a name ending with ".json"
+    in order to distinguish them from plain strings. This is done because datasets
+    or attributes are often used for storing simple values that could also be
+    validated using a JSON Schema.
+    """
 
     ATTR_SEP = "@"
     """Separator used in paths to separate a HDF5 node from an attribute."""
@@ -153,12 +192,12 @@ class H5Dir(IDirectory):
 
     def is_dir(self, path: str) -> bool:  # noqa: D102
         if path == "":
-            return True
+            return True  # root directory
         if path.find(self.ATTR_SEP) >= 0 or path not in self.file:
-            return False
+            return False  # not existing or is an attribute
         if isinstance(self.file[path], h5py.Group):
-            return True
-        return False
+            return True  # is a group
+        return False  # something that exists, but is not a group
 
     def is_file(self, path: str) -> bool:  # noqa: D102
         # attributes (treated like special files) exist if underlying group/dataset exists
