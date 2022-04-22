@@ -115,6 +115,7 @@ class DSEvalCtx(BaseModel):
         ret.location = list(self.location)
 
         if isinstance(rule.__root__, Rule):
+            # override match configuration and pattern, if specified in child rule
             rl: Rule = rule.__root__
             if rl.matchStart:
                 ret.matchStart = rl.matchStart
@@ -160,7 +161,7 @@ class DSValidator:
         schema: Union[bool, Rule, DSRule, str, Path],
         meta_conv: Optional[MetaConvention] = None,
         local_basedir: Optional[Path] = None,
-        # default_handler: Optional[str] = None,
+        relative_prefix: str = "",
     ) -> None:
         """
         Construct validator instance from given schema or schema location.
@@ -169,7 +170,13 @@ class DSValidator:
         """
         self.meta_conv = meta_conv or MetaConvention()
         self.local_basedir = local_basedir
-        # self.default_handler = default_handler
+        self.relative_prefix = relative_prefix
+
+        # if the passed relative prefix is a custom plugin, we cannot use this
+        # for $ref resolving, so we will ignore it in the Json/Yaml loader
+        is_plugin_prefix = (
+            0 == self.relative_prefix.find("v#") < self.relative_prefix.find("://")
+        )
 
         # take care of the passed schema based on its type
         if isinstance(schema, bool) or isinstance(schema, Rule):
@@ -177,8 +184,12 @@ class DSValidator:
         elif isinstance(schema, DSRule):
             self.schema = schema
         elif isinstance(schema, str) or isinstance(schema, Path):
-            uri = to_uri(str(schema), self.local_basedir)
-            dat = load_json(uri, local_basedir=self.local_basedir)
+            uri = to_uri(str(schema), self.local_basedir, self.relative_prefix)
+            dat = load_json(
+                uri,
+                local_basedir=self.local_basedir,
+                relative_prefix=self.relative_prefix if not is_plugin_prefix else "",
+            )
             # use deepcopy to get rid of jsonref (see jsonref issue #9)
             # otherwise we will get problems with pydantic serialization later
             self.schema = DSRule.parse_obj(copy.deepcopy(dat))
@@ -285,6 +296,7 @@ class DSValidator:
         psl = PathSlice.into(path, curCtx.matchStart, curCtx.matchStop)
         thenPath: str = path  # to be used for implication later on
         if rl.match or rl.rewrite:
+            # important! using the match pattern from the context (it could be inherited)
             rewritten = psl.rewrite(curCtx.matchPat, rl.rewrite)
             if rewritten is not None:
                 thenPath = rewritten.unslice()

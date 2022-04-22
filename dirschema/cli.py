@@ -7,6 +7,7 @@ from typing import Tuple
 import typer
 from ruamel.yaml import YAML
 
+from .json.handlers import loaded_handlers
 from .log import log_level, logger
 from .validate import DSValidator, MetaConvention
 
@@ -38,8 +39,20 @@ def_meta_conv = MetaConvention().to_tuple()
 """Default metadata convention, as tuple (used if user provides no override)."""
 
 
+def check_rel_prefix(prefix: str):
+    valid_protocols = ["http://", "https://", "file://", "cwd://", "local://"]
+    valid_protocols += [f"v#{name}://" for name in loaded_handlers.keys()]
+
+    if not prefix.find("://") > 0 or prefix.startswith(tuple(valid_protocols)):
+        return prefix
+
+    msg = "Unsupported URI protocol. "
+    msg += "Supported protocols are: " + ", ".join(valid_protocols)
+    raise typer.BadParameter(msg)
+
+
 @app.command()
-def check(
+def run_dirschema(
     schema: Path = typer.Argument(
         ...,
         exists=True,
@@ -60,9 +73,17 @@ def check(
         None,
         exists=True,
         help=(
-            "Base path to resolve local:// URIs "
-            "(Default: location of the passed dirschema)."
+            "Base path to resolve local:// URIs  "
+            "[default: location of the passed dirschema]"
         ),
+    ),
+    relative_prefix: str = typer.Option(
+        "",
+        help=(
+            "Prefix to add to all relative paths "
+            "(i.e. to paths not starting with a slash or some access protocol)."
+        ),
+        callback=check_rel_prefix,
     ),
     verbose: int = typer.Option(0, "--verbose", "-v", min=0, max=3),
 ) -> None:
@@ -78,7 +99,10 @@ def check(
     logger.setLevel(log_level[verbose])
     local_basedir = local_basedir or schema.parent
     dsv = DSValidator(
-        schema, MetaConvention.from_tuple(*conv), local_basedir=local_basedir
+        schema,
+        MetaConvention.from_tuple(*conv),
+        local_basedir=local_basedir,
+        relative_prefix=relative_prefix,
     )
     if errors := dsv.validate(dir):
         dsv.format_errors(errors, sys.stdout)

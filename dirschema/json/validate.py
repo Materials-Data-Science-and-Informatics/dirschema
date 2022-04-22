@@ -1,7 +1,7 @@
 """Helper functions to perform validation of JSON-compatible metadata files."""
 
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Tuple, Type, Union
 
 from jsonschema import Draft202012Validator
 
@@ -13,22 +13,28 @@ JSONValidationErrors = Dict[str, List[str]]
 """JSON metadata validation errors mapping from JSON Pointers to lists of error messages."""
 
 
-def validate_custom(dat, plugin_str: str) -> JSONValidationErrors:
-    """Perform validation based on a validation handler string."""
+def parse_plugin_uri(custom_uri: str) -> Tuple[Type[ValidationHandler], str]:
+    """Parse a validation plugin pseudo-URI, return the plugin class and args string."""
     try:
-        if not plugin_str.startswith("v#"):
+        if not custom_uri.startswith("v#"):
             raise ValueError
-        ep, args = plugin_str[2:].split("://")
+        ep, args = custom_uri[2:].split("://")
         if ep == "":
             raise ValueError
     except ValueError:
-        raise ValueError(f"Invalid custom validator string: '{plugin_str}'")
+        raise ValueError(f"Invalid custom validator plugin pseudo-URI: '{custom_uri}'")
 
     try:
-        h: ValidationHandler = loaded_handlers[ep]
-        return h.validate(dat, args)
+        h: Type[ValidationHandler] = loaded_handlers[ep]
+        return (h, args)
     except KeyError:
         raise ValueError(f"Validator entry-point not found: '{ep}'")
+
+
+def validate_custom(dat, plugin_str: str) -> JSONValidationErrors:
+    """Perform validation based on a validation handler string."""
+    h, args = parse_plugin_uri(plugin_str)
+    return h.validate(dat, args)
 
 
 def validate_jsonschema(dat, schema) -> JSONValidationErrors:
@@ -44,7 +50,10 @@ def validate_jsonschema(dat, schema) -> JSONValidationErrors:
 
 
 def validate_metadata(
-    dat, schema: Union[str, Dict], local_basedir: Optional[Path]
+    dat,
+    schema: Union[str, Dict],
+    local_basedir: Optional[Path] = None,
+    relative_prefix: str = "",
 ) -> JSONValidationErrors:
     """Validate metadata object (loaded dict) using JSON Schema or custom validator.
 
@@ -59,7 +68,7 @@ def validate_metadata(
         if schema.startswith("v#"):
             is_jsonschema = False  # custom validation, not json schema!
         else:  # load schema from URI
-            uri = to_uri(schema)
+            uri = to_uri(schema, local_basedir, relative_prefix)
             schema = load_json(uri, local_basedir=local_basedir)
     if is_jsonschema:
         assert isinstance(schema, bool) or isinstance(schema, dict)

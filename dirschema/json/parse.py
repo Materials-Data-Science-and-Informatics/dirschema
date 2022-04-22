@@ -12,18 +12,25 @@ from ruamel.yaml import YAML
 yaml = YAML(typ="safe")
 
 
-def to_uri(path: str, local_basedir: Optional[Path] = None) -> str:
+def to_uri(
+    path: str, local_basedir: Optional[Path] = None, relative_prefix: str = ""
+) -> str:
     """
     Given a path or URI, normalize it to an absolute path.
 
+    If the path is relative and without protocol, it is prefixed with `relative_prefix`
+    before attempting to resolve it (by default equal to prepending `cwd://`)
+
     If path is already http(s):// or file://... path, do nothing to it.
     If the path is absolute (starts with a slash), just prepend file://
-    If the path is local://, resolve based on prefix (if not given, CWD is used)
-    If the path is relative and without protocol, make absolute wrt. CWD
+    If the path is cwd://, resolve based on CWD (even if starting with a slash)
+    If the path is local://, resolve based on `local_basedir` (if not given, CWD is used)
 
     Result is either http(s):// or a file:// path that can be read with urlopen.
     """
     local_basedir = local_basedir or Path("")
+    if str(path)[0] != "/" and str(path).find("://") < 0:
+        path = relative_prefix + path
 
     prot, rest = "", ""
     prs = str(path).split("://")
@@ -35,12 +42,17 @@ def to_uri(path: str, local_basedir: Optional[Path] = None) -> str:
     if prot.startswith(("http", "file")):
         return path  # nothing to do
     elif prot == "local":
-        # relative, but not to CWD
+        # relative, but not to CWD, but a custom path
         rest = str((local_basedir / rest.lstrip("/")).absolute())
+    elif prot == "cwd":
+        # like normal resolution of relative,
+        # but absolute paths are still interpreted relative,
+        # so cwd:// and cwd:/// are lead to the same results
+        rest = str((Path(rest.lstrip("/"))).absolute())
     elif prot == "":
-        # URL scheme missing -> normal path
+        # relative paths are made absolute
         if not Path(rest).is_absolute():
-            rest = str((Path("") / rest).absolute())
+            rest = str((Path(rest)).absolute())
     else:
         raise ValueError(f"Unknown protocol: {prot}")
 
@@ -56,13 +68,14 @@ class ExtJsonLoader(JsonLoader):
     * resolving relative paths
     """
 
-    def __init__(self, local_basedir: Optional[Path] = None):
+    def __init__(self, local_basedir: Optional[Path] = None, relative_prefix: str = ""):
         super().__init__()
         self.local_basedir = local_basedir
+        self.rel_prefix = relative_prefix
 
     def __call__(self, uri: str, **kwargs):
         """Try loading passed uri as YAML if loading as JSON fails."""
-        uri = to_uri(uri, self.local_basedir)  # normalize path/uri
+        uri = to_uri(uri, self.local_basedir, self.rel_prefix)  # normalize path/uri
         try:
             return super().__call__(uri, **kwargs)
         except json.JSONDecodeError:
@@ -73,29 +86,28 @@ class ExtJsonLoader(JsonLoader):
             return res
 
 
+def loads_json_or_yaml(dat: str):
+    """Parse a JSON or YAML object from a string."""
+    try:
+        return json.loads(dat)
+    except json.JSONDecodeError:
+        return yaml.load(io.StringIO(dat))
+
+
+def init_loader(kwargs):
+    """Initialize JSON/YAML loader from passed kwargs dict, removing its arguments."""
+    return ExtJsonLoader(
+        kwargs.pop("local_basedir", None), kwargs.pop("relative_prefix", "")
+    )
+
+
 def loads_json(dat: str, **kwargs) -> Dict[str, Any]:
     """Load YAML/JSON from a string, resolving all refs, both local and remote."""
-    unknown_kwargs = set(kwargs.keys()) - set(["local_basedir"])
-    if len(unknown_kwargs) > 0:
-        raise ValueError(f"Unknown keyword arguments: '{unknown_kwargs}'")
-    local_basedir = kwargs.pop("local_basedir", None)
-
-    res = None
-    try:
-        res = json.loads(dat)
-    except json.JSONDecodeError:
-        res = yaml.load(io.StringIO(dat))
-
-    ldr = ExtJsonLoader(local_basedir)
-    return JsonRef.replace_refs(res, loader=ldr, **kwargs)  # type: ignore
+    ldr = init_loader(kwargs)
+    return JsonRef.replace_refs(loads_json_or_yaml(dat), loader=ldr, **kwargs)  # type: ignore
 
 
 def load_json(uri: str, **kwargs) -> Dict[str, Any]:
     """Load YAML/JSON from file/network + resolve all refs, both local and remote."""
-    unknown_kwargs = set(kwargs.keys()) - set(["local_basedir"])
-    if len(unknown_kwargs) > 0:
-        raise ValueError(f"Unknown keyword arguments: '{unknown_kwargs}'")
-    local_basedir = kwargs.pop("local_basedir", None)
-
-    ldr = ExtJsonLoader(local_basedir)
+    ldr = init_loader(kwargs)
     return JsonRef.replace_refs(ldr(str(uri)), loader=ldr, **kwargs)  # type: ignore
