@@ -1,0 +1,18 @@
+anyOf:
+- match: ""
+  type: dir
+- match: data
+  type: dir
+- match: src
+  type: dir
+- match: data/(.*)\.mp4
+  validMeta: true
+  rewrite: data/\1_frames
+  then:
+    type: dir
+- match: data/.*_frames
+  type: dir
+- match: data/.*_frames/.*\.jpg
+  type: file
+- match: src/.*\.py
+  type: file
