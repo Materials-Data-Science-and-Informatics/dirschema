@@ -15,18 +15,25 @@ def test_to_uri(tmp_path):
     for path in ["file:///hello/world", "http://www.example.com", "https://a/b/c"]:
         assert to_uri(path) == path  # return unchanged
 
-    # absolute -> add prefix
+    # absolute local path -> add prefix
     assert to_uri("/some/path") == "file:///some/path"
 
-    # relative -> use CWD
-    assert to_uri("some/path") == f"file://{cwd}/some/path"
+    # explicit CWD
+    assert to_uri("cwd://some/path") == f"file://{cwd}/some/path"
+    assert to_uri("cwd:///some/path") == f"file://{cwd}/some/path"
 
     # local without base_dir, with and without leading slash
     assert to_uri("local://some/path") == f"file://{cwd}/some/path"
     assert to_uri("local:///another/path") == f"file://{cwd}/another/path"
-
     # local with base_dir
     assert to_uri("local://a/b", tmp_path) == f"file://{tmp_path}/a/b"
+
+    # relative with default resolving -> use CWD
+    assert to_uri("some/path") == f"file://{cwd}/some/path"
+    # relative with custom prefix -> resolve relative as "local"
+    assert to_uri("a/b", tmp_path, "local://") == f"file://{tmp_path}/a/b"
+    # relative with custom prefix -> resolve relative as absolute path
+    assert to_uri("a/b", None, "/c/d/") == "file:///c/d/a/b"
 
     # test with invalid protocol
     with pytest.raises(ValueError):

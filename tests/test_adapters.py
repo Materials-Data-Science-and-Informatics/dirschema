@@ -107,6 +107,7 @@ def test_realdir(tmp_path):
     assert inst.is_file("foo/data.bin_meta.json")
 
     assert inst.load_meta("") is None
+    assert inst.load_meta("foo/bar") is None
     assert inst.load_meta("invalid") is None
     assert inst.load_meta("foo/data.bin") is None
     assert inst.load_meta("foo/notReally.json") is None
@@ -150,6 +151,7 @@ def test_zipdir(tmp_path):
     assert inst.is_file("foo/data.bin_meta.json")
 
     assert inst.load_meta("") is None
+    assert inst.load_meta("foo/bar") is None
     assert inst.load_meta("invalid") is None
     assert inst.load_meta("foo/data.bin") is None
     assert inst.load_meta("foo/notReally.json") is None

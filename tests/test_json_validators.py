@@ -1,5 +1,6 @@
 """Test both custom and normal JSON validation."""
 
+import json
 from typing import List
 
 import pytest
@@ -8,6 +9,7 @@ from pydantic import BaseModel, StrictBool, StrictInt, StrictStr
 from dirschema.json.validate import (  # isort: skip
     validate_custom,
     validate_jsonschema,
+    validate_metadata,
 )
 from dirschema.json.handler_pydantic import PydanticHandler  # isort: skip
 
@@ -86,5 +88,19 @@ def test_validate_custom():
         "/a/c": ["value is not a valid boolean"],
         "/a/d/1": ["none is not an allowed value"],
     }
+
+    PydanticHandler.MODELS = {}  # unregister models
+
+
+def test_validate_metadata(tmp_path):
+    # test automatic detection based on passed URI
+
+    PydanticHandler.MODELS["some_model"] = SomeModel  # a valid model
+    validator_str = "v#pydantic://some_model"
+    with open(tmp_path / "schema.json", "w") as f:
+        json.dump(test_schema, f)
+
+    assert not validate_metadata(good_instance, validator_str, None)
+    assert not validate_metadata(good_instance, "local://schema.json", tmp_path)
 
     PydanticHandler.MODELS = {}  # unregister models
