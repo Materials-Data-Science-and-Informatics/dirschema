@@ -31,16 +31,20 @@ files and directories are uniquely mapped to paths.
 * The set of paths in a dataset always contains at least the empty path
     (representing the root directory)
 * Furthermore, it contains all contained subdirectories and files
-    (except for ones that are ignored, e.g., hidden files etc.)
+    (except for ones that are ignored due to metadata convention (see later)
+    or adapter configuration (e.g. ignoring hidden files etc.)
 
 In order to have a unique representation of paths that can be used in regex patterns,
 all paths are normalized such that:
 
 * each path is relative to the directory root (which is represented by the empty string)
-* slashes are used to separate "segments" (i.e. directories, possibly ending with a file)
+* slashes are used to separate "segments"
+    (i.e. a sequence of directories, possibly ending with a file)
 * each segment between two slashes is non-empty
 * there is neither a leading nor a trailing slash (`/`)
 * paths do not contain special "file names" like `.` (current dir) or `..` (parent dir)
+
+**Example:** `""`, `"a"`, `"a/b/c"` are all valid paths as provided by the normalization
 
 ## Metadata Convention
 
@@ -48,7 +52,8 @@ JSON metadata can be provided for each file and directory. By default, it is ass
 for each file named `FILE` the metadata is located in a file named `FILE_meta.json`,
 whereas for a directory `DIR` the metadata is in `DIR/_meta.json`.
 
-The convention can be configured by overriding the path and file prefix and suffixes.
+The convention can be configured by overriding the prefixes and suffixes
+that are attached to the path itself and to the filename.
 The general pattern is as follows:
 
 For a path `a/b/c/d`, the metadata is located in:
@@ -66,6 +71,97 @@ would have to be excluded in an ad-hoc manner, which would fix the convention in
 DirSchema. Excluding them allows for changing the convention or using the DirSchema
 with datasets following different conventions, without changing the DirSchema itself.
 
+**Example:**
+
+With the default settings, the metadata file for `/a/b/c/d` is expected to be found at:
+
+* `/a/b/c/d_meta.json` if `d` is a file
+* `/a/b/c/d/_meta.json` if `d` is a directory
+
+If we would also add a path suffix equal to `metadata`, we would get:
+
+* `/a/b/c/metadata/d_meta.json` if `d` is a file
+* `/a/b/c/d/metadata/_meta.json` if `d` is a directory
+
+## Validation by JSON Schemas and custom plugins
+
+In any context where JSON validation is to be performed and a schema can be provided,
+it is possible to supply one of the following in the corresponding location of the schema:
+
+* a JSON Schema (directly embedded)
+* an URI pointing to a JSON Schema
+* a special URI pointing to a custom validation plugin
+
+For referencing JSON Schemas stored outside of the dirschema,
+the following possibilities exist:
+
+* a `http(s)://` URI
+* a `file://` URI or an absolute path (equivalent)
+* a `local://` URI (resolved relative to the directory of the used dirschema by default)
+* a `cwd://` URI (resolved relative to the current working directory)
+* a relative path (treated as a `cwd://` path by default)
+
+To access a custom validation plugin, a pseudo-URI starting with `v#VALIDATOR://` is
+recognized, where `VALIDATOR` is a registered plugin.
+
+The `cwd://` URI is an explicit version that behaves like normal "relative paths", i.e.
+when the validation tool is launched in `/a/b`,
+a path `cwd://c/d` is expanded to `/a/b/c/d`.
+
+By default, `local://` URIs are expanded relative to the location of the main dirschema
+file. The reference directory for interpreting `local://` paths can also be overridden to
+resolve to an arbitrary different path supplied to the validator during initialization.
+
+**Example:**
+
+Consider the following setup:
+* the dirschema lives in `/my/dirschemas/example.dirschema.yaml`
+* the dirschema validation is launched in directory `/my/workdir`
+* A custom validator called `myvalidator` is registered as a plugin
+
+Now let us see how the paths are resolved:
+
+* A JSON Schema referenced as `https://www.example.org/schemas/some_schema.json`
+    remains unchanged (the schema will be downloaded)
+* A JSON Schema referenced as `file:///schemas/some_schema.json`
+    remains unchanged
+* A JSON Schema referenced as `cwd://schemas/some_schema.json`
+    expands to `file:///my/workdir/schemas/some_schema.json`
+* A JSON Schema referenced as `local://schemas/some_schema.json`
+    will expand to `file:///my/dirschemas/schemas/some_schema.json` by default
+    (or some other path, if the local base directory is overridden)
+* A JSON Schema referenced as `/schemas/some_schema.json`
+    expands to `file:///schemas/some_schema.json`
+* A JSON Schema referenced as `schemas/some_schema.json`
+    expands to `file:///my/workdir/schemas/some_schema.json` by default
+    (if overridden, any prefix can be added to modify the interpretation of relative paths)
+* A pseudo-URI `v#myvalidator://something` will call the validation plugin
+  with the current file or directory path and the string `something` as argument
+  (the argument can tell the plugin what kind of validation to perform or schema to use).
+
+Thus, custom validation plugins can be used to serve two purposes:
+
+* perform validation beyond what is possible with JSON Schema
+* still use JSON Schema internally, but allow to use JSON Schemas
+    that cannot be addressed using the built-in supported protocols
+
+Except for custom validation plugins, all these URIs and pseudo-URIs can be used
+also as values for `$ref` inside the dirschema or JSON Schemas. The custom plugin
+Pseudo-URIs may only be used with the corresponding validation keywords of DirSchema.
+
+Relative paths can be used for convenience throughout the schema and expanded to any
+builtin JSON Schema access protocol or custom validator by setting the relative schema
+base prefix when launching the validator. Notice that using a custom plugin prefix will
+break `$ref` resolving of relative paths (you should not use `$ref` without access
+protocol anyway). If you do it anyway and want relative paths to consistently be resolved
+as expected in `$ref`s, you must prefix the relative sub-schema location with
+`cwd://` or `local://` stating your intended semantics.
+
+While all the provided ways to refer to external schemas can be useful for applying
+dirschema in various contexts, consider mixing too many, especially multiple "relative"
+modes of accessing a validator or JSON Schema as a bad practice. It can make your schemas
+harder to understand and to reuse.
+
 ## DirSchema Evaluation
 
 When validating a dataset, the DirSchema is evaluated for each path individually and
@@ -78,7 +174,7 @@ proceeds recursively as follows.
 3. Logical constraints `not`, `allOf`, `anyOf` and `oneOf` are evaluated.
 4. The `then` rule is evaluated on the path (possibly rewritten by `rewrite`), if present.
 
-Whenever a step fails, the evaluation of the current rule is aborted.
+Whenever one of these stages fails, the evaluation of the current rule is aborted.
 In the following, all available constraints and other keys are explained in more detail.
 
 ## DirSchema Rules
@@ -116,7 +212,7 @@ slice**.
 For example, given the path `a/b/c/d` with `matchStart: 1` and `matchStop: -1`, the match
 (and possible rewrite) is performed only on the path slice `b/c`.
 
-Capture groups defined by parenthesis in the regex can be used for the `rewrite` in the
+Capture groups (defined by parentheses in the regex) can be used for the `rewrite` in the
 current or any nested rule, unless overridden by a different `match`.
 
 #### matchStart
@@ -159,7 +255,7 @@ string (substitution, possibly containing capture references)
 Rewrite (parts of) the current path.
 
 **The rewritten path is used instead of the current path in the** `then` **rule,
-all constraints on the same level as the rewrite are evaluated on the *original* path!**.
+all constraints on the same level as the rewrite are evaluated on the *original* path!**
 Therefore having a `rewrite` without a `then` rule has no effect.
 
 Capture groups of the most recent `match` (i.e. on the same or level or in an ancestor
@@ -195,11 +291,11 @@ Require that the path:
 #### valid
 
 **Value:**
-JSON Schema
+JSON Schema or string
 
 **Description:**
-Require that the path is a JSON file (**YAML is not allowed**) that successfully validates
-against the JSON Schema provided as the value.
+Require that the path is loadable as JSON by the used adapter and is successfully
+validated by the referenced JSON Schema or custom validator.
 
 Validation fails if the path does not exist, cannot be loaded by the adapter or is not
 valid according to the validation handler.
@@ -207,16 +303,16 @@ valid according to the validation handler.
 #### validMeta
 
 **Value:**
-JSON Schema
+JSON Schema or string
 
 **Description:**
 Require that the metadata file of the current path (according to the used convention)
-is a JSON file (**YAML is not allowed**) that successfully validates
-against the JSON Schema provided as the value.
+is loadable as JSON by the used adapter and is successfully validated by
+the referenced JSON Schema or custom validator.
 
-Validation fails if the path does not exist, the metadata file does not exist, the
-metadata file cannot be loaded by the adapter or is not valid according to the validation
-handler.
+Validation fails if the path does not exist, the metadata companion file does not exist,
+the metadata file cannot be loaded by the adapter or is not valid according to the
+validation handler.
 
 ### Combinations of Rules
 
@@ -269,6 +365,7 @@ Satisfied if **exactly** one rule in the array of DirSchemas is satisfied.
 **Value:**
 DirSchema
 
+**Description:**
 If all other constraints in the current rule are satisfied, require that the rule provided
 in the value is also satisfied on the (possibly rewritten) path.
 
@@ -280,10 +377,10 @@ modify or refine the four evaluation phases outlined above.
 
 ## Modularity
 
-In any place where a DirSchema or JSON Schema is expected, one can use `$ref` to reference
-them, both in YAML as well as JSON format, located at a remote or local location. In case
-of relative paths, these are resolved based on the directory containing the initial rule.
-This can and should be used to reuse rules and schemas without duplicating them.
+In any place where a DirSchema or JSON Schema is expected, one can also use `$ref` to
+reference them, both in YAML as well as JSON format, located at a remote or local
+location. This works for all supported protocols except for custom validation plugins
+(i.e. custom validator pseudo-URIs are only permitted as values for `valid` and `validMeta`).
 
 ## Examples
 
