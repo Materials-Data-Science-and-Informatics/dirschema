@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import List, Optional, Pattern, Tuple, Union
 
 from jsonschema import Draft202012Validator
-from pydantic import BaseModel, Extra, Field
+from pydantic import BaseModel, Extra, Field, root_validator
 from ruamel.yaml import YAML
 from typing_extensions import Final
 
@@ -25,8 +25,6 @@ class MetaConvention(BaseModel):
     or metadata concerning directories.
 
     At the same time, these files are ignored by themselves and act as "sidecar" files.
-
-    At least file prefix or suffix must be non-empty for correct behaviour.
     """
 
     pathPrefix: str = ""
@@ -34,7 +32,15 @@ class MetaConvention(BaseModel):
     filePrefix: str = ""
     fileSuffix: str = "_meta.json"
 
+    @root_validator
+    def check_valid(cls, values):
+        """Check that at least one filename extension is non-empty."""
+        file_pref_or_suf = values.get("filePrefix", "") or values.get("fileSuffix", "")
+        assert file_pref_or_suf, "At least one of filePrefix or fileSuffix must be set!"
+        return values
+
     def to_tuple(self) -> Tuple[str, str, str, str]:
+        """Convert convention instance to tuple (e.g. used within CLI)."""
         return (self.pathPrefix, self.pathSuffix, self.filePrefix, self.fileSuffix)
 
     @classmethod
@@ -206,6 +212,7 @@ class DSRule(BaseModel):
         if b is not None:
             return super().__init__(__root__=b)
         elif "__root__" in kwargs:
+            assert len(kwargs) == 1, "No extra kwargs may be passed with __root__!"
             return super().__init__(**kwargs)
         else:
             return super().__init__(__root__=Rule(**kwargs))
