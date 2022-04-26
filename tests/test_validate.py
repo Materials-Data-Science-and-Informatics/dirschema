@@ -33,28 +33,28 @@ def test_validate_basic(tmp_path):
     dsv.local_basedir = Path(to_uri(str(tmp_path)))
     assert not dsv.validate(tmp_path)  # trivial (empty rule)
 
-    dsv.schema = rule_from_yaml('anyOf:\n- match: ""\n  then: {type: dir}')
+    dsv.schema = rule_from_yaml('anyOf:\n- match: ""\n  next: {type: dir}')
     assert not dsv.validate(tmp_path)  # still trivial (root is always "dir")
-    dsv.schema = rule_from_yaml('anyOf:\n- match: ""\n  then: {type: file}')
+    dsv.schema = rule_from_yaml('anyOf:\n- match: ""\n  next: {type: file}')
     assert dsv.validate(tmp_path)  # contradiction
-    dsv.schema = rule_from_yaml('anyOf:\n- match: ""\n  then: {type: true}')
+    dsv.schema = rule_from_yaml('anyOf:\n- match: ""\n  next: {type: true}')
     assert not dsv.validate(tmp_path)  # trivial if it exists
-    dsv.schema = rule_from_yaml('anyOf:\n- match: ""\n  then: {type: false}')
+    dsv.schema = rule_from_yaml('anyOf:\n- match: ""\n  next: {type: false}')
     assert (ret := dsv.validate(tmp_path))  # contradiction if it exists
 
-    dsv.schema = rule_from_yaml('anyOf:\n- match: ""\n  then: {valid: true}')
+    dsv.schema = rule_from_yaml('anyOf:\n- match: ""\n  next: {valid: true}')
     assert (ret := dsv.validate(tmp_path))  # not a file
-    dsv.schema = rule_from_yaml('anyOf:\n- match: ""\n  then: {validMeta: true}')
+    dsv.schema = rule_from_yaml('anyOf:\n- match: ""\n  next: {validMeta: true}')
     assert (ret := dsv.validate(tmp_path))  # not existing
 
     with open(tmp_path / "_mymeta.json", "w") as f:
         f.write("not JSON")
     dsv.schema = rule_from_yaml(
-        'anyOf: [{match: ""}, {match: "_mymeta\\\\.json", then: {type: file}}]'
+        'anyOf: [{match: ""}, {match: "_mymeta\\\\.json", next: {type: file}}]'
     )
     assert not dsv.validate(tmp_path)  # is a file
     dsv.schema = rule_from_yaml(
-        'anyOf: [{match: ""}, {match: "_mymeta\\\\.json", then: {type: dir}}]'
+        'anyOf: [{match: ""}, {match: "_mymeta\\\\.json", next: {type: dir}}]'
     )
     assert (ret := dsv.validate(tmp_path))  # file is not dir
 
@@ -63,16 +63,16 @@ def test_validate_basic(tmp_path):
     dsv.meta_conv = MetaConvention()
 
     dsv.schema = rule_from_yaml(
-        'anyOf: [{match: ""}, {match: "_mymeta\\\\.json", then: {type: true}}]'
+        'anyOf: [{match: ""}, {match: "_mymeta\\\\.json", next: {type: true}}]'
     )
     assert not dsv.validate(tmp_path)  # trivial if it exists
     dsv.schema = rule_from_yaml(
-        'anyOf: [{match: ""}, {match: "_mymeta\\\\.json", then: {type: false}}]'
+        'anyOf: [{match: ""}, {match: "_mymeta\\\\.json", next: {type: false}}]'
     )
     assert (ret := dsv.validate(tmp_path))  # contradiction if it exists
 
     dsv.schema = rule_from_yaml(
-        'anyOf: [{match: ""}, {match: "_mymeta\\\\.json", then: {valid: true}}]'
+        'anyOf: [{match: ""}, {match: "_mymeta\\\\.json", next: {valid: true}}]'
     )
     assert (ret := dsv.validate(tmp_path))  # not valid json file
 
@@ -137,7 +137,7 @@ def test_combinations(tmp_path):
     ds = Rule.construct()
     dsv = DSValidator(ds)
 
-    dsv.schema = rule_from_yaml('match: ""\nthen: {}')
+    dsv.schema = rule_from_yaml('match: ""\nnext: {}')
     assert not dsv.validate(tmp_path)
 
     dsv.schema = rule_from_yaml("allOf: []")
@@ -177,20 +177,20 @@ anyOf:
 - type: dir
 - match: a_(.*)
   rewrite: b_\\1
-  then:
+  next:
     type: false
 - match: b_(.*)
   rewrite: a_\\1
-  then:
+  next:
     type: false
 - match: (.*)
-  then:
+  next:
     anyOf:
     - rewrite: a_\\1
-      then:
+      next:
         type: file
     - rewrite: b_\\1
-      then:
+      next:
         type: file
 """
 

@@ -9,7 +9,7 @@ anyOf:
   - match: "(.*)\\.dat"
     type: file
     rewrite: \1_extra
-    then:
+    next:
       allOf:
         - type: dir
         - validMeta: { "$ref": "local://text.schema.yaml" }

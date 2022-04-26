@@ -115,6 +115,7 @@ resolve to an arbitrary different path supplied to the validator during initiali
 **Example:**
 
 Consider the following setup:
+
 * the dirschema lives in `/my/dirschemas/example.dirschema.yaml`
 * the dirschema validation is launched in directory `/my/workdir`
 * A custom validator called `myvalidator` is registered as a plugin
@@ -162,6 +163,41 @@ dirschema in various contexts, consider mixing too many, especially multiple "re
 modes of accessing a validator or JSON Schema as a bad practice. It can make your schemas
 harder to understand and to reuse.
 
+## DirSchema keywords
+
+The keywords used in dirschema can be classified into some groups:
+
+* **Primitive rules**: `type`, `valid`, `validMeta`
+
+The primitive rules are those which perform the actual desired validation on a path.
+
+* **Logical connectives**: `not`, `anyOf`, `allOf`, `oneOf`
+
+The logical connectives work in the same way as in JSON Schema and are used to
+build more complex rules from the primitive rules.
+
+* **Control flow**: `if`, `then`, `else`
+
+Logically, the `if`/`then`/`else` construct is not necessary, because `if x then y else z`
+is equivalent to `(x and y) or (not x and z)`. The construct is provided for a different
+reason - the primitive rules and logical connectives all record validation errors, which
+in the end will be shown to some user and might be hard to interpret.
+
+The `if` rule will not leave any error trace regardless of satisfaction or violation, as
+its result is only used for deciding whether `then` or `else` is to be evaluated. Thus it
+is to be used in cases where a precondition needs to hold before some rule is evaluated,
+but failing to satisfy that condition should not clutter the validation error report.
+
+* **Pattern matching**: `match`, `rewrite`, `next`
+
+The pattern matching keywords are the mechanism for selecting which rules to apply to
+which paths and constructing relations between paths.
+
+* **Settings**: `matchStart`, `matchStop`, `description`, `details`
+
+The setting keywords affect the behaviour of the evaluation, but have no "truth value".
+
+
 ## DirSchema Evaluation
 
 When validating a dataset, the DirSchema is evaluated for each path individually and
@@ -171,8 +207,8 @@ proceeds recursively as follows.
 
 1. If a `match` key is present, the path is matched against the expression.
 2. Primitive constraints `type`, `valid` and `validMeta` are evaluated.
-3. Logical constraints `not`, `allOf`, `anyOf` and `oneOf` are evaluated.
-4. The `then` rule is evaluated on the path (possibly rewritten by `rewrite`), if present.
+3. Logical constraints `not`, `allOf`, `anyOf` and `oneOf` and `if/then/else` are evaluated.
+4. The `next` rule is evaluated on the path (possibly rewritten by `rewrite`), if present.
 
 Whenever one of these stages fails, the evaluation of the current rule is aborted.
 In the following, all available constraints and other keys are explained in more detail.
@@ -254,9 +290,9 @@ string (substitution, possibly containing capture references)
 
 Rewrite (parts of) the current path.
 
-**The rewritten path is used instead of the current path in the** `then` **rule,
+**The rewritten path is used instead of the current path in the** `next` **rule,
 all constraints on the same level as the rewrite are evaluated on the *original* path!**
-Therefore having a `rewrite` without a `then` rule has no effect.
+Therefore having a `rewrite` without a `next` rule has no effect.
 
 Capture groups of the most recent `match` (i.e. on the same or level or in an ancestor
 rule) can be used in the substitution. If there is no applicable `match`, a default match
@@ -317,7 +353,7 @@ validation handler.
 ### Combinations of Rules
 
 To build more complex rules, DirSchema provides the same logical connectives that can be
-used with JSON Schema. Additionally, an implication keyword `then` is provided explicitly
+used with JSON Schema. Additionally, an implication keyword `next` is provided explicitly
 and described further below.
 
 Notice that contrary to typical logical semantics (and just as in JSON Schema),
@@ -360,7 +396,7 @@ Array of DirSchema
 **Description:**
 Satisfied if **exactly** one rule in the array of DirSchemas is satisfied.
 
-#### then
+#### next
 
 **Value:**
 DirSchema
@@ -375,6 +411,31 @@ This mechanism exists first and foremost in order to be used in combination with
 Additionally, this can be used for sequential "short circuiting" of rule evaluation to
 modify or refine the four evaluation phases outlined above.
 
+### if-then-else
+
+#### if
+
+**Value:**
+DirSchema
+
+**Description:**
+If specified, will be evaluated on current path.
+Depending on result, either the `then` or the `else` rule will be evaluated.
+
+#### then
+
+**Value:**
+DirSchema
+
+**Description:** If given, must be satisfied in case that the `if` rule is satisfied.
+
+#### else
+
+**Value:**
+DirSchema
+
+**Description:** If given, must be satisfied in case that the `if` rule is violated.
+
 ## Modularity
 
 In any place where a DirSchema or JSON Schema is expected, one can also use `$ref` to
@@ -386,6 +447,6 @@ location. This works for all supported protocols except for custom validation pl
 
 Show non-trivial example for match slice/rewrite and scoping
 
-Show example how then can be used for short circuiting
+Show example how next can be used for short circuiting
 
 Show mutex example?

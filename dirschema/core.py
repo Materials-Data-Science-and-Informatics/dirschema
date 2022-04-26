@@ -128,6 +128,12 @@ class PathSlice(BaseModel):
     _def_pat = re.compile("(.*)")
     """Default pattern (match anything, put into capture group)."""
 
+    def match(self, pat: Optional[Union[re.Pattern, str]] = None):
+        pat = pat or self._def_pat
+        if isinstance(pat, str):
+            pat = re.compile(pat)
+        return pat.fullmatch(self.sliceStr)
+
     def rewrite(
         self, pat: Optional[Union[re.Pattern, str]] = None, sub: Optional[str] = None
     ) -> Optional[PathSlice]:
@@ -140,12 +146,7 @@ class PathSlice(BaseModel):
         Returns None if match fails.
         Raises exception of rewriting fails due to e.g. invalid capture groups.
         """
-        pat = pat or self._def_pat
-        if isinstance(pat, str):
-            pat = re.compile(pat)
-
-        m = pat.fullmatch(self.sliceStr)
-        if m:
+        if m := self.match(pat):
             ret = self.copy()
             if sub is not None:
                 ret.sliceStr = m.expand(sub)
@@ -256,10 +257,20 @@ class Rule(BaseModel):
 
     not_: Optional[DSRule] = Field(description="Negation of a rule.", alias="not")
 
-    # if rewrite is set, apply 'then' to rewritten path instead of original
-    # missing rewrite is like rewrite \1, missing match is like ".*"
+    # introduced for better error reporting (will yield no error message on failure)
+    # So this is more for dirschema "control-flow"
+    if_: Optional[DSRule] = Field(
+        description="Depending on result of rule, will proceed with 'then' or 'else'.",
+        alias="if",
+    )
+
     then: Optional[DSRule] = Field(
-        description="If current rule is satisfied, evaluate the 'then' rule."
+        description="Evaluated if 'if' rule exists and satisfied.",
+    )
+
+    else_: Optional[DSRule] = Field(
+        description="Evaluated if 'if' rule exists and not satisfied.",
+        alias="else",
     )
 
     # match and rewrite (path inspection and manipulation):
@@ -281,6 +292,25 @@ class Rule(BaseModel):
 
     # only do rewrite if match was successful
     rewrite: Optional[str]
+
+    # if rewrite is set, apply 'next' to rewritten path instead of original
+    # missing rewrite is like rewrite \1, missing match is like ".*"
+    next: Optional[DSRule] = Field(
+        description="If current rule is satisfied, evaluate the 'next' rule."
+    )
+
+    # improve error reporting by making it customizable
+    # overrides all other errors on the level of this rule (but keeps subrule errors)
+    # if set to "", will report no error message for this rule
+    description: Optional[str] = Field(
+        None,
+        description="Custom error message to be displayed to the user if this rule fails.",
+    )
+    # used to prune noisy error message accumulation to some high level summary
+    details: bool = Field(
+        True,
+        description="If set, keep errors from sub-rules, otherwise ignore them.",
+    )
 
     # ----
 

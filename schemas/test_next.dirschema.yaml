@@ -1,19 +1,19 @@
-# demo of how nested rewrite/then chains behave
+# demo of how nested rewrite/next chains behave
 anyOf:
   - match: ".+"
   - rewrite: "foo"
-    then:
+    next:
       type: file
       rewrite: "\\1bar"
-      then:
-        # demo of  how "then" can be used to augment the
+      next:
+        # demo of  how "next" can be used to augment the
         # effective constraint evaluation order.
         # notice that "anyOf" is usually checked after "validMeta"
         anyOf:
           - type: dir
-        then:
+        next:
           validMeta:
             "$ref": text.schema.json
           rewrite: "\\1/qux"
-          then:
+          next:
             type: file

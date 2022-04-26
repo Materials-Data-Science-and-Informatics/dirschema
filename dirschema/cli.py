@@ -105,8 +105,10 @@ def run_dirschema(
         relative_prefix=relative_prefix,
     )
     if errors := dsv.validate(dir):
+        logger.debug(f"Validation of '{dir}' failed")
         dsv.format_errors(errors, sys.stdout)
         raise typer.Exit(code=1)
+    logger.debug(f"Validation of '{dir}' successful")
 
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@ anyOf:
 - match: data/(.*)\.mp4
   validMeta: true
   rewrite: data/\1_frames
-  then:
+  next:
     type: dir
 - match: data/.*_frames
   type: dir

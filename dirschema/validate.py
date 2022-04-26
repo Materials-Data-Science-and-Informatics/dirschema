@@ -78,6 +78,7 @@ class DSEvalCtx(BaseModel):
     # ----
 
     errors: DSValidationErrors = {}
+    failed: bool = False
 
     filePath: str = ""
     """Path of currently checked file (possibly rewritten)."""
@@ -203,45 +204,6 @@ class DSValidator:
             f"local_basedir: {self.local_basedir}\n"
         )
 
-    def validate(
-        self, root_path: Union[Path, IDirectory], **kwargs
-    ) -> DSValidationResult:
-        """
-        Validate a directory and return all validation errors (unsatisfied rules).
-
-        If `root_path` is an instance of `IDirectory`, it will be used directly.
-
-        If `root_path` is a `Path`, this function will try to pick the correct interface
-        for interpreting "files" and "directories", depending on whether the provided file
-        is a directory or a supported kind of archive file with internal structure.
-
-        Depending on the used metadata convention, the companion metadata files matching
-        the convention will be filtered out from the set of validated paths.
-
-        Returns:
-            Error dict that is empty in case of success, or otherwise contains
-            for each path with validation errors another dict with the errors.
-        """
-        logger.debug(f"Starting validation of {root_path}")
-        if isinstance(root_path, Path):
-            root_path = get_adapter_for(root_path)
-        paths = [p for p in root_path.get_paths() if not self.meta_conv.is_meta(p)]
-        errors: Dict[str, Any] = {}
-        # run validation for each filepath, collect errors separately
-        for p in paths:
-            ctx = DSEvalCtx.fresh(
-                self.schema,
-                dirAdapter=root_path,
-                metaConvention=self.meta_conv,
-                filePath=p,
-                **kwargs,
-            )
-            logger.debug(f"Running validation for '{p}'")
-            self.validate_path(p, self.schema, ctx)
-            if ctx.errors:
-                errors[p] = ctx.errors
-        return errors
-
     @classmethod
     def errors_to_json(cls, errs: DSValidationResult) -> Dict[str, Any]:
         """Convert the validation result to a JSON-compatible dict.
@@ -269,6 +231,50 @@ class DSValidator:
             return of.getvalue()
         return None
 
+    def validate(
+        self, root_path: Union[Path, IDirectory], **kwargs
+    ) -> DSValidationResult:
+        """
+        Validate a directory and return all validation errors (unsatisfied rules).
+
+        If `root_path` is an instance of `IDirectory`, it will be used directly.
+
+        If `root_path` is a `Path`, this function will try to pick the correct interface
+        for interpreting "files" and "directories", depending on whether the provided file
+        is a directory or a supported kind of archive file with internal structure.
+
+        Depending on the used metadata convention, the companion metadata files matching
+        the convention will be filtered out from the set of validated paths.
+
+        Returns:
+            Error dict that is empty in case of success, or otherwise contains
+            for each path with validation errors another dict with the errors.
+        """
+        logger.debug(f"validate '{root_path}' ...")
+        if isinstance(root_path, Path):
+            root_path = get_adapter_for(root_path)
+        paths = [p for p in root_path.get_paths() if not self.meta_conv.is_meta(p)]
+        errors: Dict[str, Any] = {}
+        # run validation for each filepath, collect errors separately
+        for p in paths:
+            ctx = DSEvalCtx.fresh(
+                self.schema,
+                dirAdapter=root_path,
+                metaConvention=self.meta_conv,
+                filePath=p,
+                **kwargs,
+            )
+            logger.debug(f"validate_path '{p}' ...")
+            success = self.validate_path(p, self.schema, ctx)
+            logger.debug(f"validate_path '{p}' -> {success}")
+            if not success:
+                errors[p] = ctx.errors or {
+                    (): DSValidationError(
+                        path=p, err="Validation failed (no error log available)."
+                    )
+                }
+        return errors
+
     def validate_path(self, path: str, rule: DSRule, curCtx: DSEvalCtx) -> bool:
         """
         Apply given rule to path of file or directory under given evaluation context.
@@ -277,55 +283,68 @@ class DSValidator:
 
         Note that not all errors might be reported, as the sub-rules are evaluated in
         different stages and each stage aborts evaluation on failure (i.e. match/rewrite,
-        primitive rules, complex rules, `then` sub-rule)
+        primitive rules, complex logic rules, `next` sub-rule)
 
-        Returns True iff no errors were added to the context.
+        Returns True iff validation of this rule was successful.
         """
-        rl = rule.__root__  # used to check constraints
-        if isinstance(rl, bool):  # trivial rule
-            if not rule.__root__:
-                curCtx.add_error("Reached 'false' rule")
-            return False
+        logger.debug(f"validate_path '{path}', at rule location: {curCtx.location}")
 
-        # print("validate_rule", f"for '{path}' rule:\n", str(curCtx.location), repr(rl))
-        # print("match/rewrite")
+        # special case: trivial bool rule
+        if isinstance(rule.__root__, bool):
+            logger.debug(curCtx.location, "trivial rule")
+            if not rule.__root__:
+                curCtx.failed = True
+                curCtx.add_error("Reached unsatisfiable 'false' rule")
+            return not curCtx.failed
+
+        rl = rule.__root__  # unpack rule
+        assert isinstance(rl, Rule)
 
         # 1. match / rewrite
         # if rewrite is set, don't need do do separate match and just try rewriting
-        # match alone does not raise errors
+        # match/rewrite does not produce an error on its own, but can fail
+        # because "match failure" is usually not "validation failure"
         psl = PathSlice.into(path, curCtx.matchStart, curCtx.matchStop)
-        thenPath: str = path  # to be used for implication later on
+        nextPath: str = path  # to be used for implication later on
         if rl.match or rl.rewrite:
             # important! using the match pattern from the context (it could be inherited)
             rewritten = psl.rewrite(curCtx.matchPat, rl.rewrite)
             if rewritten is not None:
-                thenPath = rewritten.unslice()
+                nextPath = rewritten.unslice()
             else:  # failed match or rewrite
                 op = "rewrite" if rl.rewrite else "match"
                 pat = curCtx.matchPat or psl._def_pat
                 matchPat = f"match '{pat.pattern}'"
-                rewritePat = (
-                    f" and rewrite to '{str(rl.rewrite)}'" if rl.rewrite else ""
-                )
-                curCtx.add_error(f"Failed to {matchPat}{rewritePat}", op)
+                rwPat = f" and rewrite to '{str(rl.rewrite)}'" if rl.rewrite else ""
+
+                if rl.description:  # add custom error without expanding groups
+                    curCtx.add_error(rl.description, op)
+                else:
+                    curCtx.add_error(f"Failed to {matchPat}{rwPat}", op)
+                curCtx.failed = True
                 return False
 
-        # print("primitive")
-
         # 2. proceed with the other primitive constraints
-        primitiveErrors = False
+
+        def add_error(*args):
+            """If desc is set, add desc error once and else add passed error."""
+            if rl.description is None:
+                curCtx.add_error(*args)
+            elif rl.description != "" and not curCtx.failed:
+                # add error with expanded groups for better error messages
+                curCtx.add_error(psl.match(curCtx.matchPat).expand(rl.description))
+            curCtx.failed = True
 
         # take care of type constraint
         is_file = curCtx.dirAdapter.is_file(path)
         is_dir = curCtx.dirAdapter.is_dir(path)
         if rl.type is not None and not rl.type.is_satisfied(is_file, is_dir):
-            primitiveErrors = True
             msg = f"Entity does not have expected type: '{rl.type.value}'"
             if rl.type == TypeEnum.ANY:
                 msg = "Entity must exist (type: true)"
             elif rl.type == TypeEnum.MISSING:
                 msg = "Entity must not exist (type: false)"
-            curCtx.add_error(msg, "type")
+            add_error(msg, "type", None)
 
         # take care of metadata JSON Schema validation constraint
         for key in ("valid", "validMeta"):
@@ -334,8 +353,7 @@ class DSValidator:
 
             if not is_file and not is_dir:
                 # original path does not exist -> cannot proceed
-                primitiveErrors = True
-                curCtx.add_error(f"Path '{path}' does not exist", key)
+                add_error(f"Path '{path}' does not exist", key, None)
                 continue
 
             # use metadata convention for validMeta
@@ -347,25 +365,41 @@ class DSValidator:
             dat = curCtx.dirAdapter.load_meta(metapath)
             if dat is None:
                 # failed loading metadata file -> cannot proceed
-                primitiveErrors = True
-                curCtx.add_error(
-                    f"File '{metapath}' could not be loaded", key, metapath
-                )
+                add_error(f"File '{metapath}' could not be loaded", key, metapath)
                 continue
 
             # apply validation (JSON Schema or custom plugin)
             schema = rl.__dict__[key]
             valErrs = validate_metadata(dat, schema, self.local_basedir)
             if valErrs:
-                primitiveErrors = True
-                curCtx.add_error(valErrs, key, metapath)
+                add_error(valErrs, key, metapath)
 
-        if primitiveErrors:
+        if curCtx.failed:
             return False  # stop validation if primitive checks failed
 
-        # print("complex")
-
         # 3. check the complex constraints
+
+        # if-then-else
+        if rl.if_ is not None:
+            ifCtx = curCtx.descend(rl.if_, path, "if")
+            if self.validate_path(path, rl.if_, ifCtx):
+                if rl.then is not None:
+                    thenCtx = curCtx.descend(rl.then, path, "then")
+                    if not self.validate_path(path, rl.then, thenCtx):
+                        curCtx.failed = True
+                        # add_error("'if' rule satisfied, but 'then' rule violated", "then")
+                        if rl.details:
+                            curCtx.add_errors(thenCtx.errors)
+            else:
+                if rl.else_ is not None:
+                    elseCtx = curCtx.descend(rl.else_, path, "else")
+                    if not self.validate_path(path, rl.else_, elseCtx):
+                        curCtx.failed = True
+                        # add_error("'if' rule violated and also 'else' rule violated", "else")
+                        if rl.details:
+                            curCtx.add_errors(elseCtx.errors)
+
+        # logical operators
         for op in ("allOf", "anyOf", "oneOf"):
             val = rl.__dict__[op]
             opCtx = curCtx.descend(rule, None, op)
@@ -374,42 +408,51 @@ class DSValidator:
             if num_rules == 0:
                 continue  # empty list of rules -> nothing to do
 
+            num_fails = 0
             suberrs: List[DSValidationErrors] = []
             for idx, r in enumerate(val):
                 subCtx = opCtx.descend(r, None, idx)
-                self.validate_path(path, r, subCtx)
-                if not subCtx.errors and op == "anyOf":
+                success = self.validate_path(path, r, subCtx)
+                if success and op == "anyOf":
                     suberrs = []  # don't care about the errors on success
                     break  # we have a satisfied rule -> enough
-                elif subCtx.errors:
-                    suberrs.append(subCtx.errors)
+                elif not success:
+                    num_fails += 1
+                    if subCtx.errors:
+                        suberrs.append(subCtx.errors)
 
-            num_fails = len(suberrs)
+            num_sat = num_rules - num_fails
+            err_msg = ""
             if op == "allOf" and num_fails > 0:
-                curCtx.add_error("All sub-rules must be satisfied", op)
-                curCtx.add_errors(*suberrs)
-                return False
+                err_msg = "All"
             elif op == "oneOf" and num_fails != num_rules - 1:
-                curCtx.add_error("Exactly one sub-rule must be satisfied", op)
-                curCtx.add_errors(*suberrs)
-                return False
+                err_msg = "Exactly 1"
             elif op == "anyOf" and num_fails == num_rules:
-                curCtx.add_error("At least one sub-rule must be satisfied", op)
-                curCtx.add_errors(*suberrs)
-                return False
+                err_msg = "At least 1"
+            if err_msg:
+                err_msg += f" of {num_rules} sub-rules must be satisfied "
+                err_msg += f"(satisfied: {num_sat})"
+                add_error(err_msg, op, None)
+                if rl.details:
+                    curCtx.add_errors(*suberrs)
 
         if rl.not_ is not None:
             notCtx = curCtx.descend(rl.not_, path, "not")
             if self.validate_path(path, rl.not_, notCtx):
-                curCtx.add_error("Sub-rule satisfied, but should have failed", "not")
+                add_error(
+                    "Negated sub-rule satisfied, but should have failed", "not", None
+                )
+
+        if curCtx.failed:
+            return False  # stop validation here if logical expressions failed
+
+        # 4. perform "next" rule, on possibly rewritten path
+        if rl.next is not None:
+            nextCtx = curCtx.descend(rl.next, nextPath, "next")
+            if not self.validate_path(nextPath, rl.next, nextCtx):
+                if rl.details:
+                    curCtx.add_errors(nextCtx.errors)
                 return False
 
-        # 4. perform implication / "then" constraint, on possibly rewritten path
-        if rl.then is not None:
-            # print("then")
-            thenCtx = curCtx.descend(rl.then, thenPath, "then")
-            if not self.validate_path(thenPath, rl.then, thenCtx):
-                curCtx.add_errors(thenCtx.errors)
-                return False
-
+        assert curCtx.failed == False
         return True
