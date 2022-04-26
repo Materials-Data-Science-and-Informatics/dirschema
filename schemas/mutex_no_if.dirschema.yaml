@@ -1,0 +1,36 @@
+matchStart: -1
+description: ""
+anyOf:
+- description: ""
+  not:
+    type: file
+- description: ""
+  allOf:
+    - description: ""
+      anyOf:
+      - not:
+          allOf: [{match: ".*\\.jpg"}, {not: {match: "[ab]_.*"}}]
+        description: ""
+      - match: ((.*).jpg)  # put match here to set it for sub-scope
+        next:
+          description:  # custom high-level error message
+            "For \\1 there must be either file a_\\1 or file b_\\1 (and not both)"
+          details: false  # do not clutter error reporting with the sub-errors
+          oneOf:
+          - rewrite: a_\2.jpg
+            next:
+              type: file
+          - rewrite: b_\2.jpg
+            next:
+              type: file
+    - description: ""
+      anyOf:
+      - not:
+          match: ".*\\.txt"
+        description: ""
+      - validMeta:
+          # embedded JSON Schema
+          properties:
+            author:
+              type: string
+          required: ["author"]

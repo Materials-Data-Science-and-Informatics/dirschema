@@ -176,17 +176,20 @@ The primitive rules are those which perform the actual desired validation on a p
 The logical connectives work in the same way as in JSON Schema and are used to
 build more complex rules from the primitive rules.
 
-* **Control flow**: `if`, `then`, `else`
+* **Syntactic sugar**: `if`, `then`, `else`
 
-Logically, the `if`/`then`/`else` construct is not necessary, because `if x then y else z`
-is equivalent to `(x and y) or (not x and z)`. The construct is provided for a different
-reason - the primitive rules and logical connectives all record validation errors, which
-in the end will be shown to some user and might be hard to interpret.
+Technically, `if`/`then`/`else` is redundant, as its complete behaviour can be
+replicated from logical connectives and suitable use of the `description` and `details`
+settings.
 
-The `if` rule will not leave any error trace regardless of satisfaction or violation, as
-its result is only used for deciding whether `then` or `else` is to be evaluated. Thus it
-is to be used in cases where a precondition needs to hold before some rule is evaluated,
-but failing to satisfy that condition should not clutter the validation error report.
+Practically, it is added as syntactic sugar for the often needed case where a "meta-level"
+implication such as "if precondition X is true, validate rule Y" is desired, but the user
+should not be bothered with errors concerning violations of "X" because this is not a
+real validation error.
+
+To have more human-readable schemas and better error reporting, the guideline is to use
+`if/then/else` for rule selection and "control flow", whereas the logical connectives are
+to be used for actual complex validation rules.
 
 * **Pattern matching**: `match`, `rewrite`, `next`
 
@@ -435,6 +438,30 @@ DirSchema
 DirSchema
 
 **Description:** If given, must be satisfied in case that the `if` rule is violated.
+
+### Error reporting
+
+#### description
+
+**Value:**
+string
+
+**Description:** If given, will override all other error messages from immediate
+child keys of this rule. To completely silence errors from this rule, set to empty string.
+
+If you want to have multiple custom error messages for keys in this rule (e.g. checking
+both `type` and `validMeta` with separate error messages), move these keys into `allOf`,
+and add individual `description` strings to the sub-rules inside `allOf`.
+
+#### details
+
+**Value:**
+boolean (true by default)
+
+**Description:**  If true, will preserve error messages reported from nested sub-rules
+e.g. from logical connectives etc. If false, will discard them. This can be used
+in combination with `description` to provide higher-level errors for logically complex
+rules where the default error report is not helpful.
 
 ## Modularity
 
