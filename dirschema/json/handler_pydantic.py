@@ -1,10 +1,10 @@
-"""Pydantic handler (must be placed here to avoid circular imports)."""
+"""Minimal handler for using Pydantic models."""
 
 from typing import Any, Dict, List, Optional, Type
 
 from pydantic import BaseModel, ValidationError
 
-from .handlers import ValidationHandler
+from .handler import ValidationHandler
 
 
 class PydanticHandler(ValidationHandler):
@@ -23,7 +23,7 @@ class PydanticHandler(ValidationHandler):
     MODELS: Dict[str, Type[BaseModel]] = {}
 
     @classmethod
-    def validate(cls, metadata: Any, args: str) -> Dict[str, List[str]]:
+    def validate_json(cls, metadata: Any, args: str) -> Dict[str, List[str]]:
         model: Optional[Type[BaseModel]] = cls.MODELS.get(args)
         if model is None:
             raise ValueError(f"Unknown pydantic model: '{args}'")

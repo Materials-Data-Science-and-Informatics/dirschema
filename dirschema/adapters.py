@@ -6,7 +6,7 @@ import json
 import zipfile as zip
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Iterable, Optional
+from typing import IO, Any, Iterable, Optional
 
 import ruamel.yaml.parser as yaml_parser
 
@@ -52,10 +52,6 @@ class IDirectory(ABC):
         """Return paths relative to give base directory that are to be checked."""
 
     @abstractmethod
-    def load_meta(self, path: str) -> Optional[Any]:
-        """Try loading metadata file at given path (to perform validation on it)."""
-
-    @abstractmethod
     def is_dir(self, path: str) -> bool:
         """Return whether the path is (like) a directory."""
 
@@ -63,78 +59,84 @@ class IDirectory(ABC):
     def is_file(self, path: str) -> bool:
         """Return whether the path is (like) a file."""
 
+    @abstractmethod
+    def open_file(self, path: str) -> Optional[IO[bytes]]:
+        """Try loading data from file at given path (to perform validation on it)."""
+
+    def decode_json(self, data: IO[bytes], path: str) -> Optional[Any]:
+        """Try parsing binary data stream as JSON (to perform validation on it).
+
+        Second argument is the path of the opened stream.
+
+        Default implementation will first try parsing as JSON, then as YAML.
+        """
+        try:
+            return json.load(data)
+        except json.JSONDecodeError:
+            try:
+                return yaml.load(data)
+            except yaml_parser.ParserError:
+                return None
+
+    def load_meta(self, path: str) -> Optional[Any]:
+        """Use open_file and decode_json to load JSON metadata."""
+        f = self.open_file(path)
+        return self.decode_json(f, path) if f is not None else None
+
 
 class RealDir(IDirectory):
     """Pass-through implementation for working with actual file system."""
 
-    def get_paths(self) -> Iterable[str]:  # noqa: D102
+    def get_paths(self) -> Iterable[str]:
         paths = filter(lambda p: not p.is_symlink(), sorted(self.base.rglob("*")))
         return itertools.chain(
             [""], map(lambda p: str(p.relative_to(self.base)), paths)
         )
 
-    def load_meta(self, path: str):  # noqa: D102
+    def open_file(self, path: str) -> Optional[IO[bytes]]:
         try:
-            with open(self.base / path, "r") as f:
-                if path.endswith(".json"):
-                    return json.load(f)
-                elif path.endswith((".yaml")):
-                    return yaml.load(f)
-        except (
-            FileNotFoundError,
-            IsADirectoryError,
-            json.JSONDecodeError,
-            yaml_parser.ParserError,
-        ):
+            return open(self.base / path, "rb")
+        except (FileNotFoundError, IsADirectoryError):
             return None
 
-    def is_dir(self, dir: str) -> bool:  # noqa: D102
+    def is_dir(self, dir: str) -> bool:
         return (self.base / dir).is_dir()
 
-    def is_file(self, dir: str) -> bool:  # noqa: D102
+    def is_file(self, dir: str) -> bool:
         return (self.base / dir).is_file()
 
 
 class ZipDir(IDirectory):
     """Adapter for working with zip files (otherwise equivalent to `RealDir`)."""
 
-    def __init__(self, dir: Path, opened_file: zip.ZipFile) -> None:  # noqa: D107
+    def __init__(self, dir: Path, opened_file: zip.ZipFile):
         super().__init__(dir)
         self.file = opened_file
         self.names = set(self.file.namelist())
         self.names.add("/")
 
     @classmethod
-    def for_path(cls, dir: Path):  # noqa: D102
+    def for_path(cls, dir: Path):
         opened = zip.ZipFile(dir, "r")  # auto-closed on GC, no need to do anything
         return cls(dir, opened)
 
-    def get_paths(self) -> Iterable[str]:  # noqa: D102
+    def get_paths(self) -> Iterable[str]:
         return itertools.chain(map(lambda s: s.rstrip("/"), sorted(self.names)))
 
-    def load_meta(self, path: str):  # noqa: D102
+    def open_file(self, path: str) -> Optional[IO[bytes]]:
         try:
-            dat = self.file.read(path).decode("utf-8")
-            if path.endswith(".json"):
-                return json.loads(dat)
-            elif path.endswith((".yaml")):
-                return yaml.load(io.StringIO(dat))
-        except (
-            KeyError,
-            IsADirectoryError,
-            json.JSONDecodeError,
-            yaml_parser.ParserError,
-        ):
+            return self.file.open(path)
+        except (KeyError, IsADirectoryError):
             return None
 
     # as is_dir and is_file of zip.Path appear to work purely syntactically,
     # they're useless for us. We rather just lookup in the list of paths we need anyway
 
-    def is_dir(self, dir: str) -> bool:  # noqa: D102
+    def is_dir(self, dir: str) -> bool:
         cand_name: str = dir.rstrip("/") + "/"
         return cand_name in self.names
 
-    def is_file(self, dir: str) -> bool:  # noqa: D102
+    def is_file(self, dir: str) -> bool:
         cand_name: str = dir.rstrip("/")
         return cand_name in self.names
 
@@ -165,7 +167,7 @@ class H5Dir(IDirectory):
     JSON_SUF = ".json"
     """Suffix used in leaf nodes to distinguish strings from JSON-serialized data."""
 
-    def __init__(self, dir: Path, opened_file) -> None:  # noqa: D107
+    def __init__(self, dir: Path, opened_file) -> None:
         super().__init__(dir)
         self.file = opened_file
 
@@ -175,7 +177,7 @@ class H5Dir(IDirectory):
         opened = h5py.File(dir, "r")  # auto-closed on GC, no need to do anything
         return cls(dir, opened)
 
-    def get_paths(self) -> Iterable[str]:  # noqa: D102
+    def get_paths(self) -> Iterable[str]:
         ret = [""]
         for atr in self.file["/"].attrs.keys():
             ret.append(f"{self.ATTR_SEP}{atr}")
@@ -190,7 +192,7 @@ class H5Dir(IDirectory):
         self.file.visit(collect)
         return ret
 
-    def is_dir(self, path: str) -> bool:  # noqa: D102
+    def is_dir(self, path: str) -> bool:
         if path == "":
             return True  # root directory
         if path.find(self.ATTR_SEP) >= 0 or path not in self.file:
@@ -199,7 +201,7 @@ class H5Dir(IDirectory):
             return True  # is a group
         return False  # something that exists, but is not a group
 
-    def is_file(self, path: str) -> bool:  # noqa: D102
+    def is_file(self, path: str) -> bool:
         # attributes (treated like special files) exist if underlying group/dataset exists
         if path.find(self.ATTR_SEP) >= 0:
             p = path.split(self.ATTR_SEP)
@@ -209,23 +211,34 @@ class H5Dir(IDirectory):
             # otherwise check it is a dataset (= "file")
             return path in self.file and isinstance(self.file[path], h5py.Dataset)
 
-    def load_meta(self, path: str):  # noqa: D102
+    def decode_json(self, data: IO[bytes], path: str) -> Optional[Any]:
+        bs = data.read()
+        try:
+            ret = json.loads(bs)
+        except json.JSONDecodeError:
+            return None
+
+        if isinstance(ret, dict) and not path.endswith(self.JSON_SUF):
+            return bs
+        else:
+            return ret
+
+    def open_file(self, path: str) -> Optional[IO[bytes]]:
         p = path
         if p.find(self.ATTR_SEP) >= 0:
-            # try treating as attribute. attributes are interpreted when possible
+            # try treating as attribute, return data if it is a string
             f, s = p.split(self.ATTR_SEP)
             f = f or "/"
             if f in self.file and s in self.file[f].attrs:
                 dat = self.file[f].attrs[s]
-                if isinstance(dat, str):
-                    if s.endswith(self.JSON_SUF):
-                        return json.loads(dat)
-                    else:
-                        return dat
-                elif isinstance(dat, h5py.Empty):
+                if isinstance(dat, h5py.Empty):
                     return None
+                if isinstance(dat, str):
+                    if not path.endswith(self.JSON_SUF):
+                        dat = f'"{dat}"'  # JSON-encoded string
                 else:
-                    return dat.tolist()
+                    dat = json.dumps(dat.tolist())
+                return io.BytesIO(dat.encode("utf-8"))
             else:
                 return None
 
@@ -243,14 +256,10 @@ class H5Dir(IDirectory):
 
         # the only kinds of datasets we accept are essentially utf-8 strings
         # which are represented as possibly wrapped bytes
-
         if isinstance(bs, numpy.void):  # void-wrapped bytes -> unpack
             bs = bs.tobytes()
 
-        try:  # decode string from bytes
-            return json.loads(bs.decode("utf-8"))
-        except (UnicodeDecodeError, json.JSONDecodeError):  # failed parsing it
-            return None
+        return io.BytesIO(bs)
 
 
 def get_adapter_for(path: Path) -> IDirectory:

@@ -1,7 +1,7 @@
 """Helper functions to perform validation of JSON-compatible metadata files."""
 
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Type, Union
+from typing import Dict, List, Optional, Type, Union
 
 from jsonschema import Draft202012Validator
 
@@ -13,7 +13,7 @@ JSONValidationErrors = Dict[str, List[str]]
 """JSON metadata validation errors mapping from JSON Pointers to lists of error messages."""
 
 
-def parse_plugin_uri(custom_uri: str) -> Tuple[Type[ValidationHandler], str]:
+def plugin_from_uri(custom_uri: str) -> ValidationHandler:
     """Parse a validation plugin pseudo-URI, return the plugin class and args string."""
     try:
         if not custom_uri.startswith("v#"):
@@ -26,19 +26,22 @@ def parse_plugin_uri(custom_uri: str) -> Tuple[Type[ValidationHandler], str]:
 
     try:
         h: Type[ValidationHandler] = loaded_handlers[ep]
-        return (h, args)
+        return h(args)
     except KeyError:
         raise ValueError(f"Validator entry-point not found: '{ep}'")
 
 
 def validate_custom(dat, plugin_str: str) -> JSONValidationErrors:
     """Perform validation based on a validation handler string."""
-    h, args = parse_plugin_uri(plugin_str)
-    return h.validate(dat, args)
+    h = plugin_from_uri(plugin_str)
+    if h._for_json:
+        return h.validate_json(dat, h.args)
+    else:
+        return h.validate_raw(dat, h.args)
 
 
-def validate_jsonschema(dat, schema) -> JSONValidationErrors:
-    """Perform validation based on a JSON Schema."""
+def validate_jsonschema(dat, schema: Union[bool, Dict]) -> JSONValidationErrors:
+    """Perform validation of a dict based on a JSON Schema."""
     v = Draft202012Validator(schema=schema)  # type: ignore
     errs: Dict[str, List[str]] = {}
     for verr in sorted(v.iter_errors(dat), key=lambda e: e.path):  # type: ignore
@@ -49,13 +52,33 @@ def validate_jsonschema(dat, schema) -> JSONValidationErrors:
     return errs
 
 
+def resolve_validator(
+    schema_or_ref: Union[bool, str, Dict],
+    *,
+    local_basedir: Optional[Path] = None,
+    relative_prefix: str = "",
+) -> Union[bool, Dict, ValidationHandler]:
+    if isinstance(schema_or_ref, bool) or isinstance(schema_or_ref, dict):
+        # embedded schema
+        return schema_or_ref
+
+    if not schema_or_ref.startswith("v#"):
+        # load schema from URI
+        uri = to_uri(schema_or_ref, local_basedir, relative_prefix)
+        return load_json(uri, local_basedir=local_basedir)
+
+    # custom validation, not json schema
+    return plugin_from_uri(schema_or_ref)
+
+
 def validate_metadata(
     dat,
-    schema: Union[str, Dict],
+    schema: Union[bool, str, Dict, ValidationHandler],
+    *,
     local_basedir: Optional[Path] = None,
     relative_prefix: str = "",
 ) -> JSONValidationErrors:
-    """Validate metadata object (loaded dict) using JSON Schema or custom validator.
+    """Validate object (dict or byte stream) using JSON Schema or custom validator.
 
     The validator must be either a JSON Schema dict, or a string
     pointing to a JSON Schema, or a custom validator handler string.
@@ -63,16 +86,14 @@ def validate_metadata(
     Returns a dict mapping from JSON Pointers to a list of errors in that location.
     If the dict is empty, no validation errors were detected.
     """
-    is_jsonschema = True
     if isinstance(schema, str):
-        if schema.startswith("v#"):
-            is_jsonschema = False  # custom validation, not json schema!
-        else:  # load schema from URI
-            uri = to_uri(schema, local_basedir, relative_prefix)
-            schema = load_json(uri, local_basedir=local_basedir)
-    if is_jsonschema:
-        assert isinstance(schema, bool) or isinstance(schema, dict)
-        return validate_jsonschema(dat, schema)
+        val = resolve_validator(
+            schema, local_basedir=local_basedir, relative_prefix=relative_prefix
+        )
     else:
-        assert isinstance(schema, str)
-        return validate_custom(dat, schema)
+        val = schema
+
+    if isinstance(val, ValidationHandler):
+        return val.validate(dat)
+    else:
+        return validate_jsonschema(dat, val)

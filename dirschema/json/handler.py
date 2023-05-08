@@ -1,25 +1,46 @@
 """Interface for custom validation handlers."""
 
-from abc import ABC, abstractmethod
-from typing import Any, Dict, List
+from abc import ABC
+from typing import IO, Any, Dict, List
 
 
 class ValidationHandler(ABC):
     """
     Interface for custom validators that can be registered via entrypoints.
 
+    Only one of validate or validate_json may be implemented.
+
     These can be used instead of JSON Schemas inside a dirschema like this:
 
     `validMeta: "v#ENTRYPOINT://any args for validator, e.g. schema name"`
     """
 
+    def __init__(self, args: str):
+        """Store passed arguments in instance."""
+        self.args = args
+
+    @property
+    def _for_json(self) -> bool:
+        """Return whether this handler is for JSON (i.e. overrides validate_json)."""
+        return type(self).validate_json != ValidationHandler.validate_json  # type: ignore
+
+    def validate(self, data) -> Dict[str, List[str]]:
+        if self._for_json:
+            return self.validate_json(data, self.args)
+        else:
+            return self.validate_raw(data, self.args)
+
+    # ----
+
     @classmethod
-    @abstractmethod
-    def validate(cls, metadata: Any, args: str) -> Dict[str, List[str]]:
-        """Perform custom validation on passed JSON dict.
+    def validate_raw(cls, data: IO[bytes], args: str) -> Dict[str, List[str]]:
+        """Perform custom validation on passed raw binary stream.
+
+        This can be used to implement validators for files that are not JSON
+        or not parsable as JSON by the adapter used in combination with the handler.
 
         Args:
-            metadata: Valid JSON dict loaded by a dirschema adapter.
+            data: Binary data stream
             args: String following the entry-point prefix, i.e.
                 when used as `v#ENTRYPOINT://a` the `args` value will be "a".
 
@@ -29,4 +50,21 @@ class ValidationHandler(ABC):
 
             If there are no errors, an empty dict is returned.
         """
-        raise NotImplementedError  # pragma: no cover
+        raise NotImplementedError
+
+    @classmethod
+    def validate_json(cls, data: Any, args: str) -> Dict[str, List[str]]:
+        """Perform custom validation on passed JSON dict.
+
+        Args:
+            data: Valid JSON dict loaded by a dirschema adapter.
+            args: String following the entry-point prefix, i.e.
+                when used as `v#ENTRYPOINT://a` the `args` value will be "a".
+
+        Returns:
+            The output is a dict mapping from paths (JSON Pointers) inside the
+            object to respective collected error messages.
+
+            If there are no errors, an empty dict is returned.
+        """
+        raise NotImplementedError

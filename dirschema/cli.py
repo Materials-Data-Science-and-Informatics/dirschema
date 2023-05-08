@@ -40,6 +40,7 @@ def_meta_conv = MetaConvention().to_tuple()
 
 
 def check_rel_prefix(prefix: str):
+    """Validate prefix argument."""
     valid_protocols = ["http://", "https://", "file://", "cwd://", "local://"]
     valid_protocols += [f"v#{name}://" for name in loaded_handlers.keys()]
 
@@ -109,7 +110,3 @@ def run_dirschema(
         dsv.format_errors(errors, sys.stdout)
         raise typer.Exit(code=1)
     logger.debug(f"Validation of '{dir}' successful")
-
-
-if __name__ == "__main__":
-    app()

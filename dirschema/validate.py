@@ -14,7 +14,12 @@ from ruamel.yaml import YAML
 from .adapters import IDirectory, get_adapter_for
 from .core import DSRule, MetaConvention, PathSlice, Rule, TypeEnum
 from .json.parse import load_json, to_uri
-from .json.validate import JSONValidationErrors, validate_metadata
+from .json.validate import (
+    JSONValidationErrors,
+    ValidationHandler,
+    resolve_validator,
+    validate_metadata,
+)
 from .log import logger
 
 yaml = YAML(typ="safe")
@@ -175,9 +180,7 @@ class DSValidator:
 
         # if the passed relative prefix is a custom plugin, we cannot use this
         # for $ref resolving, so we will ignore it in the Json/Yaml loader
-        is_plugin_prefix = (
-            0 == self.relative_prefix.find("v#") < self.relative_prefix.find("://")
-        )
+        is_plugin_prefix = relative_prefix.find("v#") < relative_prefix.find("://") == 0
 
         # take care of the passed schema based on its type
         if isinstance(schema, bool) or isinstance(schema, Rule):
@@ -352,7 +355,6 @@ class DSValidator:
                 continue
 
             if not is_file and not is_dir:
-                # original path does not exist -> cannot proceed
                 add_error(f"Path '{path}' does not exist", key, None)
                 continue
 
@@ -361,16 +363,32 @@ class DSValidator:
             if key == "validMeta":
                 metapath = curCtx.metaConvention.meta_for(path, is_dir=is_dir)
 
-            # try loading the metadata
-            dat = curCtx.dirAdapter.load_meta(metapath)
+            # load metadata file
+            dat = curCtx.dirAdapter.open_file(metapath)
             if dat is None:
-                # failed loading metadata file -> cannot proceed
                 add_error(f"File '{metapath}' could not be loaded", key, metapath)
                 continue
 
-            # apply validation (JSON Schema or custom plugin)
-            schema = rl.__dict__[key]
-            valErrs = validate_metadata(dat, schema, self.local_basedir)
+            # prepare correct validation method (JSON Schema or custom plugin)
+            schema_or_plugin = resolve_validator(
+                rl.__dict__[key],
+                local_basedir=self.local_basedir,
+                relative_prefix=self.relative_prefix,
+            )
+
+            # check whether loaded metadata file should be parsed as JSON
+            parse_json = (
+                not isinstance(schema_or_plugin, ValidationHandler)
+                or not schema_or_plugin._for_json
+            )
+            if parse_json:
+                # not a handler plugin for raw data -> load as JSON
+                dat = curCtx.dirAdapter.decode_json(dat, metapath)
+                if dat is None:
+                    add_error(f"File '{metapath}' could not be parsed", key, metapath)
+                    continue
+
+            valErrs = validate_metadata(dat, schema_or_plugin)
             if valErrs:
                 add_error(valErrs, key, metapath)
 
