@@ -195,7 +195,7 @@ name = "h5py"
 version = "3.8.0"
 description = "Read and write HDF5 files from Python"
 category = "main"
-optional = true
+optional = false
 python-versions = ">=3.7"
 
 [package.dependencies]
@@ -481,18 +481,6 @@ Markdown = ">=3.3"
 mkdocs = ">=1.1"
 
 [[package]]
-name = "mkdocs-click"
-version = "0.8.0"
-description = "An MkDocs extension to generate documentation for Click command line applications"
-category = "dev"
-optional = false
-python-versions = ">=3.7"
-
-[package.dependencies]
-click = ">=8.1,<9.0"
-markdown = ">=3.0.0,<4.0.0"
-
-[[package]]
 name = "mkdocs-coverage"
 version = "0.2.7"
 description = "MkDocs plugin to integrate your coverage HTML report into your site."
@@ -582,18 +570,6 @@ python-versions = ">=3.7"
 mkdocs = ">=1.0.3"
 
 [[package]]
-name = "mkdocs-typer"
-version = "0.0.2"
-description = "An MkDocs extension to generate documentation for Typer command line applications"
-category = "dev"
-optional = false
-python-versions = ">=3.7"
-
-[package.dependencies]
-markdown = ">=3.0.0,<4.0.0"
-typer = "<1.0.0"
-
-[[package]]
 name = "mkdocstrings"
 version = "0.21.2"
 description = "Automatic documentation from sources, for MkDocs."
@@ -652,7 +628,7 @@ name = "numpy"
 version = "1.24.3"
 description = "Fundamental package for array computing in Python"
 category = "main"
-optional = true
+optional = false
 python-versions = ">=3.8"
 
 [[package]]
@@ -1118,7 +1094,7 @@ h5 = ["h5py", "numpy"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8,<3.11"
-content-hash = "ee34b88939dfff6cd5659ed66726d265a24f59ef4dd1c8e87708834781e40430"
+content-hash = "f8a352eb3ed7dbf4b86ce8d16e3e06f37225df198669bc27cf07e3850e00f794"
 
 [metadata.files]
 anybadge = [
@@ -1485,10 +1461,6 @@ mkdocs-autorefs = [
     {file = "mkdocs-autorefs-0.4.1.tar.gz", hash = "sha256:70748a7bd025f9ecd6d6feeba8ba63f8e891a1af55f48e366d6d6e78493aba84"},
     {file = "mkdocs_autorefs-0.4.1-py3-none-any.whl", hash = "sha256:a2248a9501b29dc0cc8ba4c09f4f47ff121945f6ce33d760f145d6f89d313f5b"},
 ]
-mkdocs-click = [
-    {file = "mkdocs_click-0.8.0-py3-none-any.whl", hash = "sha256:f9c26d4abd505bca4113d1529d03d1ae709a68a82fc364db289634788d029353"},
-    {file = "mkdocs_click-0.8.0.tar.gz", hash = "sha256:965f38231eb04d8c980406c5ab4becf7303ef3ffc68fdb29be91927eff1adfbe"},
-]
 mkdocs-coverage = [
     {file = "mkdocs_coverage-0.2.7-py3-none-any.whl", hash = "sha256:cfb11ab6c7d6c1e30495d0cbb78893937b0715387ea4862d269980300667b0e3"},
     {file = "mkdocs_coverage-0.2.7.tar.gz", hash = "sha256:3616b2508f0197158e684cdb1a08e558c14d435ea3b79e34f71b2f024f6e022b"},
@@ -1516,10 +1488,6 @@ mkdocs-material-extensions = [
 mkdocs-section-index = [
     {file = "mkdocs_section_index-0.3.5-py3-none-any.whl", hash = "sha256:1f6359287b0a823d6297cf1cb6c0a49ed75851d0d1cea8b425b207a45ce10141"},
     {file = "mkdocs_section_index-0.3.5.tar.gz", hash = "sha256:fa8b1ce0649326b1873c6460c1df2bb0c4825fd21e3dd416f13ec212d31edf12"},
-]
-mkdocs-typer = [
-    {file = "mkdocs_typer-0.0.2-py3-none-any.whl", hash = "sha256:24d88407b458403db47a953621a31a29f37e781015925d929e783a4719203991"},
-    {file = "mkdocs_typer-0.0.2.tar.gz", hash = "sha256:150e1320a02cff86deea55a173da1d72728a9801742b2deba2926d1a33d36c07"},
 ]
 mkdocstrings = [
     {file = "mkdocstrings-0.21.2-py3-none-any.whl", hash = "sha256:949ef8da92df9d692ca07be50616459a6b536083a25520fd54b00e8814ce019b"},
