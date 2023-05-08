@@ -114,7 +114,6 @@ markdown_extensions:
   - pymdownx.emoji:
       emoji_index: !!python/name:materialx.emoji.twemoji
       emoji_generator: !!python/name:materialx.emoji.to_svg
-  - mkdocs-typer
 
 plugins:
   # default search box (must be listed if plugins are added)
