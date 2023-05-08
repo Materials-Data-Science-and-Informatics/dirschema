@@ -14,15 +14,15 @@
 ![PyPIPkgVersion](https://img.shields.io/pypi/v/dirschema)
 ](https://pypi.org/project/dirschema/)
 
+<!-- --8<-- [start:abstract] -->
+# dirschema
+
 <br />
 <div>
 <img style="center-align: middle;" alt="DirSchema Logo" src="https://user-images.githubusercontent.com/89833997/152970983-267fa89e-9928-4393-a1fa-2a8fe3c6b9ba.png" width=70% height=70% />
 &nbsp;&nbsp;
 </div>
 <br />
-
-<!-- --8<-- [start:abstract] -->
-# dirschema
 
 A directory structure and metadata linter based on JSON Schema.
 
