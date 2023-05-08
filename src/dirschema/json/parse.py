@@ -1,4 +1,4 @@
-"""Helper functions to allow using JSON and YAML interchangably and taking care of $refs."""
+"""Helper functions to allow using JSON and YAML interchangably + take care of $refs."""
 
 import io
 import json
@@ -15,8 +15,7 @@ yaml = YAML(typ="safe")
 def to_uri(
     path: str, local_basedir: Optional[Path] = None, relative_prefix: str = ""
 ) -> str:
-    """
-    Given a path or URI, normalize it to an absolute path.
+    """Given a path or URI, normalize it to an absolute path.
 
     If the path is relative and without protocol, it is prefixed with `relative_prefix`
     before attempting to resolve it (by default equal to prepending `cwd://`)
@@ -24,7 +23,7 @@ def to_uri(
     If path is already http(s):// or file://... path, do nothing to it.
     If the path is absolute (starts with a slash), just prepend file://
     If the path is cwd://, resolve based on CWD (even if starting with a slash)
-    If the path is local://, resolve based on `local_basedir` (if not given, CWD is used)
+    If the path is local://, resolve based on `local_basedir` (if missing, CWD is used)
 
     Result is either http(s):// or a file:// path that can be read with urlopen.
     """
@@ -68,7 +67,10 @@ class ExtJsonLoader(JsonLoader):
     * resolving relative paths
     """
 
-    def __init__(self, local_basedir: Optional[Path] = None, relative_prefix: str = ""):
+    def __init__(
+        self, *, local_basedir: Optional[Path] = None, relative_prefix: str = ""
+    ):
+        """Initialize loader with URI resolution arguments."""
         super().__init__()
         self.local_basedir = local_basedir
         self.rel_prefix = relative_prefix
@@ -79,7 +81,7 @@ class ExtJsonLoader(JsonLoader):
         try:
             return super().__call__(uri, **kwargs)
         except json.JSONDecodeError:
-            strval = urlopen(uri).read().decode("utf-8")
+            strval = urlopen(uri).read().decode("utf-8")  # nosec
             res = yaml.load(io.StringIO(strval, **kwargs))
             if self.cache_results:
                 self.store[uri] = res
@@ -97,17 +99,18 @@ def loads_json_or_yaml(dat: str):
 def init_loader(kwargs):
     """Initialize JSON/YAML loader from passed kwargs dict, removing its arguments."""
     return ExtJsonLoader(
-        kwargs.pop("local_basedir", None), kwargs.pop("relative_prefix", "")
+        local_basedir=kwargs.pop("local_basedir", None),
+        relative_prefix=kwargs.pop("relative_prefix", ""),
     )
 
 
 def loads_json(dat: str, **kwargs) -> Dict[str, Any]:
     """Load YAML/JSON from a string, resolving all refs, both local and remote."""
     ldr = init_loader(kwargs)
-    return JsonRef.replace_refs(loads_json_or_yaml(dat), loader=ldr, **kwargs)  # type: ignore
+    return JsonRef.replace_refs(loads_json_or_yaml(dat), loader=ldr, **kwargs)
 
 
 def load_json(uri: str, **kwargs) -> Dict[str, Any]:
     """Load YAML/JSON from file/network + resolve all refs, both local and remote."""
     ldr = init_loader(kwargs)
-    return JsonRef.replace_refs(ldr(str(uri)), loader=ldr, **kwargs)  # type: ignore
+    return JsonRef.replace_refs(ldr(str(uri)), loader=ldr, **kwargs)

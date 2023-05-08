@@ -122,8 +122,8 @@ def test_type_enum():
 def test_magic():
     """Test magic methods and convenience constructors."""
     # test the DSRule constructor (that dispatch to bool/rule works)
-    assert DSRule(True).__root__ == True
-    assert DSRule(False).__root__ == False
+    assert DSRule(True).__root__ == True  # noqa: E712
+    assert DSRule(False).__root__ == False  # noqa: E712
     assert DSRule(None).__root__ == Rule.construct()
     assert DSRule(type="file").__root__ == Rule.construct(type=TypeEnum.FILE)
     assert DSRule(

@@ -1,1 +1,1 @@
-"""Tests for package."""
+"""Tests for dirschema."""

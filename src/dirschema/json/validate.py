@@ -10,7 +10,7 @@ from .handlers import loaded_handlers
 from .parse import load_json, to_uri
 
 JSONValidationErrors = Dict[str, List[str]]
-"""JSON metadata validation errors mapping from JSON Pointers to lists of error messages."""
+"""JSON validation errors mapping from JSON Pointers to of error message lists."""
 
 
 def plugin_from_uri(custom_uri: str) -> ValidationHandler:
@@ -58,6 +58,12 @@ def resolve_validator(
     local_basedir: Optional[Path] = None,
     relative_prefix: str = "",
 ) -> Union[bool, Dict, ValidationHandler]:
+    """Resolve passed object into a schema or validator.
+
+    If passed object is already a schema, will return it.
+    If passed object is a string, will load the referenced schema
+    or instantiate the custom validator (a string starting with `v#`).
+    """
     if isinstance(schema_or_ref, bool) or isinstance(schema_or_ref, dict):
         # embedded schema
         return schema_or_ref

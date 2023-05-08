@@ -161,7 +161,7 @@ def test_zipdir(tmp_path):
 def test_hdf5dir(tmp_path):
     """Test adapter for HDF5 files."""
     base = prep_hdf5dir(tmp_path)
-    inst = H5Dir(base, h5py.File(base, "r"))
+    inst = H5Dir(h5py.File(base, "r"))
 
     paths = inst.get_paths()
     expected = [

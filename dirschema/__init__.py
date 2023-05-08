@@ -1,1 +1,0 @@
-"""Dirschema package."""

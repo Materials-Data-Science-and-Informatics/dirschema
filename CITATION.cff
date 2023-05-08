@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+type: software
+message: If you use this software, please cite it using this metadata.
+
+title: "dirschema"
+version: "0.1.0"
+abstract: "Spec and validator for directories, files and metadata based on JSON Schema and regexes."
+repository-code: "https://github.com/Materials-Data-Science-and-Informatics/dirschema"
+license: "MIT"
+keywords: [
+    "jsonschema",
+    "validation",
+    "directory",
+    "structure",
+    "fair",
+    "metadata"
+]
+
+authors:
+  - family-names: "Pirogov"
+    given-names: "Anton"
+    email: "a.pirogov@fz-juelich.de"
+    orcid: "https://orcid.org/0000-0002-5077-7497"
+    affiliation: "Forschungszentrum Jülich GmbH - Institute for Materials Data Science and Informatics (IAS9)"
+

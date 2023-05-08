@@ -18,11 +18,10 @@ yaml = YAML(typ="safe")
 
 
 class MetaConvention(BaseModel):
-    """
-    Filename convention for metadata files that are associated with other entities.
+    """Filename convention for metadata files that are associated with other entities.
 
-    It defines where to look for metadata for files that are not themselves known as json,
-    or metadata concerning directories.
+    It defines where to look for metadata for files that are not themselves known
+    as json, or metadata concerning directories.
 
     At the same time, these files are ignored by themselves and act as "sidecar" files.
     """
@@ -36,7 +35,8 @@ class MetaConvention(BaseModel):
     def check_valid(cls, values):
         """Check that at least one filename extension is non-empty."""
         file_pref_or_suf = values.get("filePrefix", "") or values.get("fileSuffix", "")
-        assert file_pref_or_suf, "At least one of filePrefix or fileSuffix must be set!"
+        if not file_pref_or_suf:
+            raise ValueError("At least one of filePrefix or fileSuffix must be set!")
         return values
 
     def to_tuple(self) -> Tuple[str, str, str, str]:
@@ -91,8 +91,7 @@ class MetaConvention(BaseModel):
 
 
 class PathSlice(BaseModel):
-    """
-    Helper class to slice into segments of a path, match a regex and perform substitutions.
+    """Helper class to slice into path segments and do regex-based match/substitution.
 
     Invariant: into(path, sl).unslice() == path for all sl and path.
     """
@@ -105,8 +104,7 @@ class PathSlice(BaseModel):
     def into(
         cls, path: str, start: Optional[int] = None, stop: Optional[int] = None
     ) -> PathSlice:
-        """
-        Slice into a path, splitting on the slashes.
+        """Slice into a path, splitting on the slashes.
 
         Slice semantics is mostly like Python, except that stop=0 means
         "until the end", so that [0:0] means the full path.
@@ -129,6 +127,7 @@ class PathSlice(BaseModel):
     """Default pattern (match anything, put into capture group)."""
 
     def match(self, pat: Optional[Union[re.Pattern, str]] = None):
+        """Do full regex match on current slice."""
         pat = pat or self._def_pat
         if isinstance(pat, str):
             pat = re.compile(pat)
@@ -137,8 +136,7 @@ class PathSlice(BaseModel):
     def rewrite(
         self, pat: Optional[Union[re.Pattern, str]] = None, sub: Optional[str] = None
     ) -> Optional[PathSlice]:
-        """
-        Match and rewrite in the slice string and return a new PathSlice.
+        """Match and rewrite in the slice string and return a new PathSlice.
 
         If no pattern given, default pattern is used.
         If no substitution is given, just match on pattern is performed.
@@ -158,20 +156,19 @@ class JSONSchema(BaseModel):
     """Helper class wrapping an arbitrary JSON Schema to be acceptable for pydantic."""
 
     @classmethod
-    def __get_validators__(cls):
+    def __get_validators__(cls):  # noqa: D105
         yield cls.validate
 
     @classmethod
-    def validate(cls, v):
+    def validate(cls, v):  # noqa: D102
         Draft202012Validator.check_schema(v)  # throws SchemaError if schema is invalid
         return v
 
 
 class TypeEnum(Enum):
-    """
-    Possible values for a path type inside a dirschema rule.
+    """Possible values for a path type inside a dirschema rule.
 
-    MISSING means that the path may not exist (i.e. neither file or directory),
+    MISSING means that the path must not exist (i.e. neither file or directory),
     whereas ANY means that any of these options is fine, as long as the path exists.
     """
 
@@ -181,6 +178,7 @@ class TypeEnum(Enum):
     ANY = True
 
     def is_satisfied(self, is_file: bool, is_dir: bool) -> bool:
+        """Check whether the flags of a path satisfy this path type."""
         if self == TypeEnum.MISSING and (is_file or is_dir):
             return False
         if self == TypeEnum.ANY and not (is_file or is_dir):
@@ -200,8 +198,7 @@ DEF_REWRITE: Final[str] = "\\1"
 
 
 class DSRule(BaseModel):
-    """
-    A DirSchema rule is either a trivial (boolean) rule, or a complex object.
+    """A DirSchema rule is either a trivial (boolean) rule, or a complex object.
 
     Use this class for parsing, if it is not known which of these it is.
     """
@@ -213,7 +210,8 @@ class DSRule(BaseModel):
         if b is not None:
             return super().__init__(__root__=b)
         elif "__root__" in kwargs:
-            assert len(kwargs) == 1, "No extra kwargs may be passed with __root__!"
+            if len(kwargs) != 1:
+                raise ValueError("No extra kwargs may be passed with __root__!")
             return super().__init__(**kwargs)
         else:
             return super().__init__(__root__=Rule(**kwargs))
@@ -231,7 +229,7 @@ class DSRule(BaseModel):
 
 
 class Rule(BaseModel):
-    """A DirSchema is a conjunction of at most one of each possible constraint/keyword."""
+    """A DirSchema is a conjunction of a subset of distinct constraints/keywords."""
 
     # primitive:
     type: Optional[TypeEnum] = Field(
@@ -304,7 +302,7 @@ class Rule(BaseModel):
     # if set to "", will report no error message for this rule
     description: Optional[str] = Field(
         None,
-        description="Custom error message to be displayed to the user if this rule fails.",
+        description="Custom error message to be shown to the user if this rule fails.",
     )
     # used to prune noisy error message accumulation to some high level summary
     details: bool = Field(
@@ -326,7 +324,7 @@ class Rule(BaseModel):
         yaml.dump(res, stream)
         return ""
 
-    class Config:
+    class Config:  # noqa: D106
         extra = Extra.forbid
 
 

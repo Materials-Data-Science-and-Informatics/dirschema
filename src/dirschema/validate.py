@@ -32,8 +32,7 @@ def loc_to_jsonpointer(lst) -> str:
 
 
 def json_dict(model, **kwargs):
-    """
-    Given a Pydantic model, convert it to a raw JSON compatible dict.
+    """Given a Pydantic model, convert it to a raw JSON compatible dict.
 
     This uses a round-trip via JSON-serialization and deserialization to get rid
     of non-JSON entities (the `BaseModel.dict()` method yields possibly non-JSON dicts).
@@ -65,13 +64,12 @@ corresponding validation errors for all entities where validation failed.
 
 
 class DSEvalCtx(BaseModel):
-    """
-    DirSchema evaluation context, used like a Reader Monad.
+    """DirSchema evaluation context, used like a Reader Monad.
 
     Contains information that is required to evaluate a rule for a path.
     """
 
-    class Config:
+    class Config:  # noqa: D106
         arbitrary_types_allowed = True
 
     dirAdapter: IDirectory
@@ -169,8 +167,7 @@ class DSValidator:
         local_basedir: Optional[Path] = None,
         relative_prefix: str = "",
     ) -> None:
-        """
-        Construct validator instance from given schema or schema location.
+        """Construct validator instance from given schema or schema location.
 
         Accepts DSRule, raw bool or Rule, or a str/Path that is interpreted as location.
         """
@@ -223,8 +220,7 @@ class DSValidator:
 
     @classmethod
     def format_errors(cls, errs: DSValidationResult, stream=None) -> Optional[str]:
-        """
-        Report errors as YAML output.
+        """Report errors as YAML output.
 
         If a stream is provided, prints it out. Otherwise, returns it as string.
         """
@@ -237,17 +233,18 @@ class DSValidator:
     def validate(
         self, root_path: Union[Path, IDirectory], **kwargs
     ) -> DSValidationResult:
-        """
-        Validate a directory and return all validation errors (unsatisfied rules).
+        """Validate a directory, return all validation errors (unsatisfied rules).
 
         If `root_path` is an instance of `IDirectory`, it will be used directly.
 
-        If `root_path` is a `Path`, this function will try to pick the correct interface
-        for interpreting "files" and "directories", depending on whether the provided file
-        is a directory or a supported kind of archive file with internal structure.
+        If `root_path` is a `Path`, this function will try to pick the correct
+        interface for interpreting "files" and "directories", depending on
+        whether the provided file is a directory or a supported kind of archive
+        file with internal structure.
 
-        Depending on the used metadata convention, the companion metadata files matching
-        the convention will be filtered out from the set of validated paths.
+        Depending on the used metadata convention, the companion metadata files
+        matching the convention will be filtered out from the set of validated
+        paths.
 
         Returns:
             Error dict that is empty in case of success, or otherwise contains
@@ -279,14 +276,14 @@ class DSValidator:
         return errors
 
     def validate_path(self, path: str, rule: DSRule, curCtx: DSEvalCtx) -> bool:
-        """
-        Apply given rule to path of file or directory under given evaluation context.
+        """Apply rule to path of file/directory under given evaluation context.
 
         Will collect errors in the context object.
 
-        Note that not all errors might be reported, as the sub-rules are evaluated in
-        different stages and each stage aborts evaluation on failure (i.e. match/rewrite,
-        primitive rules, complex logic rules, `next` sub-rule)
+        Note that not all errors might be reported, as the sub-rules are
+        evaluated in different stages and each stage aborts evaluation on
+        failure (i.e. match/rewrite, primitive rules, complex logic rules,
+        `next` sub-rule)
 
         Returns True iff validation of this rule was successful.
         """
@@ -301,16 +298,16 @@ class DSValidator:
             return not curCtx.failed
 
         rl = rule.__root__  # unpack rule
-        assert isinstance(rl, Rule)
+        # assert isinstance(rl, Rule)
 
         # 1. match / rewrite
-        # if rewrite is set, don't need do do separate match and just try rewriting
+        # if rewrite is set, don't need to do separate match,just try rewriting
         # match/rewrite does not produce an error on its own, but can fail
         # because "match failure" is usually not "validation failure"
         psl = PathSlice.into(path, curCtx.matchStart, curCtx.matchStop)
         nextPath: str = path  # to be used for implication later on
         if rl.match or rl.rewrite:
-            # important! using the match pattern from the context (it could be inherited)
+            # important! using the match pattern from the context (could be inherited)
             rewritten = psl.rewrite(curCtx.matchPat, rl.rewrite)
             if rewritten is not None:
                 nextPath = rewritten.unslice()
@@ -405,7 +402,7 @@ class DSValidator:
                     thenCtx = curCtx.descend(rl.then, path, "then")
                     if not self.validate_path(path, rl.then, thenCtx):
                         curCtx.failed = True
-                        # add_error("'if' rule satisfied, but 'then' rule violated", "then")
+                        # add_error("'if' rule satisfied, but 'then' rule violated", "then")  # noqa: E501
                         if rl.details:
                             curCtx.add_errors(thenCtx.errors)
             else:
@@ -413,7 +410,8 @@ class DSValidator:
                     elseCtx = curCtx.descend(rl.else_, path, "else")
                     if not self.validate_path(path, rl.else_, elseCtx):
                         curCtx.failed = True
-                        # add_error("'if' rule violated and also 'else' rule violated", "else")
+                        # add_error("'if' rule violated and also 'else' rule violated", "else")  # noqa: E501
+
                         if rl.details:
                             curCtx.add_errors(elseCtx.errors)
 
@@ -472,5 +470,5 @@ class DSValidator:
                     curCtx.add_errors(nextCtx.errors)
                 return False
 
-        assert curCtx.failed == False
+        # assert curCtx.failed == False
         return True

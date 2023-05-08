@@ -4,9 +4,8 @@ from abc import ABC
 from typing import IO, Any, Dict, List
 
 
-class ValidationHandler(ABC):
-    """
-    Interface for custom validators that can be registered via entrypoints.
+class ValidationHandler(ABC):  # we don't use @abstractmethod on purpose # noqa: B024
+    """Interface for custom validators that can be registered via entrypoints.
 
     Only one of validate or validate_json may be implemented.
 
@@ -22,9 +21,10 @@ class ValidationHandler(ABC):
     @property
     def _for_json(self) -> bool:
         """Return whether this handler is for JSON (i.e. overrides validate_json)."""
-        return type(self).validate_json != ValidationHandler.validate_json  # type: ignore
+        return type(self).validate_json != ValidationHandler.validate_json
 
     def validate(self, data) -> Dict[str, List[str]]:
+        """Run validation on passed metadata object."""
         if self._for_json:
             return self.validate_json(data, self.args)
         else:

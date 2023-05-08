@@ -1,15 +1,16 @@
-# dirschema
-
-[
-![Test](https://img.shields.io/github/workflow/status/Materials-Data-Science-and-Informatics/dirschema/test?label=test)
-](https://github.com/Materials-Data-Science-and-Informatics/dirschema/actions?query=workflow:test)
-[
-![Coverage](https://img.shields.io/codecov/c/gh/Materials-Data-Science-and-Informatics/dirschema?token=4JU2SZFZDZ)
-](https://app.codecov.io/gh/Materials-Data-Science-and-Informatics/dirschema)
+![Project status](https://img.shields.io/badge/project%20status-alpha-%23ff8000)
 [
 ![Docs](https://img.shields.io/badge/read-docs-success)
-](https://materials-data-science-and-informatics.github.io/dirschema/dirschema.html)
+](https://materials-data-science-and-informatics.github.io/dirschema)
 [
+![CI](https://img.shields.io/github/actions/workflow/status/Materials-Data-Science-and-Informatics/dirschema/ci.yml?branch=main&label=ci)
+](https://github.com/Materials-Data-Science-and-Informatics/dirschema/actions/workflows/ci.yml)
+[
+![Test Coverage](https://materials-data-science-and-informatics.github.io/dirschema/main/coverage_badge.svg)
+](https://materials-data-science-and-informatics.github.io/dirschema/main/coverage)
+[
+![Docs Coverage](https://materials-data-science-and-informatics.github.io/dirschema/main/interrogate_badge.svg)
+](https://materials-data-science-and-informatics.github.io/dirschema)
 ![PyPIPkgVersion](https://img.shields.io/pypi/v/dirschema)
 ](https://pypi.org/project/dirschema/)
 
@@ -19,6 +20,9 @@
 &nbsp;&nbsp;
 </div>
 <br />
+
+<!-- --8<-- [start:abstract] -->
+# dirschema
 
 A directory structure and metadata linter based on JSON Schema.
 
@@ -40,47 +44,66 @@ With it you can for example check that:
 If validating these kinds of constraints looks appealing to you, this tool is for you!
 
 **Dirschema features:**
+
 * Built-in support for schemas and metadata stored as JSON or YAML
 * Built-in support for checking contents of ZIP and HDF5 archives
 * Extensible validation interface for advanced needs beyond JSON Schema
 * Both a Python library and a CLI tool to perform the validation
 
-## Installation and Usage
+<!-- --8<-- [end:abstract] -->
+<!-- --8<-- [start:quickstart] -->
 
-Install the tool using `pip install` just as any other Python package.
+## Installation
 
-Read the [manual](./MANUAL.md) to learn how to write a dirschema.
-
-Given a DirSchema file and a directory that needs to be checked, just run:
 ```
-dirschema my_dirschema.yaml some/directory
+pip install dirschema
 ```
-If there is no output, everything is fine. Otherwise, the tool will output
-a detailed error report for each file or directory that failed validation.
 
-You can call the validation from Python using the class `DSValidator` in
-`dirschema.validate`, e.g. `DSValidator("/path/to/dirschema").validate("/dataset/path")`
+## Getting Started
 
-## Development
+The `dirschema` tool needs as input:
 
-This project uses [Poetry](https://python-poetry.org/) for dependency management.
+* a DirSchema YAML file (containing a specification), and
+* a path to a directory or file (e.g. zip file) that should be checked.
 
-Clone this repository and run `poetry install`.
+You can run it like this:
 
-Run `pre-commit install` after cloning to enable pre-commit to enforce the required linting hooks.
+```
+dirschema my_dirschema.yaml DIRECTORY_OR_ARCHIVE_PATH
+```
 
-Run `pytest` before merging your changes to make sure you did not break anything.
+If the validation was successful, there will be no output.
+Otherwise, the tool will output a list of errors (e.g. invalid metadata, missing files, etc.).
 
-To generate documentation, run `pdoc -o docs dirschema`.
+You can also use `dirschema` from other Python code as a library:
 
-To check coverage, use `pytest --cov`.
+```python
+from dirschema.validate import DSValidator
+DSValidator("/path/to/dirschema").validate("/dataset/path")
+```
 
-To run the tests with different Python versions, run `tox`.
-You can use [pyenv](https://github.com/pyenv/pyenv)
-to manage and install other Python interpreter versions without touching the system.
-You should install the versions in the `.python-version` file.
+Similarly, the method will return an error dict, which will be empty if the validation succeeded.
+
+<!-- --8<-- [end:quickstart] -->
+
+**You can find more information on using and contributing to this repository in the
+[documentation](https://materials-data-science-and-informatics.github.io/dirschema/main).**
+
+<!-- --8<-- [start:citation] -->
+
+## How to Cite
+
+If you want to cite this project in your scientific work,
+please use the [citation file](https://citation-file-format.github.io/)
+in the [repository](https://github.com/Materials-Data-Science-and-Informatics/dirschema/blob/main/CITATION.cff).
+
+<!-- --8<-- [end:citation] -->
+<!-- --8<-- [start:acknowledgements] -->
 
 ## Acknowledgements
+
+We kindly thank all
+[authors and contributors](https://materials-data-science-and-informatics.github.io/dirschema/latest/credits).
 
 <div>
 <img style="vertical-align: middle;" alt="HMC Logo" src="https://github.com/Materials-Data-Science-and-Informatics/Logos/raw/main/HMC/HMC_Logo_M.png" width=50% height=50% />
@@ -93,3 +116,5 @@ This project was developed at the Institute for Materials Data Science and Infor
 (IAS-9) of the Jülich Research Center and funded by the Helmholtz Metadata Collaboration
 (HMC), an incubator-platform of the Helmholtz Association within the framework of the
 Information and Data Science strategic initiative.
+
+<!-- --8<-- [end:acknowledgements] -->

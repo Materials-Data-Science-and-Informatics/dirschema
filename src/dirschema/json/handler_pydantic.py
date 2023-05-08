@@ -24,6 +24,7 @@ class PydanticHandler(ValidationHandler):
 
     @classmethod
     def validate_json(cls, metadata: Any, args: str) -> Dict[str, List[str]]:
+        """See [dirschema.json.handler.ValidationHandler.validate_json][]."""
         model: Optional[Type[BaseModel]] = cls.MODELS.get(args)
         if model is None:
             raise ValueError(f"Unknown pydantic model: '{args}'")
