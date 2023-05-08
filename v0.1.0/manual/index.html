@@ -1,0 +1,1914 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Spec and validator for directories, files and metadata based on JSON Schema and regexes.">
+      
+      
+      
+        <link rel="canonical" href="https://materials-data-science-and-informatics.github.io/dirschema/v0.1.0/manual/">
+      
+      
+        <link rel="prev" href="../quickstart/">
+      
+      
+        <link rel="next" href="../reference/dirschema/">
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.9">
+    
+    
+      
+        <title>Manual - dirschema</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.85bb2934.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.a6bdf11c.min.css">
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_markdown_exec_ansi.css">
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../css/style.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#dirschema-manual" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+  This page is for an outdated or development version.
+  <a href="../..">
+    <strong>Click here to go to the latest stable version.</strong>
+  </a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),outdated=__md_get("__outdated",sessionStorage);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="dirschema" class="md-header__button md-logo" aria-label="dirschema" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            dirschema
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Manual
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+          
+            
+            
+            
+            <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+            
+              <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+              </label>
+            
+          
+            
+            
+            
+            <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+            
+              <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+              </label>
+            
+          
+        </form>
+      
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Materials-Data-Science-and-Informatics/dirschema" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Materials-Data-Science-and-Informatics/dirschema
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        Home
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+    
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../quickstart/" class="md-tabs__link md-tabs__link--active">
+        Usage
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../contributing/" class="md-tabs__link">
+        Development
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="dirschema" class="md-nav__button md-logo" aria-label="dirschema" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    dirschema
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Materials-Data-Science-and-Informatics/dirschema" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Materials-Data-Science-and-Informatics/dirschema
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="0">
+          Home
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_1">
+          <span class="md-nav__icon md-icon"></span>
+          Home
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../changelog/" class="md-nav__link">
+        Changelog
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../credits/" class="md-nav__link">
+        Credits
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../license/" class="md-nav__link">
+        License
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+          Usage
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Usage
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart/" class="md-nav__link">
+        Quickstart
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Manual
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Manual
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#adapter-interface" class="md-nav__link">
+    Adapter Interface
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#path-convention" class="md-nav__link">
+    Path Convention
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#metadata-convention" class="md-nav__link">
+    Metadata Convention
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation-by-json-schemas-and-custom-plugins" class="md-nav__link">
+    Validation by JSON Schemas and custom plugins
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dirschema-keywords" class="md-nav__link">
+    DirSchema keywords
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dirschema-evaluation" class="md-nav__link">
+    DirSchema Evaluation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dirschema-rules" class="md-nav__link">
+    DirSchema Rules
+  </a>
+  
+    <nav class="md-nav" aria-label="DirSchema Rules">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#matching-and-rewriting" class="md-nav__link">
+    Matching and Rewriting
+  </a>
+  
+    <nav class="md-nav" aria-label="Matching and Rewriting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#match" class="md-nav__link">
+    match
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#matchstart" class="md-nav__link">
+    matchStart
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#matchstop" class="md-nav__link">
+    matchStop
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rewrite" class="md-nav__link">
+    rewrite
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#primitive-rules" class="md-nav__link">
+    Primitive Rules
+  </a>
+  
+    <nav class="md-nav" aria-label="Primitive Rules">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#type" class="md-nav__link">
+    type
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#valid" class="md-nav__link">
+    valid
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validmeta" class="md-nav__link">
+    validMeta
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#combinations-of-rules" class="md-nav__link">
+    Combinations of Rules
+  </a>
+  
+    <nav class="md-nav" aria-label="Combinations of Rules">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#not" class="md-nav__link">
+    not
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#allof" class="md-nav__link">
+    allOf
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#anyof" class="md-nav__link">
+    anyOf
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#oneof" class="md-nav__link">
+    oneOf
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    next
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#if-then-else" class="md-nav__link">
+    if-then-else
+  </a>
+  
+    <nav class="md-nav" aria-label="if-then-else">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#if" class="md-nav__link">
+    if
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#then" class="md-nav__link">
+    then
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#else" class="md-nav__link">
+    else
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#error-reporting" class="md-nav__link">
+    Error reporting
+  </a>
+  
+    <nav class="md-nav" aria-label="Error reporting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description" class="md-nav__link">
+    description
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#details" class="md-nav__link">
+    details
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#modularity" class="md-nav__link">
+    Modularity
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    Examples
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+          API
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_2_3">
+          <span class="md-nav__icon md-icon"></span>
+          API
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3_1" >
+      
+      
+      
+        
+        
+        <div class="md-nav__link md-nav__link--index ">
+          <a href="../reference/dirschema/">dirschema</a>
+          
+            <label for="__nav_2_3_1">
+              <span class="md-nav__icon md-icon"></span>
+            </label>
+          
+        </div>
+      
+      <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_3_1_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_2_3_1">
+          <span class="md-nav__icon md-icon"></span>
+          dirschema
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/dirschema/adapters/" class="md-nav__link">
+        adapters
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/dirschema/cli/" class="md-nav__link">
+        cli
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/dirschema/core/" class="md-nav__link">
+        core
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3_1_4" >
+      
+      
+      
+        
+        
+        <div class="md-nav__link md-nav__link--index ">
+          <a href="../reference/dirschema/json/">json</a>
+          
+            <label for="__nav_2_3_1_4">
+              <span class="md-nav__icon md-icon"></span>
+            </label>
+          
+        </div>
+      
+      <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_2_3_1_4_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_2_3_1_4">
+          <span class="md-nav__icon md-icon"></span>
+          json
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/dirschema/json/handler/" class="md-nav__link">
+        handler
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/dirschema/json/handler_pydantic/" class="md-nav__link">
+        handler_pydantic
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/dirschema/json/handlers/" class="md-nav__link">
+        handlers
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/dirschema/json/parse/" class="md-nav__link">
+        parse
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/dirschema/json/validate/" class="md-nav__link">
+        validate
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/dirschema/log/" class="md-nav__link">
+        log
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/dirschema/validate/" class="md-nav__link">
+        validate
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          Development
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Development
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        How To Contribute
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dev_guide/" class="md-nav__link">
+        Developer Guide
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../code_of_conduct/" class="md-nav__link">
+        Code of Conduct
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../coverage/" class="md-nav__link">
+        Coverage Report
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#adapter-interface" class="md-nav__link">
+    Adapter Interface
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#path-convention" class="md-nav__link">
+    Path Convention
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#metadata-convention" class="md-nav__link">
+    Metadata Convention
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation-by-json-schemas-and-custom-plugins" class="md-nav__link">
+    Validation by JSON Schemas and custom plugins
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dirschema-keywords" class="md-nav__link">
+    DirSchema keywords
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dirschema-evaluation" class="md-nav__link">
+    DirSchema Evaluation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dirschema-rules" class="md-nav__link">
+    DirSchema Rules
+  </a>
+  
+    <nav class="md-nav" aria-label="DirSchema Rules">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#matching-and-rewriting" class="md-nav__link">
+    Matching and Rewriting
+  </a>
+  
+    <nav class="md-nav" aria-label="Matching and Rewriting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#match" class="md-nav__link">
+    match
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#matchstart" class="md-nav__link">
+    matchStart
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#matchstop" class="md-nav__link">
+    matchStop
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rewrite" class="md-nav__link">
+    rewrite
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#primitive-rules" class="md-nav__link">
+    Primitive Rules
+  </a>
+  
+    <nav class="md-nav" aria-label="Primitive Rules">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#type" class="md-nav__link">
+    type
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#valid" class="md-nav__link">
+    valid
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validmeta" class="md-nav__link">
+    validMeta
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#combinations-of-rules" class="md-nav__link">
+    Combinations of Rules
+  </a>
+  
+    <nav class="md-nav" aria-label="Combinations of Rules">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#not" class="md-nav__link">
+    not
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#allof" class="md-nav__link">
+    allOf
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#anyof" class="md-nav__link">
+    anyOf
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#oneof" class="md-nav__link">
+    oneOf
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    next
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#if-then-else" class="md-nav__link">
+    if-then-else
+  </a>
+  
+    <nav class="md-nav" aria-label="if-then-else">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#if" class="md-nav__link">
+    if
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#then" class="md-nav__link">
+    then
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#else" class="md-nav__link">
+    else
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#error-reporting" class="md-nav__link">
+    Error reporting
+  </a>
+  
+    <nav class="md-nav" aria-label="Error reporting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description" class="md-nav__link">
+    description
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#details" class="md-nav__link">
+    details
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#modularity" class="md-nav__link">
+    Modularity
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    Examples
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+    <a href="https://github.com/Materials-Data-Science-and-Informatics/dirschema/blob/main/docs/manual.md" title="Edit this page" class="md-content__button md-icon">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4v-2m10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1 2.1 2.1Z"/></svg>
+    </a>
+  
+  
+    
+      
+    
+    <a href="https://github.com/Materials-Data-Science-and-Informatics/dirschema/raw/main/docs/manual.md" title="View source of this page" class="md-content__button md-icon">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 18c.56 0 1 .44 1 1s-.44 1-1 1-1-.44-1-1 .44-1 1-1m0-3c-2.73 0-5.06 1.66-6 4 .94 2.34 3.27 4 6 4s5.06-1.66 6-4c-.94-2.34-3.27-4-6-4m0 6.5a2.5 2.5 0 0 1-2.5-2.5 2.5 2.5 0 0 1 2.5-2.5 2.5 2.5 0 0 1 2.5 2.5 2.5 2.5 0 0 1-2.5 2.5M9.27 20H6V4h7v5h5v4.07c.7.08 1.36.25 2 .49V8l-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h4.5a8.15 8.15 0 0 1-1.23-2Z"/></svg>
+    </a>
+  
+
+
+<h1 id="dirschema-manual">DirSchema Manual<a class="headerlink" href="#dirschema-manual" title="Permanent link">&para;</a></h1>
+<p>DirSchema was created to describe the structure of datasets as well as metadata
+requirements, under the assumption that the metadata for files is stored in separate JSON
+files that follow a reasonable and consistent naming convention throughout the dataset.</p>
+<p>For this purpose, it lifts JSON Schema validation from the level of individual JSON files
+to hierarchical directory-like structures, i.e. besides actual files and directories it is
+easily possible to use a DirSchema for validating archive files, like a HDF5 or ZIP file.</p>
+<h2 id="adapter-interface">Adapter Interface<a class="headerlink" href="#adapter-interface" title="Permanent link">&para;</a></h2>
+<p>A DirSchema can be evaluated on any kind of tree-shaped hierarchical entity that
+supports the following operations:</p>
+<ul>
+<li>return a list of paths to all "files" and "directories" (normalized as described below)</li>
+<li>test whether a path is a "directory" (inner node)</li>
+<li>test whether a path is a "file" (leaf)</li>
+<li>load a "file" (typically JSON) to perform JSON Schema or custom validation on it</li>
+</ul>
+<p>In the following we will use the language of <strong>directories</strong> and <strong>files</strong> and will refer
+to the whole tree structure as the <strong>dataset</strong>. Other directory/file-like structures can
+be processed if a suitable adapter implementing the required interface is provided.</p>
+<h2 id="path-convention">Path Convention<a class="headerlink" href="#path-convention" title="Permanent link">&para;</a></h2>
+<p>DirSchema rules are evaluated on a set of paths and rely on pattern matching to determine
+which rule(s) must be applied to which path. Therefore, it is important to understand how
+files and directories are uniquely mapped to paths.</p>
+<ul>
+<li>The set of paths in a dataset always contains at least the empty path
+    (representing the root directory)</li>
+<li>Furthermore, it contains all contained subdirectories and files
+    (except for ones that are ignored due to metadata convention (see later)
+    or adapter configuration (e.g. ignoring hidden files etc.)</li>
+</ul>
+<p>In order to have a unique representation of paths that can be used in regex patterns,
+all paths are normalized such that:</p>
+<ul>
+<li>each path is relative to the directory root (which is represented by the empty string)</li>
+<li>slashes are used to separate "segments"
+    (i.e. a sequence of directories, possibly ending with a file)</li>
+<li>each segment between two slashes is non-empty</li>
+<li>there is neither a leading nor a trailing slash (<code>/</code>)</li>
+<li>paths do not contain special "file names" like <code>.</code> (current dir) or <code>..</code> (parent dir)</li>
+</ul>
+<p><strong>Example:</strong> <code>""</code>, <code>"a"</code>, <code>"a/b/c"</code> are all valid paths as provided by the normalization</p>
+<h2 id="metadata-convention">Metadata Convention<a class="headerlink" href="#metadata-convention" title="Permanent link">&para;</a></h2>
+<p>JSON metadata can be provided for each file and directory. By default, it is assumed that
+for each file named <code>FILE</code> the metadata is located in a file named <code>FILE_meta.json</code>,
+whereas for a directory <code>DIR</code> the metadata is in <code>DIR/_meta.json</code>.</p>
+<p>The convention can be configured by overriding the prefixes and suffixes
+that are attached to the path itself and to the filename.
+The general pattern is as follows:</p>
+<p>For a path <code>a/b/c/d</code>, the metadata is located in:</p>
+<ul>
+<li><code>&lt;PATH_PREFIX/&gt;a/b/c&lt;/PATH_SUFFIX&gt;/&lt;FILE_PREFIX&gt;d&lt;FILE_SUFFIX&gt;</code> if <code>d</code> is a file</li>
+<li><code>&lt;PATH_PREFIX/&gt;a/b/c/d&lt;/PATH_SUFFIX&gt;/&lt;FILE_PREFIX&gt;&lt;FILE_SUFFIX&gt;</code> if <code>d</code> is a directory</li>
+</ul>
+<p>All these prefixes and suffixes are optional, except for the requirement that either a
+file prefix or a file suffix must be provided.</p>
+<p><strong>All files following the used metadata naming convention are automatically excluded from
+the set of validated files</strong>. These files are seen as merely "companion files" to other
+files in the dataset. This simplifies the writing of DirSchemas, as otherwise these files
+would have to be excluded in an ad-hoc manner, which would fix the convention inside a
+DirSchema. Excluding them allows for changing the convention or using the DirSchema
+with datasets following different conventions, without changing the DirSchema itself.</p>
+<p><strong>Example:</strong></p>
+<p>With the default settings, the metadata file for <code>/a/b/c/d</code> is expected to be found at:</p>
+<ul>
+<li><code>/a/b/c/d_meta.json</code> if <code>d</code> is a file</li>
+<li><code>/a/b/c/d/_meta.json</code> if <code>d</code> is a directory</li>
+</ul>
+<p>If we would also add a path suffix equal to <code>metadata</code>, we would get:</p>
+<ul>
+<li><code>/a/b/c/metadata/d_meta.json</code> if <code>d</code> is a file</li>
+<li><code>/a/b/c/d/metadata/_meta.json</code> if <code>d</code> is a directory</li>
+</ul>
+<h2 id="validation-by-json-schemas-and-custom-plugins">Validation by JSON Schemas and custom plugins<a class="headerlink" href="#validation-by-json-schemas-and-custom-plugins" title="Permanent link">&para;</a></h2>
+<p>In any context where JSON validation is to be performed and a schema can be provided,
+it is possible to supply one of the following in the corresponding location of the schema:</p>
+<ul>
+<li>a JSON Schema (directly embedded)</li>
+<li>an URI pointing to a JSON Schema</li>
+<li>a special URI pointing to a custom validation plugin</li>
+</ul>
+<p>For referencing JSON Schemas stored outside of the dirschema,
+the following possibilities exist:</p>
+<ul>
+<li>a <code>http(s)://</code> URI</li>
+<li>a <code>file://</code> URI or an absolute path (equivalent)</li>
+<li>a <code>local://</code> URI (resolved relative to the directory of the used dirschema by default)</li>
+<li>a <code>cwd://</code> URI (resolved relative to the current working directory)</li>
+<li>a relative path (treated as a <code>cwd://</code> path by default)</li>
+</ul>
+<p>To access a custom validation plugin, a pseudo-URI starting with <code>v#VALIDATOR://</code> is
+recognized, where <code>VALIDATOR</code> is a registered plugin.</p>
+<p>The <code>cwd://</code> URI is an explicit version that behaves like normal "relative paths", i.e.
+when the validation tool is launched in <code>/a/b</code>,
+a path <code>cwd://c/d</code> is expanded to <code>/a/b/c/d</code>.</p>
+<p>By default, <code>local://</code> URIs are expanded relative to the location of the main dirschema
+file. The reference directory for interpreting <code>local://</code> paths can also be overridden to
+resolve to an arbitrary different path supplied to the validator during initialization.</p>
+<p><strong>Example:</strong></p>
+<p>Consider the following setup:</p>
+<ul>
+<li>the dirschema lives in <code>/my/dirschemas/example.dirschema.yaml</code></li>
+<li>the dirschema validation is launched in directory <code>/my/workdir</code></li>
+<li>A custom validator called <code>myvalidator</code> is registered as a plugin</li>
+</ul>
+<p>Now let us see how the paths are resolved:</p>
+<ul>
+<li>A JSON Schema referenced as <code>https://www.example.org/schemas/some_schema.json</code>
+    remains unchanged (the schema will be downloaded)</li>
+<li>A JSON Schema referenced as <code>file:///schemas/some_schema.json</code>
+    remains unchanged</li>
+<li>A JSON Schema referenced as <code>cwd://schemas/some_schema.json</code>
+    expands to <code>file:///my/workdir/schemas/some_schema.json</code></li>
+<li>A JSON Schema referenced as <code>local://schemas/some_schema.json</code>
+    will expand to <code>file:///my/dirschemas/schemas/some_schema.json</code> by default
+    (or some other path, if the local base directory is overridden)</li>
+<li>A JSON Schema referenced as <code>/schemas/some_schema.json</code>
+    expands to <code>file:///schemas/some_schema.json</code></li>
+<li>A JSON Schema referenced as <code>schemas/some_schema.json</code>
+    expands to <code>file:///my/workdir/schemas/some_schema.json</code> by default
+    (if overridden, any prefix can be added to modify the interpretation of relative paths)</li>
+<li>A pseudo-URI <code>v#myvalidator://something</code> will call the validation plugin
+  with the current file or directory path and the string <code>something</code> as argument
+  (the argument can tell the plugin what kind of validation to perform or schema to use).</li>
+</ul>
+<p>Thus, custom validation plugins can be used to serve two purposes:</p>
+<ul>
+<li>perform validation beyond what is possible with JSON Schema</li>
+<li>still use JSON Schema internally, but allow to use JSON Schemas
+    that cannot be addressed using the built-in supported protocols</li>
+</ul>
+<p>Except for custom validation plugins, all these URIs and pseudo-URIs can be used
+also as values for <code>$ref</code> inside the dirschema or JSON Schemas. The custom plugin
+Pseudo-URIs may only be used with the corresponding validation keywords of DirSchema.</p>
+<p>Relative paths can be used for convenience throughout the schema and expanded to any
+builtin JSON Schema access protocol or custom validator by setting the relative schema
+base prefix when launching the validator. Notice that using a custom plugin prefix will
+break <code>$ref</code> resolving of relative paths (you should not use <code>$ref</code> without access
+protocol anyway). If you do it anyway and want relative paths to consistently be resolved
+as expected in <code>$ref</code>s, you must prefix the relative sub-schema location with
+<code>cwd://</code> or <code>local://</code> stating your intended semantics.</p>
+<p>While all the provided ways to refer to external schemas can be useful for applying
+dirschema in various contexts, consider mixing too many, especially multiple "relative"
+modes of accessing a validator or JSON Schema as a bad practice. It can make your schemas
+harder to understand and to reuse.</p>
+<h2 id="dirschema-keywords">DirSchema keywords<a class="headerlink" href="#dirschema-keywords" title="Permanent link">&para;</a></h2>
+<p>The keywords used in dirschema can be classified into some groups:</p>
+<ul>
+<li><strong>Primitive rules</strong>: <code>type</code>, <code>valid</code>, <code>validMeta</code></li>
+</ul>
+<p>The primitive rules are those which perform the actual desired validation on a path.</p>
+<ul>
+<li><strong>Logical connectives</strong>: <code>not</code>, <code>anyOf</code>, <code>allOf</code>, <code>oneOf</code></li>
+</ul>
+<p>The logical connectives work in the same way as in JSON Schema and are used to
+build more complex rules from the primitive rules.</p>
+<ul>
+<li><strong>Syntactic sugar</strong>: <code>if</code>, <code>then</code>, <code>else</code></li>
+</ul>
+<p>Technically, <code>if</code>/<code>then</code>/<code>else</code> is redundant, as its complete behaviour can be
+replicated from logical connectives and suitable use of the <code>description</code> and <code>details</code>
+settings.</p>
+<p>Practically, it is added as syntactic sugar for the often needed case where a "meta-level"
+implication such as "if precondition X is true, validate rule Y" is desired, but the user
+should not be bothered with errors concerning violations of "X" because this is not a
+real validation error.</p>
+<p>To have more human-readable schemas and better error reporting, the guideline is to use
+<code>if/then/else</code> for rule selection and "control flow", whereas the logical connectives are
+to be used for actual complex validation rules.</p>
+<ul>
+<li><strong>Pattern matching</strong>: <code>match</code>, <code>rewrite</code>, <code>next</code></li>
+</ul>
+<p>The pattern matching keywords are the mechanism for selecting which rules to apply to
+which paths and constructing relations between paths.</p>
+<ul>
+<li><strong>Settings</strong>: <code>matchStart</code>, <code>matchStop</code>, <code>description</code>, <code>details</code></li>
+</ul>
+<p>The setting keywords affect the behaviour of the evaluation, but have no "truth value".</p>
+<h2 id="dirschema-evaluation">DirSchema Evaluation<a class="headerlink" href="#dirschema-evaluation" title="Permanent link">&para;</a></h2>
+<p>When validating a dataset, the DirSchema is evaluated for each path individually and
+therefore rule violations are also reported for each path separately. For each path, the
+validation returns a (part of) the unsatisfied constraints as response. Rule evaluation
+proceeds recursively as follows.</p>
+<ol>
+<li>If a <code>match</code> key is present, the path is matched against the expression.</li>
+<li>Primitive constraints <code>type</code>, <code>valid</code> and <code>validMeta</code> are evaluated.</li>
+<li>Logical constraints <code>not</code>, <code>allOf</code>, <code>anyOf</code> and <code>oneOf</code> and <code>if/then/else</code> are evaluated.</li>
+<li>The <code>next</code> rule is evaluated on the path (possibly rewritten by <code>rewrite</code>), if present.</li>
+</ol>
+<p>Whenever one of these stages fails, the evaluation of the current rule is aborted.
+In the following, all available constraints and other keys are explained in more detail.</p>
+<h2 id="dirschema-rules">DirSchema Rules<a class="headerlink" href="#dirschema-rules" title="Permanent link">&para;</a></h2>
+<p>A DirSchema rule is - similar to a JSON Schema - either a boolean (rule that is trivially
+<code>true</code> or <code>false</code>), or a conjunction of at most one of each kind of possible primitive
+and/or complex constraints. A constraint is primitive iff it does not contain any nested
+constraint (i.e. primitive rules are leaves in the tree of nested rules).</p>
+<p>DirSchema rules are assumed to be JSON or YAML files. In the following it is assumed that
+JSON and YAML syntax is understood and only the key/value pairs for defining constraints
+are presented.</p>
+<h3 id="matching-and-rewriting">Matching and Rewriting<a class="headerlink" href="#matching-and-rewriting" title="Permanent link">&para;</a></h3>
+<p>As explained above, the complete rule expression is evaluated on each path. To
+apply different rules to different paths and express dependencies between related paths,
+DirSchema provides regex matching and substitution for paths.</p>
+<h4 id="match">match<a class="headerlink" href="#match" title="Permanent link">&para;</a></h4>
+<p><strong>Value:</strong>
+string (containing a regex pattern)</p>
+<p><strong>Description:</strong>
+Require that the path must fully match the provided regex.</p>
+<p>If the match fails, it is assumed that the current rule is not intended for the current
+path and therefore further evaluation of this rule is aborted.</p>
+<p>The behavior of <code>match</code> can be modified by setting <code>matchStart</code> and/or <code>matchStop</code> to
+restrict the matching scope to certain path segments. Such an interval is called <strong>path
+slice</strong>.</p>
+<p>For example, given the path <code>a/b/c/d</code> with <code>matchStart: 1</code> and <code>matchStop: -1</code>, the match
+(and possible rewrite) is performed only on the path slice <code>b/c</code>.</p>
+<p>Capture groups (defined by parentheses in the regex) can be used for the <code>rewrite</code> in the
+current or any nested rule, unless overridden by a different <code>match</code>.</p>
+<h4 id="matchstart">matchStart<a class="headerlink" href="#matchstart" title="Permanent link">&para;</a></h4>
+<p><strong>Value:</strong>
+integer (default: 0)</p>
+<p><strong>Description:</strong>
+Defines the index of the first path segment to be included in the match.</p>
+<p>Negative indices work the same as in Python.</p>
+<p>For example, to match only in the file name, <code>matchStart</code> can be set to <code>-1</code>.</p>
+<p>This setting is inherited into contained rules until overridden.</p>
+<h4 id="matchstop">matchStop<a class="headerlink" href="#matchstop" title="Permanent link">&para;</a></h4>
+<p><strong>Value:</strong>
+integer (default: 0)</p>
+<p><strong>Description:</strong>
+Defines the index of the first path segment after <code>matchStart</code> that is <strong>not</strong> to be
+included in the match.</p>
+<p>Negative indices work the same as in Python.</p>
+<p>Contrary to Python, a value of 0 means "until the end", like leaving out the end index in
+a Python slice.</p>
+<p>This setting is inherited into contained rules until overridden.</p>
+<h4 id="rewrite">rewrite<a class="headerlink" href="#rewrite" title="Permanent link">&para;</a></h4>
+<p><strong>Value:</strong>
+string (substitution, possibly containing capture references)</p>
+<p><strong>Description:</strong></p>
+<p>Rewrite (parts of) the current path.</p>
+<p><strong>The rewritten path is used instead of the current path in the</strong> <code>next</code> <strong>rule,
+all constraints on the same level as the rewrite are evaluated on the <em>original</em> path!</strong>
+Therefore having a <code>rewrite</code> without a <code>next</code> rule has no effect.</p>
+<p>Capture groups of the most recent <code>match</code> (i.e. on the same or level or in an ancestor
+rule) can be used in the substitution. If there is no applicable <code>match</code>, a default match
+for the pattern <code>(.*)</code> is assumed and therefore <code>\\1</code> references the whole matched path or
+path slice (determined by the currently active <code>matchStart</code>/<code>matchStop</code>).</p>
+<p>In principle, this can be used to roughly emulate the functionality of <code>validMeta</code>,
+but as metadata requirements are one of the main use cases, validMeta
+is preferable, as it is not hard-coding a metadata file naming convention.</p>
+<p>But in a case where more than one metadata file is required for a single file, the
+non-standard file could be validated by a combination of <code>rewrite</code> and <code>valid</code>, if
+there is no other way to express the desired constraints.</p>
+<h3 id="primitive-rules">Primitive Rules<a class="headerlink" href="#primitive-rules" title="Permanent link">&para;</a></h3>
+<p>Beside <code>match</code>, the following primitive rules are provided:</p>
+<h4 id="type">type<a class="headerlink" href="#type" title="Permanent link">&para;</a></h4>
+<p><strong>Value:</strong>
+boolean, "file" or "dir"</p>
+<p><strong>Description:</strong>
+Require that the path:</p>
+<ul>
+<li><code>true</code>: exists (either file or directory)</li>
+<li><code>false</code>: does not exist</li>
+<li><code>"file"</code>: is a file</li>
+<li><code>"dir"</code>: is a directory</li>
+</ul>
+<h4 id="valid">valid<a class="headerlink" href="#valid" title="Permanent link">&para;</a></h4>
+<p><strong>Value:</strong>
+JSON Schema or string</p>
+<p><strong>Description:</strong>
+Require that the path is loadable as JSON by the used adapter and is successfully
+validated by the referenced JSON Schema or custom validator.</p>
+<p>Validation fails if the path does not exist, cannot be loaded by the adapter or is not
+valid according to the validation handler.</p>
+<h4 id="validmeta">validMeta<a class="headerlink" href="#validmeta" title="Permanent link">&para;</a></h4>
+<p><strong>Value:</strong>
+JSON Schema or string</p>
+<p><strong>Description:</strong>
+Require that the metadata file of the current path (according to the used convention)
+is loadable as JSON by the used adapter and is successfully validated by
+the referenced JSON Schema or custom validator.</p>
+<p>Validation fails if the path does not exist, the metadata companion file does not exist,
+the metadata file cannot be loaded by the adapter or is not valid according to the
+validation handler.</p>
+<h3 id="combinations-of-rules">Combinations of Rules<a class="headerlink" href="#combinations-of-rules" title="Permanent link">&para;</a></h3>
+<p>To build more complex rules, DirSchema provides the same logical connectives that can be
+used with JSON Schema. Additionally, an implication keyword <code>next</code> is provided explicitly
+and described further below.</p>
+<p>Notice that contrary to typical logical semantics (and just as in JSON Schema),
+<code>oneOf/anyOf</code> evaluate to <strong>true</strong> for empty arrays, because they are interpreted as "not
+existing" instead of being treated as empty existentials.</p>
+<p>For each path, the rules are checked in the listed order ("short circuiting"), which
+matters for <code>anyOf</code> - once a rule in the array is satisfied, the following rules are not
+evaluated. So prefer putting simpler/the most common case first.</p>
+<h4 id="not">not<a class="headerlink" href="#not" title="Permanent link">&para;</a></h4>
+<p><strong>Value:</strong>
+DirSchema</p>
+<p><strong>Description:</strong>
+Logical negation.</p>
+<h4 id="allof">allOf<a class="headerlink" href="#allof" title="Permanent link">&para;</a></h4>
+<p><strong>Value:</strong>
+Array of DirSchema</p>
+<p><strong>Description:</strong>
+Logical conjunction.</p>
+<h4 id="anyof">anyOf<a class="headerlink" href="#anyof" title="Permanent link">&para;</a></h4>
+<p><strong>Value:</strong>
+Array of DirSchema</p>
+<p><strong>Description:</strong>
+Logical disjunction.</p>
+<h4 id="oneof">oneOf<a class="headerlink" href="#oneof" title="Permanent link">&para;</a></h4>
+<p><strong>Value:</strong>
+Array of DirSchema</p>
+<p><strong>Description:</strong>
+Satisfied if <strong>exactly</strong> one rule in the array of DirSchemas is satisfied.</p>
+<h4 id="next">next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h4>
+<p><strong>Value:</strong>
+DirSchema</p>
+<p><strong>Description:</strong>
+If all other constraints in the current rule are satisfied, require that the rule provided
+in the value is also satisfied on the (possibly rewritten) path.</p>
+<p>This mechanism exists first and foremost in order to be used in combination with
+<code>rewrite</code>, as just combining multiple rules can be achieved using <code>allOf</code>.</p>
+<p>Additionally, this can be used for sequential "short circuiting" of rule evaluation to
+modify or refine the four evaluation phases outlined above.</p>
+<h3 id="if-then-else">if-then-else<a class="headerlink" href="#if-then-else" title="Permanent link">&para;</a></h3>
+<h4 id="if">if<a class="headerlink" href="#if" title="Permanent link">&para;</a></h4>
+<p><strong>Value:</strong>
+DirSchema</p>
+<p><strong>Description:</strong>
+If specified, will be evaluated on current path.
+Depending on result, either the <code>then</code> or the <code>else</code> rule will be evaluated.</p>
+<h4 id="then">then<a class="headerlink" href="#then" title="Permanent link">&para;</a></h4>
+<p><strong>Value:</strong>
+DirSchema</p>
+<p><strong>Description:</strong> If given, must be satisfied in case that the <code>if</code> rule is satisfied.</p>
+<h4 id="else">else<a class="headerlink" href="#else" title="Permanent link">&para;</a></h4>
+<p><strong>Value:</strong>
+DirSchema</p>
+<p><strong>Description:</strong> If given, must be satisfied in case that the <code>if</code> rule is violated.</p>
+<h3 id="error-reporting">Error reporting<a class="headerlink" href="#error-reporting" title="Permanent link">&para;</a></h3>
+<h4 id="description">description<a class="headerlink" href="#description" title="Permanent link">&para;</a></h4>
+<p><strong>Value:</strong>
+string</p>
+<p><strong>Description:</strong> If given, will override all other error messages from immediate
+child keys of this rule. To completely silence errors from this rule, set to empty string.</p>
+<p>If you want to have multiple custom error messages for keys in this rule (e.g. checking
+both <code>type</code> and <code>validMeta</code> with separate error messages), move these keys into <code>allOf</code>,
+and add individual <code>description</code> strings to the sub-rules inside <code>allOf</code>.</p>
+<h4 id="details">details<a class="headerlink" href="#details" title="Permanent link">&para;</a></h4>
+<p><strong>Value:</strong>
+boolean (true by default)</p>
+<p><strong>Description:</strong>  If true, will preserve error messages reported from nested sub-rules
+e.g. from logical connectives etc. If false, will discard them. This can be used
+in combination with <code>description</code> to provide higher-level errors for logically complex
+rules where the default error report is not helpful.</p>
+<h2 id="modularity">Modularity<a class="headerlink" href="#modularity" title="Permanent link">&para;</a></h2>
+<p>In any place where a DirSchema or JSON Schema is expected, one can also use <code>$ref</code> to
+reference them, both in YAML as well as JSON format, located at a remote or local
+location. This works for all supported protocols except for custom validation plugins
+(i.e. custom validator pseudo-URIs are only permitted as values for <code>valid</code> and <code>validMeta</code>).</p>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
+<p><strong>TODO:</strong></p>
+<p>Show non-trivial example for match slice/rewrite and scoping</p>
+<p>Show example how next can be used for short circuiting</p>
+<p>Show mutex example?</p>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+            Back to top
+          </button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../quickstart/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Quickstart" rel="prev">
+            <div class="md-footer__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Quickstart
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../reference/dirschema/" class="md-footer__link md-footer__link--next" aria-label="Next: dirschema" rel="next">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                dirschema
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <!-- Copyright and theme information -->
+<div class="md-copyright">
+  
+  
+    Made with
+    <a
+      href="https://squidfunk.github.io/mkdocs-material/"
+      target="_blank" rel="noopener"
+    >
+      Material for MkDocs
+    </a>
+    <!-- added link to project template -->
+    and
+    <a
+      href="https://github.com/Materials-Data-Science-and-Informatics/fair-python-cookiecutter"
+      target="_blank" rel="noopener"
+    >
+      fair-python-cookiecutter
+    </a>
+    <!-- ------------------------------ -->
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/Materials-Data-Science-and-Informatics" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/Materials-Data-Science-and-Informatics" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M352 256c0 22.2-1.2 43.6-3.3 64H163.3c-2.2-20.4-3.3-41.8-3.3-64s1.2-43.6 3.3-64h185.4c2.2 20.4 3.3 41.8 3.3 64zm28.8-64h123.1c5.3 20.5 8.1 41.9 8.1 64s-2.8 43.5-8.1 64H380.8c2.1-20.6 3.2-42 3.2-64s-1.1-43.4-3.2-64zm112.6-32H376.7c-10-63.9-29.8-117.4-55.3-151.6 78.3 20.7 142 77.5 171.9 151.6zm-149.1 0H167.7c6.1-36.4 15.5-68.6 27-94.7 10.5-23.6 22.2-40.7 33.5-51.5C239.4 3.2 248.7 0 256 0s16.6 3.2 27.8 13.8c11.3 10.8 23 27.9 33.5 51.5 11.6 26 20.9 58.2 27 94.7zm-209 0H18.6c30-74.1 93.6-130.9 172-151.6-25.5 34.2-45.3 87.7-55.3 151.6zM8.1 192h123.1c-2.1 20.6-3.2 42-3.2 64s1.1 43.4 3.2 64H8.1C2.8 299.5 0 278.1 0 256s2.8-43.5 8.1-64zm186.6 254.6c-11.6-26-20.9-58.2-27-94.6h176.6c-6.1 36.4-15.5 68.6-27 94.6-10.5 23.6-22.2 40.7-33.5 51.5-11.2 10.7-20.5 13.9-27.8 13.9s-16.6-3.2-27.8-13.8c-11.3-10.8-23-27.9-33.5-51.5zM135.3 352c10 63.9 29.8 117.4 55.3 151.6-78.4-20.7-142-77.5-172-151.6h116.7zm358.1 0c-30 74.1-93.6 130.9-171.9 151.6 25.5-34.2 45.2-87.7 55.3-151.6h116.6z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.action.edit", "content.action.view", "content.code.annotate", "header.autohide", "navigation.footer", "navigation.instant", "navigation.tabs", "navigation.tabs.sticky", "navigation.tracking", "navigation.top", "search.highlight", "search.suggest"], "search": "../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.fac441b0.min.js"></script>
+      
+    
+  </body>
+</html>
