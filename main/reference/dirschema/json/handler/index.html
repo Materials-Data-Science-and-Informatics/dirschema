@@ -19,7 +19,7 @@
         <link rel="next" href="../handler_pydantic/">
       
       <link rel="icon" href="../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.9">
+      <meta name="generator" content="mkdocs-1.5.2, mkdocs-material-9.1.21">
     
     
       
@@ -27,10 +27,10 @@
       
     
     
-      <link rel="stylesheet" href="../../../../assets/stylesheets/main.85bb2934.min.css">
+      <link rel="stylesheet" href="../../../../assets/stylesheets/main.eebd395e.min.css">
       
         
-        <link rel="stylesheet" href="../../../../assets/stylesheets/palette.a6bdf11c.min.css">
+        <link rel="stylesheet" href="../../../../assets/stylesheets/palette.ecc896b0.min.css">
       
       
 
@@ -1037,15 +1037,15 @@
 
 
 <h2 id="dirschema.json.handler.ValidationHandler" class="doc doc-heading">
-        <span class="doc doc-object-name doc-class-name">ValidationHandler</span>
+          <span class="doc doc-object-name doc-class-name">ValidationHandler</span>
 
 
 <a href="#dirschema.json.handler.ValidationHandler" class="headerlink" title="Permanent link">&para;</a></h2>
 
 
   <div class="doc doc-contents ">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="abc.ABC">ABC</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="abc.ABC">ABC</span></code></p>
 
   
       <p>Interface for custom validators that can be registered via entrypoints.</p>
@@ -1053,10 +1053,9 @@
 <p>These can be used instead of JSON Schemas inside a dirschema like this:</p>
 <p><code>validMeta: "v#ENTRYPOINT://any args for validator, e.g. schema name"</code></p>
 
-
-        <details class="quote">
-          <summary>Source code in <code>src/dirschema/json/handler.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 7</span>
+            <details class="quote">
+              <summary>Source code in <code>src/dirschema/json/handler.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 7</span>
 <span class="normal"> 8</span>
 <span class="normal"> 9</span>
 <span class="normal">10</span>
@@ -1184,11 +1183,12 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -1203,7 +1203,7 @@
 
 
 <h3 id="dirschema.json.handler.ValidationHandler.__init__" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">__init__</span>
+          <span class="doc doc-object-name doc-function-name">__init__</span>
 
 
 <a href="#dirschema.json.handler.ValidationHandler.__init__" class="headerlink" title="Permanent link">&para;</a></h3>
@@ -1214,25 +1214,26 @@
   
       <p>Store passed arguments in instance.</p>
 
-      <details class="quote">
-        <summary>Source code in <code>src/dirschema/json/handler.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">17</span>
+          <details class="quote">
+            <summary>Source code in <code>src/dirschema/json/handler.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">17</span>
 <span class="normal">18</span>
 <span class="normal">19</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Store passed arguments in instance.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="n">args</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
 <h3 id="dirschema.json.handler.ValidationHandler.validate" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">validate</span>
+          <span class="doc doc-object-name doc-function-name">validate</span>
 
 
 <a href="#dirschema.json.handler.ValidationHandler.validate" class="headerlink" title="Permanent link">&para;</a></h3>
@@ -1243,9 +1244,9 @@
   
       <p>Run validation on passed metadata object.</p>
 
-      <details class="quote">
-        <summary>Source code in <code>src/dirschema/json/handler.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">26</span>
+          <details class="quote">
+            <summary>Source code in <code>src/dirschema/json/handler.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">26</span>
 <span class="normal">27</span>
 <span class="normal">28</span>
 <span class="normal">29</span>
@@ -1257,17 +1258,18 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">validate_raw</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
 <h3 id="dirschema.json.handler.ValidationHandler.validate_raw" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">validate_raw</span>
+          <span class="doc doc-object-name doc-function-name">validate_raw</span>
 
   
   <span class="doc doc-labels">
@@ -1286,6 +1288,8 @@
 <p>This can be used to implement validators for files that are not JSON
 or not parsable as JSON by the adapter used in combination with the handler.</p>
 
+
+
   <p><strong>Parameters:</strong></p>
   <table>
     <thead>
@@ -1302,7 +1306,11 @@ or not parsable as JSON by the adapter used in combination with the handler.</p>
           <td>
                 <code><span title="typing.IO">IO</span>[bytes]</code>
           </td>
-          <td><p>Binary data stream</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Binary data stream</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1312,14 +1320,20 @@ or not parsable as JSON by the adapter used in combination with the handler.</p>
           <td>
                 <code>str</code>
           </td>
-          <td><p>String following the entry-point prefix, i.e.
-when used as <code>v#ENTRYPOINT://a</code> the <code>args</code> value will be "a".</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>String following the entry-point prefix, i.e.
+when used as <code>v#ENTRYPOINT://a</code> the <code>args</code> value will be "a".</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
         </tr>
     </tbody>
   </table>
+
+
 
   <p><strong>Returns:</strong></p>
   <table>
@@ -1334,26 +1348,38 @@ when used as <code>v#ENTRYPOINT://a</code> the <code>args</code> value will be "
           <td>
                 <code><span title="typing.Dict">Dict</span>[str, <span title="typing.List">List</span>[str]]</code>
           </td>
-          <td><p>The output is a dict mapping from paths (JSON Pointers) inside the</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The output is a dict mapping from paths (JSON Pointers) inside the</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td>
                 <code><span title="typing.Dict">Dict</span>[str, <span title="typing.List">List</span>[str]]</code>
           </td>
-          <td><p>object to respective collected error messages.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>object to respective collected error messages.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td>
                 <code><span title="typing.Dict">Dict</span>[str, <span title="typing.List">List</span>[str]]</code>
           </td>
-          <td><p>If there are no errors, an empty dict is returned.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>If there are no errors, an empty dict is returned.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>src/dirschema/json/handler.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">35</span>
+          <details class="quote">
+            <summary>Source code in <code>src/dirschema/json/handler.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">35</span>
 <span class="normal">36</span>
 <span class="normal">37</span>
 <span class="normal">38</span>
@@ -1391,17 +1417,18 @@ when used as <code>v#ENTRYPOINT://a</code> the <code>args</code> value will be "
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">raise</span> <span class="ne">NotImplementedError</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
 <h3 id="dirschema.json.handler.ValidationHandler.validate_json" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">validate_json</span>
+          <span class="doc doc-object-name doc-function-name">validate_json</span>
 
   
   <span class="doc doc-labels">
@@ -1415,6 +1442,8 @@ when used as <code>v#ENTRYPOINT://a</code> the <code>args</code> value will be "
   <div class="doc doc-contents ">
   
       <p>Perform custom validation on passed JSON dict.</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -1432,7 +1461,11 @@ when used as <code>v#ENTRYPOINT://a</code> the <code>args</code> value will be "
           <td>
                 <code><span title="typing.Any">Any</span></code>
           </td>
-          <td><p>Valid JSON dict loaded by a dirschema adapter.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Valid JSON dict loaded by a dirschema adapter.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1442,14 +1475,20 @@ when used as <code>v#ENTRYPOINT://a</code> the <code>args</code> value will be "
           <td>
                 <code>str</code>
           </td>
-          <td><p>String following the entry-point prefix, i.e.
-when used as <code>v#ENTRYPOINT://a</code> the <code>args</code> value will be "a".</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>String following the entry-point prefix, i.e.
+when used as <code>v#ENTRYPOINT://a</code> the <code>args</code> value will be "a".</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
         </tr>
     </tbody>
   </table>
+
+
 
   <p><strong>Returns:</strong></p>
   <table>
@@ -1464,26 +1503,38 @@ when used as <code>v#ENTRYPOINT://a</code> the <code>args</code> value will be "
           <td>
                 <code><span title="typing.Dict">Dict</span>[str, <span title="typing.List">List</span>[str]]</code>
           </td>
-          <td><p>The output is a dict mapping from paths (JSON Pointers) inside the</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The output is a dict mapping from paths (JSON Pointers) inside the</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td>
                 <code><span title="typing.Dict">Dict</span>[str, <span title="typing.List">List</span>[str]]</code>
           </td>
-          <td><p>object to respective collected error messages.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>object to respective collected error messages.</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td>
                 <code><span title="typing.Dict">Dict</span>[str, <span title="typing.List">List</span>[str]]</code>
           </td>
-          <td><p>If there are no errors, an empty dict is returned.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>If there are no errors, an empty dict is returned.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>src/dirschema/json/handler.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">55</span>
+          <details class="quote">
+            <summary>Source code in <code>src/dirschema/json/handler.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">55</span>
 <span class="normal">56</span>
 <span class="normal">57</span>
 <span class="normal">58</span>
@@ -1515,7 +1566,7 @@ when used as <code>v#ENTRYPOINT://a</code> the <code>args</code> value will be "
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">raise</span> <span class="ne">NotImplementedError</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -1655,10 +1706,10 @@ when used as <code>v#ENTRYPOINT://a</code> the <code>args</code> value will be "
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../../../..", "features": ["content.action.edit", "content.action.view", "content.code.annotate", "header.autohide", "navigation.footer", "navigation.instant", "navigation.tabs", "navigation.tabs.sticky", "navigation.tracking", "navigation.top", "search.highlight", "search.suggest"], "search": "../../../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../../../..", "features": ["content.action.edit", "content.action.view", "content.code.annotate", "header.autohide", "navigation.footer", "navigation.instant", "navigation.tabs", "navigation.tabs.sticky", "navigation.tracking", "navigation.top", "search.highlight", "search.suggest"], "search": "../../../../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../../../assets/javascripts/bundle.fac441b0.min.js"></script>
+      <script src="../../../../assets/javascripts/bundle.220ee61c.min.js"></script>
       
     
   </body>

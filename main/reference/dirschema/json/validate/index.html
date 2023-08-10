@@ -19,7 +19,7 @@
         <link rel="next" href="../../log/">
       
       <link rel="icon" href="../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.9">
+      <meta name="generator" content="mkdocs-1.5.2, mkdocs-material-9.1.21">
     
     
       
@@ -27,10 +27,10 @@
       
     
     
-      <link rel="stylesheet" href="../../../../assets/stylesheets/main.85bb2934.min.css">
+      <link rel="stylesheet" href="../../../../assets/stylesheets/main.eebd395e.min.css">
       
         
-        <link rel="stylesheet" href="../../../../assets/stylesheets/palette.a6bdf11c.min.css">
+        <link rel="stylesheet" href="../../../../assets/stylesheets/palette.ecc896b0.min.css">
       
       
 
@@ -1038,7 +1038,7 @@
 
 
 <h2 id="dirschema.json.validate.JSONValidationErrors" class="doc doc-heading">
-        <span class="doc doc-object-name doc-attribute-name">JSONValidationErrors</span>
+          <span class="doc doc-object-name doc-attribute-name">JSONValidationErrors</span>
 
   
   <span class="doc doc-labels">
@@ -1058,12 +1058,13 @@
 
 
 
+
 <div class="doc doc-object doc-function">
 
 
 
 <h2 id="dirschema.json.validate.plugin_from_uri" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">plugin_from_uri</span>
+          <span class="doc doc-object-name doc-function-name">plugin_from_uri</span>
 
 
 <a href="#dirschema.json.validate.plugin_from_uri" class="headerlink" title="Permanent link">&para;</a></h2>
@@ -1074,9 +1075,9 @@
   
       <p>Parse a validation plugin pseudo-URI, return the plugin class and args string.</p>
 
-      <details class="quote">
-        <summary>Source code in <code>src/dirschema/json/validate.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">16</span>
+          <details class="quote">
+            <summary>Source code in <code>src/dirschema/json/validate.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">16</span>
 <span class="normal">17</span>
 <span class="normal">18</span>
 <span class="normal">19</span>
@@ -1108,17 +1109,18 @@
     <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Validator entry-point not found: &#39;</span><span class="si">{</span><span class="n">ep</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
 <h2 id="dirschema.json.validate.validate_custom" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">validate_custom</span>
+          <span class="doc doc-object-name doc-function-name">validate_custom</span>
 
 
 <a href="#dirschema.json.validate.validate_custom" class="headerlink" title="Permanent link">&para;</a></h2>
@@ -1131,9 +1133,9 @@
   
       <p>Perform validation based on a validation handler string.</p>
 
-      <details class="quote">
-        <summary>Source code in <code>src/dirschema/json/validate.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">34</span>
+          <details class="quote">
+            <summary>Source code in <code>src/dirschema/json/validate.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">34</span>
 <span class="normal">35</span>
 <span class="normal">36</span>
 <span class="normal">37</span>
@@ -1147,17 +1149,18 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">h</span><span class="o">.</span><span class="n">validate_raw</span><span class="p">(</span><span class="n">dat</span><span class="p">,</span> <span class="n">h</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
 <h2 id="dirschema.json.validate.validate_jsonschema" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">validate_jsonschema</span>
+          <span class="doc doc-object-name doc-function-name">validate_jsonschema</span>
 
 
 <a href="#dirschema.json.validate.validate_jsonschema" class="headerlink" title="Permanent link">&para;</a></h2>
@@ -1170,9 +1173,9 @@
   
       <p>Perform validation of a dict based on a JSON Schema.</p>
 
-      <details class="quote">
-        <summary>Source code in <code>src/dirschema/json/validate.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">43</span>
+          <details class="quote">
+            <summary>Source code in <code>src/dirschema/json/validate.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">43</span>
 <span class="normal">44</span>
 <span class="normal">45</span>
 <span class="normal">46</span>
@@ -1192,17 +1195,18 @@
         <span class="n">errs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">verr</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">errs</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
 <h2 id="dirschema.json.validate.resolve_validator" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">resolve_validator</span>
+          <span class="doc doc-object-name doc-function-name">resolve_validator</span>
 
 
 <a href="#dirschema.json.validate.resolve_validator" class="headerlink" title="Permanent link">&para;</a></h2>
@@ -1221,9 +1225,9 @@
 If passed object is a string, will load the referenced schema
 or instantiate the custom validator (a string starting with <code>v#</code>).</p>
 
-      <details class="quote">
-        <summary>Source code in <code>src/dirschema/json/validate.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">55</span>
+          <details class="quote">
+            <summary>Source code in <code>src/dirschema/json/validate.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">55</span>
 <span class="normal">56</span>
 <span class="normal">57</span>
 <span class="normal">58</span>
@@ -1269,17 +1273,18 @@ or instantiate the custom validator (a string starting with <code>v#</code>).</p
     <span class="c1"># custom validation, not json schema</span>
     <span class="k">return</span> <span class="n">plugin_from_uri</span><span class="p">(</span><span class="n">schema_or_ref</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
 <h2 id="dirschema.json.validate.validate_metadata" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">validate_metadata</span>
+          <span class="doc doc-object-name doc-function-name">validate_metadata</span>
 
 
 <a href="#dirschema.json.validate.validate_metadata" class="headerlink" title="Permanent link">&para;</a></h2>
@@ -1300,9 +1305,9 @@ pointing to a JSON Schema, or a custom validator handler string.</p>
 <p>Returns a dict mapping from JSON Pointers to a list of errors in that location.
 If the dict is empty, no validation errors were detected.</p>
 
-      <details class="quote">
-        <summary>Source code in <code>src/dirschema/json/validate.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 80</span>
+          <details class="quote">
+            <summary>Source code in <code>src/dirschema/json/validate.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 80</span>
 <span class="normal"> 81</span>
 <span class="normal"> 82</span>
 <span class="normal"> 83</span>
@@ -1354,7 +1359,7 @@ If the dict is empty, no validation errors were detected.</p>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">validate_jsonschema</span><span class="p">(</span><span class="n">dat</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -1485,10 +1490,10 @@ If the dict is empty, no validation errors were detected.</p>
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../../../..", "features": ["content.action.edit", "content.action.view", "content.code.annotate", "header.autohide", "navigation.footer", "navigation.instant", "navigation.tabs", "navigation.tabs.sticky", "navigation.tracking", "navigation.top", "search.highlight", "search.suggest"], "search": "../../../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../../../..", "features": ["content.action.edit", "content.action.view", "content.code.annotate", "header.autohide", "navigation.footer", "navigation.instant", "navigation.tabs", "navigation.tabs.sticky", "navigation.tracking", "navigation.top", "search.highlight", "search.suggest"], "search": "../../../../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../../../assets/javascripts/bundle.fac441b0.min.js"></script>
+      <script src="../../../../assets/javascripts/bundle.220ee61c.min.js"></script>
       
     
   </body>

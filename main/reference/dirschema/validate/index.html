@@ -19,7 +19,7 @@
         <link rel="next" href="../../../contributing/">
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.9">
+      <meta name="generator" content="mkdocs-1.5.2, mkdocs-material-9.1.21">
     
     
       
@@ -27,10 +27,10 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.85bb2934.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.eebd395e.min.css">
       
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/palette.a6bdf11c.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ecc896b0.min.css">
       
       
 
@@ -1296,7 +1296,7 @@
 
 
 <h2 id="dirschema.validate.DSValidationErrors" class="doc doc-heading">
-        <span class="doc doc-object-name doc-attribute-name">DSValidationErrors</span>
+          <span class="doc doc-object-name doc-attribute-name">DSValidationErrors</span>
 
   
   <span class="doc doc-labels">
@@ -1305,7 +1305,7 @@
 
 <a href="#dirschema.validate.DSValidationErrors" class="headerlink" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="n">DSValidationErrors</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">[</span>
-    <span class="n">Tuple</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="bp">Ellipsis</span><span class="p">],</span> <span class="n">DSValidationError</span>
+    <span class="n">Tuple</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="o">...</span><span class="p">],</span> <span class="n">DSValidationError</span>
 <span class="p">]</span>
 </code></pre></div>
 
@@ -1323,7 +1323,7 @@ if the schema is loaded as a JSON dict.</p>
 
 
 <h2 id="dirschema.validate.DSValidationResult" class="doc doc-heading">
-        <span class="doc doc-object-name doc-attribute-name">DSValidationResult</span>
+          <span class="doc doc-object-name doc-attribute-name">DSValidationResult</span>
 
   
   <span class="doc doc-labels">
@@ -1348,23 +1348,22 @@ corresponding validation errors for all entities where validation failed.</p>
 
 
 <h2 id="dirschema.validate.DSValidationError" class="doc doc-heading">
-        <span class="doc doc-object-name doc-class-name">DSValidationError</span>
+          <span class="doc doc-object-name doc-class-name">DSValidationError</span>
 
 
 <a href="#dirschema.validate.DSValidationError" class="headerlink" title="Permanent link">&para;</a></h2>
 
 
   <div class="doc doc-contents ">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
 
   
       <p>A single Dirschema validation error.</p>
 
-
-        <details class="quote">
-          <summary>Source code in <code>src/dirschema/validate.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">43</span>
+            <details class="quote">
+              <summary>Source code in <code>src/dirschema/validate.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">43</span>
 <span class="normal">44</span>
 <span class="normal">45</span>
 <span class="normal">46</span>
@@ -1380,7 +1379,7 @@ corresponding validation errors for all entities where validation failed.</p>
     <span class="n">err</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">JSONValidationErrors</span><span class="p">]</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Error object (error message or a dict with refined validation errors).&quot;&quot;&quot;</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
@@ -1397,7 +1396,7 @@ corresponding validation errors for all entities where validation failed.</p>
 
 
 <h3 id="dirschema.validate.DSValidationError.path" class="doc doc-heading">
-        <span class="doc doc-object-name doc-attribute-name">path</span>
+          <span class="doc doc-object-name doc-attribute-name">path</span>
 
   
   <span class="doc doc-labels">
@@ -1420,7 +1419,7 @@ corresponding validation errors for all entities where validation failed.</p>
 
 
 <h3 id="dirschema.validate.DSValidationError.err" class="doc doc-heading">
-        <span class="doc doc-object-name doc-attribute-name">err</span>
+          <span class="doc doc-object-name doc-attribute-name">err</span>
 
   
   <span class="doc doc-labels">
@@ -1453,24 +1452,23 @@ corresponding validation errors for all entities where validation failed.</p>
 
 
 <h2 id="dirschema.validate.DSEvalCtx" class="doc doc-heading">
-        <span class="doc doc-object-name doc-class-name">DSEvalCtx</span>
+          <span class="doc doc-object-name doc-class-name">DSEvalCtx</span>
 
 
 <a href="#dirschema.validate.DSEvalCtx" class="headerlink" title="Permanent link">&para;</a></h2>
 
 
   <div class="doc doc-contents ">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
 
   
       <p>DirSchema evaluation context, used like a Reader Monad.</p>
 <p>Contains information that is required to evaluate a rule for a path.</p>
 
-
-        <details class="quote">
-          <summary>Source code in <code>src/dirschema/validate.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 66</span>
+            <details class="quote">
+              <summary>Source code in <code>src/dirschema/validate.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 66</span>
 <span class="normal"> 67</span>
 <span class="normal"> 68</span>
 <span class="normal"> 69</span>
@@ -1654,7 +1652,7 @@ corresponding validation errors for all entities where validation failed.</p>
         <span class="k">for</span> <span class="n">err_dict</span> <span class="ow">in</span> <span class="n">err_dicts</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">err_dict</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
@@ -1671,7 +1669,7 @@ corresponding validation errors for all entities where validation failed.</p>
 
 
 <h3 id="dirschema.validate.DSEvalCtx.dirAdapter" class="doc doc-heading">
-        <span class="doc doc-object-name doc-attribute-name">dirAdapter</span>
+          <span class="doc doc-object-name doc-attribute-name">dirAdapter</span>
 
   
   <span class="doc doc-labels">
@@ -1694,12 +1692,12 @@ corresponding validation errors for all entities where validation failed.</p>
 
 
 <h3 id="dirschema.validate.DSEvalCtx.metaConvention" class="doc doc-heading">
-        <span class="doc doc-object-name doc-attribute-name">metaConvention</span>
+          <span class="doc doc-object-name doc-attribute-name">metaConvention</span>
 
   
   <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
       <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
   </span>
 
 <a href="#dirschema.validate.DSEvalCtx.metaConvention" class="headerlink" title="Permanent link">&para;</a></h3>
@@ -1718,12 +1716,12 @@ corresponding validation errors for all entities where validation failed.</p>
 
 
 <h3 id="dirschema.validate.DSEvalCtx.filePath" class="doc doc-heading">
-        <span class="doc doc-object-name doc-attribute-name">filePath</span>
+          <span class="doc doc-object-name doc-attribute-name">filePath</span>
 
   
   <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
       <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
   </span>
 
 <a href="#dirschema.validate.DSEvalCtx.filePath" class="headerlink" title="Permanent link">&para;</a></h3>
@@ -1742,12 +1740,12 @@ corresponding validation errors for all entities where validation failed.</p>
 
 
 <h3 id="dirschema.validate.DSEvalCtx.location" class="doc doc-heading">
-        <span class="doc doc-object-name doc-attribute-name">location</span>
+          <span class="doc doc-object-name doc-attribute-name">location</span>
 
   
   <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
       <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
   </span>
 
 <a href="#dirschema.validate.DSEvalCtx.location" class="headerlink" title="Permanent link">&para;</a></h3>
@@ -1763,12 +1761,13 @@ corresponding validation errors for all entities where validation failed.</p>
 
 
 
+
 <div class="doc doc-object doc-function">
 
 
 
 <h3 id="dirschema.validate.DSEvalCtx.fresh" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">fresh</span>
+          <span class="doc doc-object-name doc-function-name">fresh</span>
 
   
   <span class="doc doc-labels">
@@ -1776,16 +1775,16 @@ corresponding validation errors for all entities where validation failed.</p>
   </span>
 
 <a href="#dirschema.validate.DSEvalCtx.fresh" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="n">fresh</span><span class="p">(</span><span class="n">rule</span><span class="p">:</span> <span class="n">DSRule</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">fresh</span><span class="p">(</span><span class="n">rule</span><span class="p">:</span> <span class="n">DSRule</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">DSRule</span><span class="p">)</span>
 </code></pre></div>
 
   <div class="doc doc-contents ">
   
       <p>Initialize a fresh evaluation context.</p>
 
-      <details class="quote">
-        <summary>Source code in <code>src/dirschema/validate.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 98</span>
+          <details class="quote">
+            <summary>Source code in <code>src/dirschema/validate.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 98</span>
 <span class="normal"> 99</span>
 <span class="normal">100</span>
 <span class="normal">101</span>
@@ -1795,17 +1794,18 @@ corresponding validation errors for all entities where validation failed.</p>
     <span class="n">ret</span> <span class="o">=</span> <span class="n">DSEvalCtx</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># initialize most fields from passed kwargs</span>
     <span class="k">return</span> <span class="n">ret</span><span class="o">.</span><span class="n">descend</span><span class="p">(</span><span class="n">rule</span><span class="p">)</span>  <span class="c1"># initialize match* fields from rule</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
 <h3 id="dirschema.validate.DSEvalCtx.descend" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">descend</span>
+          <span class="doc doc-object-name doc-function-name">descend</span>
 
 
 <a href="#dirschema.validate.DSEvalCtx.descend" class="headerlink" title="Permanent link">&para;</a></h3>
@@ -1823,9 +1823,9 @@ corresponding validation errors for all entities where validation failed.</p>
 and the key in the parent rule that is used to access the sub-rule.</p>
 <p>This will not preserve the parent errors (use <code>add_errors</code> to merge).</p>
 
-      <details class="quote">
-        <summary>Source code in <code>src/dirschema/validate.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">104</span>
+          <details class="quote">
+            <summary>Source code in <code>src/dirschema/validate.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">104</span>
 <span class="normal">105</span>
 <span class="normal">106</span>
 <span class="normal">107</span>
@@ -1893,17 +1893,18 @@ and the key in the parent rule that is used to access the sub-rule.</p>
 
     <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
 <h3 id="dirschema.validate.DSEvalCtx.add_error" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">add_error</span>
+          <span class="doc doc-object-name doc-function-name">add_error</span>
 
 
 <a href="#dirschema.validate.DSEvalCtx.add_error" class="headerlink" title="Permanent link">&para;</a></h3>
@@ -1920,9 +1921,9 @@ and the key in the parent rule that is used to access the sub-rule.</p>
 <p>Will extend current location with <code>child</code>, if given,
 will use passed <code>path</code>, if given.</p>
 
-      <details class="quote">
-        <summary>Source code in <code>src/dirschema/validate.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">139</span>
+          <details class="quote">
+            <summary>Source code in <code>src/dirschema/validate.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">139</span>
 <span class="normal">140</span>
 <span class="normal">141</span>
 <span class="normal">142</span>
@@ -1950,17 +1951,18 @@ will use passed <code>path</code>, if given.</p>
     <span class="n">fp</span> <span class="o">=</span> <span class="n">path</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">filePath</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">loc</span><span class="p">)]</span> <span class="o">=</span> <span class="n">DSValidationError</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">fp</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="n">err</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
 <h3 id="dirschema.validate.DSEvalCtx.add_errors" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">add_errors</span>
+          <span class="doc doc-object-name doc-function-name">add_errors</span>
 
 
 <a href="#dirschema.validate.DSEvalCtx.add_errors" class="headerlink" title="Permanent link">&para;</a></h3>
@@ -1971,9 +1973,9 @@ will use passed <code>path</code>, if given.</p>
   
       <p>Merge all passed error dicts into the errors of this context.</p>
 
-      <details class="quote">
-        <summary>Source code in <code>src/dirschema/validate.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">154</span>
+          <details class="quote">
+            <summary>Source code in <code>src/dirschema/validate.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">154</span>
 <span class="normal">155</span>
 <span class="normal">156</span>
 <span class="normal">157</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">add_errors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">err_dicts</span><span class="p">):</span>
@@ -1981,7 +1983,7 @@ will use passed <code>path</code>, if given.</p>
     <span class="k">for</span> <span class="n">err_dict</span> <span class="ow">in</span> <span class="n">err_dicts</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">err_dict</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -1999,7 +2001,7 @@ will use passed <code>path</code>, if given.</p>
 
 
 <h2 id="dirschema.validate.DSValidator" class="doc doc-heading">
-        <span class="doc doc-object-name doc-class-name">DSValidator</span>
+          <span class="doc doc-object-name doc-class-name">DSValidator</span>
 
 
 <a href="#dirschema.validate.DSValidator" class="headerlink" title="Permanent link">&para;</a></h2>
@@ -2010,10 +2012,9 @@ will use passed <code>path</code>, if given.</p>
   
       <p>Validator class that performs dirschema validation for a given dirschema.</p>
 
-
-        <details class="quote">
-          <summary>Source code in <code>src/dirschema/validate.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">160</span>
+            <details class="quote">
+              <summary>Source code in <code>src/dirschema/validate.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">160</span>
 <span class="normal">161</span>
 <span class="normal">162</span>
 <span class="normal">163</span>
@@ -2643,11 +2644,12 @@ will use passed <code>path</code>, if given.</p>
         <span class="c1"># assert curCtx.failed == False</span>
         <span class="k">return</span> <span class="kc">True</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -2662,7 +2664,7 @@ will use passed <code>path</code>, if given.</p>
 
 
 <h3 id="dirschema.validate.DSValidator.__init__" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">__init__</span>
+          <span class="doc doc-object-name doc-function-name">__init__</span>
 
 
 <a href="#dirschema.validate.DSValidator.__init__" class="headerlink" title="Permanent link">&para;</a></h3>
@@ -2679,9 +2681,9 @@ will use passed <code>path</code>, if given.</p>
       <p>Construct validator instance from given schema or schema location.</p>
 <p>Accepts DSRule, raw bool or Rule, or a str/Path that is interpreted as location.</p>
 
-      <details class="quote">
-        <summary>Source code in <code>src/dirschema/validate.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">163</span>
+          <details class="quote">
+            <summary>Source code in <code>src/dirschema/validate.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">163</span>
 <span class="normal">164</span>
 <span class="normal">165</span>
 <span class="normal">166</span>
@@ -2767,17 +2769,18 @@ will use passed <code>path</code>, if given.</p>
         <span class="sa">f</span><span class="s2">&quot;local_basedir: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">local_basedir</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
 <h3 id="dirschema.validate.DSValidator.errors_to_json" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">errors_to_json</span>
+          <span class="doc doc-object-name doc-function-name">errors_to_json</span>
 
   
   <span class="doc doc-labels">
@@ -2793,9 +2796,9 @@ will use passed <code>path</code>, if given.</p>
       <p>Convert the validation result to a JSON-compatible dict.</p>
 <p>Resulting structure is (file path -&gt; schema location -&gt; error message or dict).</p>
 
-      <details class="quote">
-        <summary>Source code in <code>src/dirschema/validate.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">207</span>
+          <details class="quote">
+            <summary>Source code in <code>src/dirschema/validate.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">207</span>
 <span class="normal">208</span>
 <span class="normal">209</span>
 <span class="normal">210</span>
@@ -2821,17 +2824,18 @@ will use passed <code>path</code>, if given.</p>
         <span class="k">for</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">file_errors</span> <span class="ow">in</span> <span class="n">errs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
     <span class="p">}</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
 <h3 id="dirschema.validate.DSValidator.format_errors" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">format_errors</span>
+          <span class="doc doc-object-name doc-function-name">format_errors</span>
 
   
   <span class="doc doc-labels">
@@ -2840,7 +2844,8 @@ will use passed <code>path</code>, if given.</p>
 
 <a href="#dirschema.validate.DSValidator.format_errors" class="headerlink" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="n">format_errors</span><span class="p">(</span>
-    <span class="n">errs</span><span class="p">:</span> <span class="n">DSValidationResult</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">errs</span><span class="p">:</span> <span class="n">DSValidationResult</span><span class="p">,</span>
+    <span class="n">stream</span><span class="p">:</span> <span class="n">DSValidationResult</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
 </code></pre></div>
 
@@ -2849,9 +2854,9 @@ will use passed <code>path</code>, if given.</p>
       <p>Report errors as YAML output.</p>
 <p>If a stream is provided, prints it out. Otherwise, returns it as string.</p>
 
-      <details class="quote">
-        <summary>Source code in <code>src/dirschema/validate.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">221</span>
+          <details class="quote">
+            <summary>Source code in <code>src/dirschema/validate.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">221</span>
 <span class="normal">222</span>
 <span class="normal">223</span>
 <span class="normal">224</span>
@@ -2873,22 +2878,24 @@ will use passed <code>path</code>, if given.</p>
         <span class="k">return</span> <span class="n">of</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span>
     <span class="k">return</span> <span class="kc">None</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
 <h3 id="dirschema.validate.DSValidator.validate" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">validate</span>
+          <span class="doc doc-object-name doc-function-name">validate</span>
 
 
 <a href="#dirschema.validate.DSValidator.validate" class="headerlink" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="n">validate</span><span class="p">(</span>
-    <span class="n">root_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="n">IDirectory</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="n">root_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="n">IDirectory</span><span class="p">],</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="n">IDirectory</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DSValidationResult</span>
 </code></pre></div>
 
@@ -2904,6 +2911,8 @@ file with internal structure.</p>
 matching the convention will be filtered out from the set of validated
 paths.</p>
 
+
+
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
@@ -2917,20 +2926,28 @@ paths.</p>
           <td>
                 <code><a class="autorefs autorefs-internal" title="dirschema.validate.DSValidationResult" href="#dirschema.validate.DSValidationResult">DSValidationResult</a></code>
           </td>
-          <td><p>Error dict that is empty in case of success, or otherwise contains</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Error dict that is empty in case of success, or otherwise contains</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td>
                 <code><a class="autorefs autorefs-internal" title="dirschema.validate.DSValidationResult" href="#dirschema.validate.DSValidationResult">DSValidationResult</a></code>
           </td>
-          <td><p>for each path with validation errors another dict with the errors.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>for each path with validation errors another dict with the errors.</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>src/dirschema/validate.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">233</span>
+          <details class="quote">
+            <summary>Source code in <code>src/dirschema/validate.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">233</span>
 <span class="normal">234</span>
 <span class="normal">235</span>
 <span class="normal">236</span>
@@ -3018,17 +3035,18 @@ paths.</p>
             <span class="p">}</span>
     <span class="k">return</span> <span class="n">errors</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
 <h3 id="dirschema.validate.DSValidator.validate_path" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">validate_path</span>
+          <span class="doc doc-object-name doc-function-name">validate_path</span>
 
 
 <a href="#dirschema.validate.DSValidator.validate_path" class="headerlink" title="Permanent link">&para;</a></h3>
@@ -3047,9 +3065,9 @@ failure (i.e. match/rewrite, primitive rules, complex logic rules,
 <code>next</code> sub-rule)</p>
 <p>Returns True iff validation of this rule was successful.</p>
 
-      <details class="quote">
-        <summary>Source code in <code>src/dirschema/validate.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">278</span>
+          <details class="quote">
+            <summary>Source code in <code>src/dirschema/validate.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">278</span>
 <span class="normal">279</span>
 <span class="normal">280</span>
 <span class="normal">281</span>
@@ -3443,7 +3461,7 @@ failure (i.e. match/rewrite, primitive rules, complex logic rules,
     <span class="c1"># assert curCtx.failed == False</span>
     <span class="k">return</span> <span class="kc">True</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -3455,6 +3473,7 @@ failure (i.e. match/rewrite, primitive rules, complex logic rules,
   </div>
 
 </div>
+
 
 
 <div class="doc doc-object doc-function">
@@ -3462,7 +3481,7 @@ failure (i.e. match/rewrite, primitive rules, complex logic rules,
 
 
 <h2 id="dirschema.validate.loc_to_jsonpointer" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">loc_to_jsonpointer</span>
+          <span class="doc doc-object-name doc-function-name">loc_to_jsonpointer</span>
 
 
 <a href="#dirschema.validate.loc_to_jsonpointer" class="headerlink" title="Permanent link">&para;</a></h2>
@@ -3473,25 +3492,26 @@ failure (i.e. match/rewrite, primitive rules, complex logic rules,
   
       <p>Convert a list of string keys and int indices to a JSON Pointer string.</p>
 
-      <details class="quote">
-        <summary>Source code in <code>src/dirschema/validate.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">29</span>
+          <details class="quote">
+            <summary>Source code in <code>src/dirschema/validate.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">29</span>
 <span class="normal">30</span>
 <span class="normal">31</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">loc_to_jsonpointer</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert a list of string keys and int indices to a JSON Pointer string.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">lst</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
 <h2 id="dirschema.validate.json_dict" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">json_dict</span>
+          <span class="doc doc-object-name doc-function-name">json_dict</span>
 
 
 <a href="#dirschema.validate.json_dict" class="headerlink" title="Permanent link">&para;</a></h2>
@@ -3504,9 +3524,9 @@ failure (i.e. match/rewrite, primitive rules, complex logic rules,
 <p>This uses a round-trip via JSON-serialization and deserialization to get rid
 of non-JSON entities (the <code>BaseModel.dict()</code> method yields possibly non-JSON dicts).</p>
 
-      <details class="quote">
-        <summary>Source code in <code>src/dirschema/validate.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">34</span>
+          <details class="quote">
+            <summary>Source code in <code>src/dirschema/validate.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">34</span>
 <span class="normal">35</span>
 <span class="normal">36</span>
 <span class="normal">37</span>
@@ -3520,7 +3540,7 @@ of non-JSON entities (the <code>BaseModel.dict()</code> method yields possibly n
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">json</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -3651,10 +3671,10 @@ of non-JSON entities (the <code>BaseModel.dict()</code> method yields possibly n
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../../..", "features": ["content.action.edit", "content.action.view", "content.code.annotate", "header.autohide", "navigation.footer", "navigation.instant", "navigation.tabs", "navigation.tabs.sticky", "navigation.tracking", "navigation.top", "search.highlight", "search.suggest"], "search": "../../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["content.action.edit", "content.action.view", "content.code.annotate", "header.autohide", "navigation.footer", "navigation.instant", "navigation.tabs", "navigation.tabs.sticky", "navigation.tracking", "navigation.top", "search.highlight", "search.suggest"], "search": "../../../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.fac441b0.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.220ee61c.min.js"></script>
       
     
   </body>

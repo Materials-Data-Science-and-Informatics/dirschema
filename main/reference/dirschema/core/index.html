@@ -19,7 +19,7 @@
         <link rel="next" href="../json/">
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.9">
+      <meta name="generator" content="mkdocs-1.5.2, mkdocs-material-9.1.21">
     
     
       
@@ -27,10 +27,10 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.85bb2934.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.eebd395e.min.css">
       
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/palette.a6bdf11c.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ecc896b0.min.css">
       
       
 
@@ -1320,7 +1320,7 @@
 
 
 <h2 id="dirschema.core.DEF_MATCH" class="doc doc-heading">
-        <span class="doc doc-object-name doc-attribute-name">DEF_MATCH</span>
+          <span class="doc doc-object-name doc-attribute-name">DEF_MATCH</span>
 
   
   <span class="doc doc-labels">
@@ -1343,7 +1343,7 @@
 
 
 <h2 id="dirschema.core.DEF_REWRITE" class="doc doc-heading">
-        <span class="doc doc-object-name doc-attribute-name">DEF_REWRITE</span>
+          <span class="doc doc-object-name doc-attribute-name">DEF_REWRITE</span>
 
   
   <span class="doc doc-labels">
@@ -1367,15 +1367,15 @@
 
 
 <h2 id="dirschema.core.MetaConvention" class="doc doc-heading">
-        <span class="doc doc-object-name doc-class-name">MetaConvention</span>
+          <span class="doc doc-object-name doc-class-name">MetaConvention</span>
 
 
 <a href="#dirschema.core.MetaConvention" class="headerlink" title="Permanent link">&para;</a></h2>
 
 
   <div class="doc doc-contents ">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
 
   
       <p>Filename convention for metadata files that are associated with other entities.</p>
@@ -1383,10 +1383,9 @@
 as json, or metadata concerning directories.</p>
 <p>At the same time, these files are ignored by themselves and act as "sidecar" files.</p>
 
-
-        <details class="quote">
-          <summary>Source code in <code>src/dirschema/core.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">20</span>
+            <details class="quote">
+              <summary>Source code in <code>src/dirschema/core.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">20</span>
 <span class="normal">21</span>
 <span class="normal">22</span>
 <span class="normal">23</span>
@@ -1528,11 +1527,12 @@ as json, or metadata concerning directories.</p>
             <span class="n">newp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metaname</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">()</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="o">*</span><span class="n">newp</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -1547,7 +1547,7 @@ as json, or metadata concerning directories.</p>
 
 
 <h3 id="dirschema.core.MetaConvention.check_valid" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">check_valid</span>
+          <span class="doc doc-object-name doc-function-name">check_valid</span>
 
 
 <a href="#dirschema.core.MetaConvention.check_valid" class="headerlink" title="Permanent link">&para;</a></h3>
@@ -1558,9 +1558,9 @@ as json, or metadata concerning directories.</p>
   
       <p>Check that at least one filename extension is non-empty.</p>
 
-      <details class="quote">
-        <summary>Source code in <code>src/dirschema/core.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">34</span>
+          <details class="quote">
+            <summary>Source code in <code>src/dirschema/core.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">34</span>
 <span class="normal">35</span>
 <span class="normal">36</span>
 <span class="normal">37</span>
@@ -1574,17 +1574,18 @@ as json, or metadata concerning directories.</p>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;At least one of filePrefix or fileSuffix must be set!&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">values</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
 <h3 id="dirschema.core.MetaConvention.to_tuple" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">to_tuple</span>
+          <span class="doc doc-object-name doc-function-name">to_tuple</span>
 
 
 <a href="#dirschema.core.MetaConvention.to_tuple" class="headerlink" title="Permanent link">&para;</a></h3>
@@ -1595,25 +1596,26 @@ as json, or metadata concerning directories.</p>
   
       <p>Convert convention instance to tuple (e.g. used within CLI).</p>
 
-      <details class="quote">
-        <summary>Source code in <code>src/dirschema/core.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">42</span>
+          <details class="quote">
+            <summary>Source code in <code>src/dirschema/core.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">42</span>
 <span class="normal">43</span>
 <span class="normal">44</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">to_tuple</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert convention instance to tuple (e.g. used within CLI).&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pathPrefix</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pathSuffix</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filePrefix</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileSuffix</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
 <h3 id="dirschema.core.MetaConvention.from_tuple" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">from_tuple</span>
+          <span class="doc doc-object-name doc-function-name">from_tuple</span>
 
   
   <span class="doc doc-labels">
@@ -1628,9 +1630,9 @@ as json, or metadata concerning directories.</p>
   
       <p>Return new metadata file convention.</p>
 
-      <details class="quote">
-        <summary>Source code in <code>src/dirschema/core.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">46</span>
+          <details class="quote">
+            <summary>Source code in <code>src/dirschema/core.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">46</span>
 <span class="normal">47</span>
 <span class="normal">48</span>
 <span class="normal">49</span>
@@ -1642,17 +1644,18 @@ as json, or metadata concerning directories.</p>
         <span class="n">pathPrefix</span><span class="o">=</span><span class="n">pp</span><span class="p">,</span> <span class="n">pathSuffix</span><span class="o">=</span><span class="n">ps</span><span class="p">,</span> <span class="n">filePrefix</span><span class="o">=</span><span class="n">fp</span><span class="p">,</span> <span class="n">fileSuffix</span><span class="o">=</span><span class="n">fs</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
 <h3 id="dirschema.core.MetaConvention.is_meta" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">is_meta</span>
+          <span class="doc doc-object-name doc-function-name">is_meta</span>
 
 
 <a href="#dirschema.core.MetaConvention.is_meta" class="headerlink" title="Permanent link">&para;</a></h3>
@@ -1663,9 +1666,9 @@ as json, or metadata concerning directories.</p>
   
       <p>Check whether given path is a metadata file according to the convention.</p>
 
-      <details class="quote">
-        <summary>Source code in <code>src/dirschema/core.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">53</span>
+          <details class="quote">
+            <summary>Source code in <code>src/dirschema/core.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">53</span>
 <span class="normal">54</span>
 <span class="normal">55</span>
 <span class="normal">56</span>
@@ -1695,17 +1698,18 @@ as json, or metadata concerning directories.</p>
     <span class="n">ps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pathSuffix</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span> <span class="ow">or</span> <span class="n">prts</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">pathSuffix</span>
     <span class="k">return</span> <span class="n">pp</span> <span class="ow">and</span> <span class="n">ps</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
 <h3 id="dirschema.core.MetaConvention.meta_for" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">meta_for</span>
+          <span class="doc doc-object-name doc-function-name">meta_for</span>
 
 
 <a href="#dirschema.core.MetaConvention.meta_for" class="headerlink" title="Permanent link">&para;</a></h3>
@@ -1716,9 +1720,9 @@ as json, or metadata concerning directories.</p>
   
       <p>Return metadata filename for provided path, based on this convention.</p>
 
-      <details class="quote">
-        <summary>Source code in <code>src/dirschema/core.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">69</span>
+          <details class="quote">
+            <summary>Source code in <code>src/dirschema/core.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">69</span>
 <span class="normal">70</span>
 <span class="normal">71</span>
 <span class="normal">72</span>
@@ -1762,7 +1766,7 @@ as json, or metadata concerning directories.</p>
         <span class="n">newp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metaname</span><span class="p">)</span>
     <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">()</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="o">*</span><span class="n">newp</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -1780,24 +1784,23 @@ as json, or metadata concerning directories.</p>
 
 
 <h2 id="dirschema.core.PathSlice" class="doc doc-heading">
-        <span class="doc doc-object-name doc-class-name">PathSlice</span>
+          <span class="doc doc-object-name doc-class-name">PathSlice</span>
 
 
 <a href="#dirschema.core.PathSlice" class="headerlink" title="Permanent link">&para;</a></h2>
 
 
   <div class="doc doc-contents ">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
 
   
       <p>Helper class to slice into path segments and do regex-based match/substitution.</p>
 <p>Invariant: into(path, sl).unslice() == path for all sl and path.</p>
 
-
-        <details class="quote">
-          <summary>Source code in <code>src/dirschema/core.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 93</span>
+            <details class="quote">
+              <summary>Source code in <code>src/dirschema/core.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 93</span>
 <span class="normal"> 94</span>
 <span class="normal"> 95</span>
 <span class="normal"> 96</span>
@@ -1917,11 +1920,12 @@ as json, or metadata concerning directories.</p>
             <span class="k">return</span> <span class="n">ret</span>
         <span class="k">return</span> <span class="kc">None</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -1936,7 +1940,7 @@ as json, or metadata concerning directories.</p>
 
 
 <h3 id="dirschema.core.PathSlice.into" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">into</span>
+          <span class="doc doc-object-name doc-function-name">into</span>
 
   
   <span class="doc doc-labels">
@@ -1957,9 +1961,9 @@ as json, or metadata concerning directories.</p>
 <p>Slice semantics is mostly like Python, except that stop=0 means
 "until the end", so that [0:0] means the full path.</p>
 
-      <details class="quote">
-        <summary>Source code in <code>src/dirschema/core.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">103</span>
+          <details class="quote">
+            <summary>Source code in <code>src/dirschema/core.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">103</span>
 <span class="normal">104</span>
 <span class="normal">105</span>
 <span class="normal">106</span>
@@ -1995,17 +1999,18 @@ as json, or metadata concerning directories.</p>
         <span class="n">sliceSuf</span><span class="o">=</span><span class="n">suf</span> <span class="k">if</span> <span class="n">suf</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
 <h3 id="dirschema.core.PathSlice.unslice" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">unslice</span>
+          <span class="doc doc-object-name doc-function-name">unslice</span>
 
 
 <a href="#dirschema.core.PathSlice.unslice" class="headerlink" title="Permanent link">&para;</a></h3>
@@ -2016,25 +2021,26 @@ as json, or metadata concerning directories.</p>
   
       <p>Inverse of slice operation (recovers complete path string).</p>
 
-      <details class="quote">
-        <summary>Source code in <code>src/dirschema/core.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">122</span>
+          <details class="quote">
+            <summary>Source code in <code>src/dirschema/core.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">122</span>
 <span class="normal">123</span>
 <span class="normal">124</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">unslice</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Inverse of slice operation (recovers complete path string).&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">slicePre</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sliceStr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sliceSuf</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span><span class="p">])</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
 <h3 id="dirschema.core.PathSlice.match" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">match</span>
+          <span class="doc doc-object-name doc-function-name">match</span>
 
 
 <a href="#dirschema.core.PathSlice.match" class="headerlink" title="Permanent link">&para;</a></h3>
@@ -2045,9 +2051,9 @@ as json, or metadata concerning directories.</p>
   
       <p>Do full regex match on current slice.</p>
 
-      <details class="quote">
-        <summary>Source code in <code>src/dirschema/core.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">129</span>
+          <details class="quote">
+            <summary>Source code in <code>src/dirschema/core.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">129</span>
 <span class="normal">130</span>
 <span class="normal">131</span>
 <span class="normal">132</span>
@@ -2059,17 +2065,18 @@ as json, or metadata concerning directories.</p>
         <span class="n">pat</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">pat</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">pat</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sliceStr</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
 <h3 id="dirschema.core.PathSlice.rewrite" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">rewrite</span>
+          <span class="doc doc-object-name doc-function-name">rewrite</span>
 
 
 <a href="#dirschema.core.PathSlice.rewrite" class="headerlink" title="Permanent link">&para;</a></h3>
@@ -2088,9 +2095,9 @@ Returns new PathSlice with possibly rewritten slice.
 Returns None if match fails.
 Raises exception of rewriting fails due to e.g. invalid capture groups.</p>
 
-      <details class="quote">
-        <summary>Source code in <code>src/dirschema/core.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">136</span>
+          <details class="quote">
+            <summary>Source code in <code>src/dirschema/core.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">136</span>
 <span class="normal">137</span>
 <span class="normal">138</span>
 <span class="normal">139</span>
@@ -2124,7 +2131,7 @@ Raises exception of rewriting fails due to e.g. invalid capture groups.</p>
         <span class="k">return</span> <span class="n">ret</span>
     <span class="k">return</span> <span class="kc">None</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -2142,23 +2149,22 @@ Raises exception of rewriting fails due to e.g. invalid capture groups.</p>
 
 
 <h2 id="dirschema.core.JSONSchema" class="doc doc-heading">
-        <span class="doc doc-object-name doc-class-name">JSONSchema</span>
+          <span class="doc doc-object-name doc-class-name">JSONSchema</span>
 
 
 <a href="#dirschema.core.JSONSchema" class="headerlink" title="Permanent link">&para;</a></h2>
 
 
   <div class="doc doc-contents ">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
 
   
       <p>Helper class wrapping an arbitrary JSON Schema to be acceptable for pydantic.</p>
 
-
-        <details class="quote">
-          <summary>Source code in <code>src/dirschema/core.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">155</span>
+            <details class="quote">
+              <summary>Source code in <code>src/dirschema/core.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">155</span>
 <span class="normal">156</span>
 <span class="normal">157</span>
 <span class="normal">158</span>
@@ -2180,7 +2186,7 @@ Raises exception of rewriting fails due to e.g. invalid capture groups.</p>
         <span class="n">Draft202012Validator</span><span class="o">.</span><span class="n">check_schema</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>  <span class="c1"># throws SchemaError if schema is invalid</span>
         <span class="k">return</span> <span class="n">v</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
@@ -2207,25 +2213,24 @@ Raises exception of rewriting fails due to e.g. invalid capture groups.</p>
 
 
 <h2 id="dirschema.core.TypeEnum" class="doc doc-heading">
-        <span class="doc doc-object-name doc-class-name">TypeEnum</span>
+          <span class="doc doc-object-name doc-class-name">TypeEnum</span>
 
 
 <a href="#dirschema.core.TypeEnum" class="headerlink" title="Permanent link">&para;</a></h2>
 
 
   <div class="doc doc-contents ">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="enum.Enum">Enum</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="enum.Enum">Enum</span></code></p>
 
   
       <p>Possible values for a path type inside a dirschema rule.</p>
 <p>MISSING means that the path must not exist (i.e. neither file or directory),
 whereas ANY means that any of these options is fine, as long as the path exists.</p>
 
-
-        <details class="quote">
-          <summary>Source code in <code>src/dirschema/core.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">168</span>
+            <details class="quote">
+              <summary>Source code in <code>src/dirschema/core.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">168</span>
 <span class="normal">169</span>
 <span class="normal">170</span>
 <span class="normal">171</span>
@@ -2271,11 +2276,12 @@ whereas ANY means that any of these options is fine, as long as the path exists.
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="kc">True</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -2290,7 +2296,7 @@ whereas ANY means that any of these options is fine, as long as the path exists.
 
 
 <h3 id="dirschema.core.TypeEnum.is_satisfied" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">is_satisfied</span>
+          <span class="doc doc-object-name doc-function-name">is_satisfied</span>
 
 
 <a href="#dirschema.core.TypeEnum.is_satisfied" class="headerlink" title="Permanent link">&para;</a></h3>
@@ -2301,9 +2307,9 @@ whereas ANY means that any of these options is fine, as long as the path exists.
   
       <p>Check whether the flags of a path satisfy this path type.</p>
 
-      <details class="quote">
-        <summary>Source code in <code>src/dirschema/core.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">180</span>
+          <details class="quote">
+            <summary>Source code in <code>src/dirschema/core.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">180</span>
 <span class="normal">181</span>
 <span class="normal">182</span>
 <span class="normal">183</span>
@@ -2325,7 +2331,7 @@ whereas ANY means that any of these options is fine, as long as the path exists.
         <span class="k">return</span> <span class="kc">False</span>
     <span class="k">return</span> <span class="kc">True</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -2343,24 +2349,23 @@ whereas ANY means that any of these options is fine, as long as the path exists.
 
 
 <h2 id="dirschema.core.DSRule" class="doc doc-heading">
-        <span class="doc doc-object-name doc-class-name">DSRule</span>
+          <span class="doc doc-object-name doc-class-name">DSRule</span>
 
 
 <a href="#dirschema.core.DSRule" class="headerlink" title="Permanent link">&para;</a></h2>
 
 
   <div class="doc doc-contents ">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
 
   
       <p>A DirSchema rule is either a trivial (boolean) rule, or a complex object.</p>
 <p>Use this class for parsing, if it is not known which of these it is.</p>
 
-
-        <details class="quote">
-          <summary>Source code in <code>src/dirschema/core.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">200</span>
+            <details class="quote">
+              <summary>Source code in <code>src/dirschema/core.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">200</span>
 <span class="normal">201</span>
 <span class="normal">202</span>
 <span class="normal">203</span>
@@ -2418,11 +2423,12 @@ whereas ANY means that any of these options is fine, as long as the path exists.
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Just return value for wrapped object.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__root__</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -2437,20 +2443,22 @@ whereas ANY means that any of these options is fine, as long as the path exists.
 
 
 <h3 id="dirschema.core.DSRule.__init__" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">__init__</span>
+          <span class="doc doc-object-name doc-function-name">__init__</span>
 
 
 <a href="#dirschema.core.DSRule.__init__" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="fm">__init__</span><span class="p">(</span><span class="n">b</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="fm">__init__</span><span class="p">(</span>
+    <span class="n">b</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span>
+<span class="p">)</span>
 </code></pre></div>
 
   <div class="doc doc-contents ">
   
       <p>Construct wrapped boolean or object, depending on arguments.</p>
 
-      <details class="quote">
-        <summary>Source code in <code>src/dirschema/core.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">208</span>
+          <details class="quote">
+            <summary>Source code in <code>src/dirschema/core.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">208</span>
 <span class="normal">209</span>
 <span class="normal">210</span>
 <span class="normal">211</span>
@@ -2470,17 +2478,18 @@ whereas ANY means that any of these options is fine, as long as the path exists.
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">__root__</span><span class="o">=</span><span class="n">Rule</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
 <h3 id="dirschema.core.DSRule.__repr__" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">__repr__</span>
+          <span class="doc doc-object-name doc-function-name">__repr__</span>
 
 
 <a href="#dirschema.core.DSRule.__repr__" class="headerlink" title="Permanent link">&para;</a></h3>
@@ -2491,9 +2500,9 @@ whereas ANY means that any of these options is fine, as long as the path exists.
   
       <p>Make wrapper transparent and just return repr of wrapped object.</p>
 
-      <details class="quote">
-        <summary>Source code in <code>src/dirschema/core.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">219</span>
+          <details class="quote">
+            <summary>Source code in <code>src/dirschema/core.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">219</span>
 <span class="normal">220</span>
 <span class="normal">221</span>
 <span class="normal">222</span>
@@ -2505,17 +2514,18 @@ whereas ANY means that any of these options is fine, as long as the path exists.
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__root__</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
 <h3 id="dirschema.core.DSRule.__bool__" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">__bool__</span>
+          <span class="doc doc-object-name doc-function-name">__bool__</span>
 
 
 <a href="#dirschema.core.DSRule.__bool__" class="headerlink" title="Permanent link">&para;</a></h3>
@@ -2526,15 +2536,15 @@ whereas ANY means that any of these options is fine, as long as the path exists.
   
       <p>Just return value for wrapped object.</p>
 
-      <details class="quote">
-        <summary>Source code in <code>src/dirschema/core.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">226</span>
+          <details class="quote">
+            <summary>Source code in <code>src/dirschema/core.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">226</span>
 <span class="normal">227</span>
 <span class="normal">228</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__bool__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Just return value for wrapped object.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__root__</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -2552,23 +2562,22 @@ whereas ANY means that any of these options is fine, as long as the path exists.
 
 
 <h2 id="dirschema.core.Rule" class="doc doc-heading">
-        <span class="doc doc-object-name doc-class-name">Rule</span>
+          <span class="doc doc-object-name doc-class-name">Rule</span>
 
 
 <a href="#dirschema.core.Rule" class="headerlink" title="Permanent link">&para;</a></h2>
 
 
   <div class="doc doc-contents ">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
 
   
       <p>A DirSchema is a conjunction of a subset of distinct constraints/keywords.</p>
 
-
-        <details class="quote">
-          <summary>Source code in <code>src/dirschema/core.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">231</span>
+            <details class="quote">
+              <summary>Source code in <code>src/dirschema/core.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">231</span>
 <span class="normal">232</span>
 <span class="normal">233</span>
 <span class="normal">234</span>
@@ -2764,11 +2773,12 @@ whereas ANY means that any of these options is fine, as long as the path exists.
     <span class="k">class</span> <span class="nc">Config</span><span class="p">:</span>  <span class="c1"># noqa: D106</span>
         <span class="n">extra</span> <span class="o">=</span> <span class="n">Extra</span><span class="o">.</span><span class="n">forbid</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -2783,7 +2793,7 @@ whereas ANY means that any of these options is fine, as long as the path exists.
 
 
 <h3 id="dirschema.core.Rule.__repr__" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">__repr__</span>
+          <span class="doc doc-object-name doc-function-name">__repr__</span>
 
 
 <a href="#dirschema.core.Rule.__repr__" class="headerlink" title="Permanent link">&para;</a></h3>
@@ -2794,9 +2804,9 @@ whereas ANY means that any of these options is fine, as long as the path exists.
   
       <p>Print out the rule as YAML (only the non-default values).</p>
 
-      <details class="quote">
-        <summary>Source code in <code>src/dirschema/core.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">315</span>
+          <details class="quote">
+            <summary>Source code in <code>src/dirschema/core.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">315</span>
 <span class="normal">316</span>
 <span class="normal">317</span>
 <span class="normal">318</span>
@@ -2818,7 +2828,7 @@ whereas ANY means that any of these options is fine, as long as the path exists.
     <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">stream</span><span class="p">)</span>
     <span class="k">return</span> <span class="s2">&quot;&quot;</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -2958,10 +2968,10 @@ whereas ANY means that any of these options is fine, as long as the path exists.
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../../..", "features": ["content.action.edit", "content.action.view", "content.code.annotate", "header.autohide", "navigation.footer", "navigation.instant", "navigation.tabs", "navigation.tabs.sticky", "navigation.tracking", "navigation.top", "search.highlight", "search.suggest"], "search": "../../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["content.action.edit", "content.action.view", "content.code.annotate", "header.autohide", "navigation.footer", "navigation.instant", "navigation.tabs", "navigation.tabs.sticky", "navigation.tracking", "navigation.top", "search.highlight", "search.suggest"], "search": "../../../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.fac441b0.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.220ee61c.min.js"></script>
       
     
   </body>
