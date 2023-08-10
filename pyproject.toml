@@ -1,15 +1,39 @@
+[tool.somesy.project]
+name = "dirschema"
+version = "0.1.0"
+description = "Spec and validator for directories, files and metadata based on JSON Schema and regexes."
+license = "MIT"
+repository = "https://github.com/Materials-Data-Science-and-Informatics/dirschema"
+homepage = "https://materials-data-science-and-informatics.github.io/dirschema"
+documentation = "https://materials-data-science-and-informatics.github.io/dirschema"
+keywords = ["jsonschema", "validation", "directory", "structure", "fair", "metadata"]
+
+[[tool.somesy.project.people]]
+family-names = "Pirogov"
+given-names = "Anton"
+email = "a.pirogov@fz-juelich.de"
+orcid = "https://orcid.org/0000-0002-5077-7497"
+
+contribution_begin = "2021-09-22"
+contribution = "Main author and maintainer."
+contribution_types = ["code"]
+
+author = true
+maintainer = true
+
 [tool.poetry]
+# ---- DO NOT EDIT, managed by somesy ----
 name = "dirschema"
 version = "0.1.0"
 description = "Spec and validator for directories, files and metadata based on JSON Schema and regexes."
 authors = ["Anton Pirogov <a.pirogov@fz-juelich.de>"]
 license = "MIT"
-
-readme = "README.md"
 repository = "https://github.com/Materials-Data-Science-and-Informatics/dirschema"
 homepage = "https://materials-data-science-and-informatics.github.io/dirschema"
 documentation = "https://materials-data-science-and-informatics.github.io/dirschema"
 keywords = ["jsonschema", "validation", "directory", "structure", "fair", "metadata"]
+# ----------------------------------------
+readme = "README.md"
 classifiers = [ # see https://pypi.org/classifiers/
   "Development Status :: 3 - Alpha",
   "License :: OSI Approved :: MIT License",
@@ -31,9 +55,11 @@ include = [
   "*.md",
   "LICENSE", "LICENSES", ".reuse/dep5",
   "CITATION.cff", "codemeta.json",
-  "mkdocs.yml", "docs",
-  "tests",
+  { path = "mkdocs.yml", format = "sdist" },
+  { path = "docs", format = "sdist" },
+  { path = "tests", format = "sdist" },
 ]
+maintainers = ["Anton Pirogov <a.pirogov@fz-juelich.de>"]
 
 [tool.poetry.dependencies]
 python = "^3.8,<3.11"
@@ -69,7 +95,6 @@ markdown-exec = {extras = ["ansi"], version = "^1.6.0"}
 mkdocs-coverage = "^0.2.7"
 mike = "^1.1.2"
 anybadge = "^1.14.0"
-interrogate = "^1.5.0"
 black = "^23.3.0"
 
 [tool.poetry.group.all-extras.dependencies]

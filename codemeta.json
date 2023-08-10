@@ -23,8 +23,12 @@
     ],
     "author": [
         {
+            "@id": "https://orcid.org/0000-0002-5077-7497",
             "@type": "Person",
-            "email": "a.pirogov@fz-juelich.de",
+            "affiliation": {
+                "@type": "Organization",
+                "legalName": "Forschungszentrum Jülich GmbH - Institute for Materials Data Science and Informatics (IAS9)"
+            },
             "familyName": "Pirogov",
             "givenName": "Anton"
         }
@@ -130,5 +134,6 @@
         "name": "dirschema",
         "runtimePlatform": "Python 3"
     },
+    "url": "https://materials-data-science-and-informatics.github.io/dirschema",
     "version": "0.1.0"
 }

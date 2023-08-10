@@ -9,9 +9,6 @@
 ![Test Coverage](https://materials-data-science-and-informatics.github.io/dirschema/main/coverage_badge.svg)
 ](https://materials-data-science-and-informatics.github.io/dirschema/main/coverage)
 [
-![Docs Coverage](https://materials-data-science-and-informatics.github.io/dirschema/main/interrogate_badge.svg)
-](https://materials-data-science-and-informatics.github.io/dirschema)
-[
 ![PyPIPkgVersion](https://img.shields.io/pypi/v/dirschema)
 ](https://pypi.org/project/dirschema/)
 
