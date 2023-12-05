@@ -17,7 +17,7 @@
 
 <br />
 <div>
-<img style="center-align: middle;" alt="DirSchema Logo" src="https://user-images.githubusercontent.com/89833997/152970983-267fa89e-9928-4393-a1fa-2a8fe3c6b9ba.png" width=70% height=70% />
+<img style="center-align: middle;" alt="DirSchema Logo" src="https://raw.githubusercontent.com/Materials-Data-Science-and-Informatics/Logos/main/DirSchema/DirSchema_Logo_Text.png" width=70% height=70% />
 &nbsp;&nbsp;
 </div>
 <br />
