@@ -14,11 +14,11 @@
     "audience": [
         {
             "@type": "Audience",
-            "audienceType": "Science/Research"
+            "audienceType": "Developers"
         },
         {
             "@type": "Audience",
-            "audienceType": "Developers"
+            "audienceType": "Science/Research"
         }
     ],
     "author": [
@@ -46,9 +46,16 @@
         "validation"
     ],
     "license": "http://spdx.org/licenses/MIT",
+    "maintainer": {
+        "@type": "Person",
+        "email": "a.pirogov@fz-juelich.de",
+        "familyName": "Pirogov",
+        "givenName": "Anton"
+    },
     "name": "dirschema",
     "operatingSystem": "OS Independent",
     "runtimePlatform": "Python 3",
+    "softwareHelp": "https://materials-data-science-and-informatics.github.io/dirschema",
     "softwareRequirements": [
         {
             "@type": "SoftwareApplication",
