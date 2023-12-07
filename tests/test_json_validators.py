@@ -4,14 +4,13 @@ import json
 from typing import List
 
 import pytest
-from pydantic import BaseModel, StrictBool, StrictInt, StrictStr
-
 from dirschema.json.handler_pydantic import PydanticHandler
 from dirschema.json.validate import (
     validate_custom,
     validate_jsonschema,
     validate_metadata,
 )
+from pydantic import BaseModel, StrictBool, StrictInt, StrictStr
 
 
 class SubModel(BaseModel):

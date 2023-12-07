@@ -3,7 +3,6 @@ import re
 from typing import cast
 
 import pytest
-
 from dirschema.core import DSRule, MetaConvention, PathSlice, Rule, TypeEnum
 
 

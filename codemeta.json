@@ -59,13 +59,6 @@
     "softwareRequirements": [
         {
             "@type": "SoftwareApplication",
-            "identifier": "'optional':",
-            "name": "'optional':",
-            "runtimePlatform": "Python 3",
-            "version": "True}"
-        },
-        {
-            "@type": "SoftwareApplication",
             "identifier": "entrypoints",
             "name": "entrypoints",
             "runtimePlatform": "Python 3",
@@ -76,7 +69,7 @@
             "identifier": "h5py",
             "name": "h5py",
             "runtimePlatform": "Python 3",
-            "version": "{'version': '^3.4.0'"
+            "version": "^3.4.0"
         },
         {
             "@type": "SoftwareApplication",
@@ -97,7 +90,7 @@
             "identifier": "numpy",
             "name": "numpy",
             "runtimePlatform": "Python 3",
-            "version": "{'version': '^1.21.2'"
+            "version": "^1.21.2"
         },
         {
             "@type": "SoftwareApplication",

@@ -5,7 +5,6 @@ import os
 from pathlib import Path
 
 import pytest
-
 from dirschema.json.parse import load_json, loads_json, to_uri
 
 

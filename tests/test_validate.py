@@ -196,8 +196,7 @@ anyOf:
 
 
 def test_example_forall_mutex(tmp_path):
-    """
-    Non-trival test - mutual exclusion for dependent paths.
+    """Non-trival test - mutual exclusion for dependent paths.
 
     For each file **/ITEM that does not start with a_ or b_,
     require that either a_ITEM or b_ITEM must exist, but not both.

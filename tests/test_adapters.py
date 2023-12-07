@@ -7,7 +7,6 @@ from pathlib import Path
 import h5py
 import numpy
 import pytest
-
 from dirschema.adapters import H5Dir, RealDir, ZipDir, get_adapter_for
 
 

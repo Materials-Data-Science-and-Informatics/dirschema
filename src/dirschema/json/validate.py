@@ -22,13 +22,14 @@ def plugin_from_uri(custom_uri: str) -> ValidationHandler:
         if ep == "":
             raise ValueError
     except ValueError:
-        raise ValueError(f"Invalid custom validator plugin pseudo-URI: '{custom_uri}'")
+        msg = f"Invalid custom validator plugin pseudo-URI: '{custom_uri}'"
+        raise ValueError(msg) from None
 
     try:
         h: Type[ValidationHandler] = loaded_handlers[ep]
         return h(args)
     except KeyError:
-        raise ValueError(f"Validator entry-point not found: '{ep}'")
+        raise ValueError(f"Validator entry-point not found: '{ep}'") from None
 
 
 def validate_custom(dat, plugin_str: str) -> JSONValidationErrors:

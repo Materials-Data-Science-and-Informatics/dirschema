@@ -154,18 +154,12 @@ exclude_lines = [
     "@(abc\\.)?abstractmethod",
 ]
 
-[tool.flake8]
-ignore = ["W503"]
-max-line-length = 88
+[tool.ruff.lint]
+extend-select = ["B", "D", "I", "S"]
+ignore = ["D203", "D213", "D407", "B008"]
 
-[tool.pydocstyle]
-convention = "google"
-
-[tool.interrogate]
-fail-under = 95
-
-[tool.bandit]
-exclude_dirs = ["tests", "scripts"]
+[tool.ruff.lint.per-file-ignores]
+"**/{tests,docs}/*" = ["ALL"]
 
 [tool.licensecheck]
 using = "poetry"

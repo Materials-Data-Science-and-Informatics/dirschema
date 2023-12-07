@@ -45,7 +45,7 @@ class IDirectory(ABC):
 
     @abstractmethod
     def __init__(cls, obj: object) -> None:
-        """Initialized an instance for a suitable directory-like object."""
+        """Initialize an instance for a suitable directory-like object."""
 
     @classmethod
     @abstractmethod

@@ -1,4 +1,4 @@
-"""This module loads the validation handlers found in the current environment."""
+"""Loading of the validation handlers found in the current environment."""
 
 import entrypoints
 

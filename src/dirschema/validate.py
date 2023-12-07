@@ -246,7 +246,7 @@ class DSValidator:
         matching the convention will be filtered out from the set of validated
         paths.
 
-        Returns:
+        Returns
             Error dict that is empty in case of success, or otherwise contains
             for each path with validation errors another dict with the errors.
         """

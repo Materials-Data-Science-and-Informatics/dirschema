@@ -81,7 +81,7 @@ class ExtJsonLoader(JsonLoader):
         try:
             return super().__call__(uri, **kwargs)
         except json.JSONDecodeError:
-            strval = urlopen(uri).read().decode("utf-8")  # nosec
+            strval = urlopen(uri).read().decode("utf-8")  # noqa: S310
             res = yaml.load(io.StringIO(strval, **kwargs))
             if self.cache_results:
                 self.store[uri] = res
